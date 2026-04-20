@@ -1,0 +1,16 @@
+# --- Web & Backend Framework ---
+fastapi
+uvicorn
+jinja2
+python-multipart
+
+# --- Agentic AI Core (LangChain & LangGraph) ---
+langchain
+langchain-community
+langgraph
+pydantic
+
+# --- Ollama & Utilities ---
+requests
+aiohttp
+langchain-ollama

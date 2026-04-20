@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGENTIC CORE v3.0 | Enterprise AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;900&display=swap');
+        :root { --bg: #030508; --card: #0a0d14; --admin: #ef4444; --client: #3b82f6; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: #f8fafc; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .glass { background: rgba(10, 13, 20, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+        .tab-active-client { background: var(--client); color: white; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
+        .tab-active-admin { background: var(--admin); color: white; box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
+        
+        /* Animation cho các phần tử */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.4s ease-out forwards; }
+        
+        /* Tùy chỉnh Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+    </style>
+</head>
+<body class="h-screen overflow-hidden flex flex-col">
+
+    <nav class="h-16 flex items-center justify-between px-8 glass border-b border-white/5 z-50">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-blue-400 rounded-xl flex items-center justify-center">
+                <i class="fas fa-project-diagram text-white text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-black tracking-tighter uppercase italic">Agentic<span class="text-blue-500">Core</span> <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded ml-2 not-italic text-gray-400">v3.0</span></h1>
+                <p class="text-[9px] text-gray-500 uppercase tracking-widest font-bold">Multi-Agent Enterprise OS</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <div id="systemPulse" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
+                <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span></span>
+                <span class="text-[10px] font-bold text-green-500 uppercase mono">PostgreSQL Active</span>
+            </div>
+            <div id="roleIndicator" class="px-4 py-1.5 rounded-lg text-[10px] font-black tracking-widest uppercase border border-white/10 bg-white/5 transition-all duration-500">
+                Initializing...
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow flex p-6 gap-6 overflow-hidden">
+        
+        <aside class="w-[420px] flex flex-col gap-6">
+            
+            <div class="glass rounded-2xl p-6 flex flex-col gap-4 relative">
+                <div class="flex p-1 bg-black/40 rounded-xl border border-white/5">
+                    <button onclick="setMode('BUYER')" id="btnBuyer" class="flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all tab-active-client">
+                        <i class="fas fa-shopping-bag mr-2"></i> Client Mode
+                    </button>
+                    <button onclick="setMode('ADMIN')" id="btnAdmin" class="flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all text-gray-500">
+                        <i class="fas fa-shield-halved mr-2"></i> Admin Panel
+                    </button>
+                </div>
+
+                <div class="relative">
+                    <textarea id="goalInput" class="w-full h-40 bg-black/60 border border-white/10 rounded-2xl p-5 text-sm mono focus:border-blue-500/50 outline-none transition-all resize-none placeholder-gray-700" placeholder="Agent đang đợi lệnh của Phú..."></textarea>
+                    <div class="absolute bottom-4 right-4 flex gap-2">
+                        <kbd class="px-2 py-1 bg-white/5 border border-white/10 rounded text-[9px] text-gray-500 font-bold uppercase">Enter to Run</kbd>
+                    </div>
+                </div>
+
+                <button id="executeBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black text-xs py-4 rounded-xl shadow-xl shadow-blue-600/20 active:scale-[0.98] transition-all uppercase tracking-[0.2em] flex items-center justify-center gap-3">
+                    <i class="fas fa-bolt"></i> <span>Execute Autonomous Loop</span>
+                </button>
+            </div>
+
+            <div class="glass rounded-2xl p-6 flex-grow flex flex-col overflow-hidden border-t-2 border-blue-500/30" id="dbContainer">
+                <h2 class="text-[11px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 flex items-center justify-between">
+                    <span>Enterprise Data Store</span>
+                    <i class="fas fa-server text-blue-500"></i>
+                </h2>
+                <div id="dbView" class="flex-grow overflow-y-auto custom-scroll">
+                    <div class="h-full flex flex-col items-center justify-center opacity-20">
+                        <i class="fas fa-database text-4xl mb-4"></i>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-center">Awaiting Action Query</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <section class="flex-grow glass rounded-2xl flex flex-col overflow-hidden border-t-2 border-purple-500/30">
+            <div class="h-14 flex items-center justify-between px-8 border-b border-white/5 bg-white/[0.02]">
+                <div class="flex items-center gap-4">
+                    <div class="flex gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                    </div>
+                    <span class="text-[11px] font-black uppercase tracking-[0.4em] text-gray-400">Autonomous Reasoning Traces</span>
+                </div>
+                <button onclick="clearSystem()" class="text-[10px] font-bold text-gray-600 hover:text-red-400 transition uppercase tracking-widest">
+                    <i class="fas fa-broom mr-2"></i>Wipe Neural Cache
+                </button>
+            </div>
+            
+            <div id="traceContent" class="flex-grow overflow-y-auto p-8 space-y-6">
+                <div class="max-w-2xl mx-auto text-center space-y-4 py-20 opacity-30">
+                    <i class="fas fa-microchip text-7xl text-purple-500 mb-4"></i>
+                    <h3 class="text-xl font-black uppercase tracking-tighter">System Architect Terminal</h3>
+                    <p class="text-sm font-medium">Hệ thống đang ở trạng thái nghỉ. Vui lòng nhập lệnh để kích hoạt các Agent Layer.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        let currentRole = 'BUYER';
+        const runBtn = document.getElementById('executeBtn');
+        const trace = document.getElementById('traceContent');
+        const dbView = document.getElementById('dbView');
+        const roleIndicator = document.getElementById('roleIndicator');
+
+        // Khởi tạo ban đầu
+        setMode('BUYER');
+
+        function setMode(mode) {
+            currentRole = mode;
+            const isBuyer = mode === 'BUYER';
+            
+            // Cập nhật Tab UI
+            document.getElementById('btnBuyer').className = isBuyer ? 'flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all tab-active-client' : 'flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all text-gray-500 hover:text-white';
+            document.getElementById('btnAdmin').className = !isBuyer ? 'flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all tab-active-admin' : 'flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all text-gray-500 hover:text-white';
+            
+            // Cập nhật Theme
+            runBtn.className = isBuyer ? 'w-full mt-4 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs py-4 rounded-xl shadow-xl shadow-blue-600/20 active:scale-[0.98] transition-all uppercase tracking-[0.2em] flex items-center justify-center gap-3' : 'w-full mt-4 bg-red-600 hover:bg-red-500 text-white font-black text-xs py-4 rounded-xl shadow-xl shadow-red-600/20 active:scale-[0.98] transition-all uppercase tracking-[0.2em] flex items-center justify-center gap-3';
+            
+            document.getElementById('dbContainer').style.borderColor = isBuyer ? 'rgba(59, 130, 246, 0.3)' : 'rgba(239, 68, 68, 0.3)';
+            
+            roleIndicator.innerText = `SESSION: ${mode}`;
+            roleIndicator.className = isBuyer ? 'px-4 py-1.5 rounded-lg text-[10px] font-black tracking-widest uppercase border border-blue-500/20 bg-blue-500/5 text-blue-400' : 'px-4 py-1.5 rounded-lg text-[10px] font-black tracking-widest uppercase border border-red-500/20 bg-red-500/5 text-red-400';
+            
+            document.getElementById('goalInput').placeholder = isBuyer ? "Phú muốn tìm sản phẩm gì?" : "Nhập lệnh Admin (ví dụ: Cập nhật tồn kho)...";
+        }
+
+        function clearSystem() {
+            trace.innerHTML = '<div class="max-w-2xl mx-auto text-center py-20 opacity-10"><i class="fas fa-ghost text-7xl mb-4"></i><p class="mono uppercase">Memory Flushed</p></div>';
+            dbView.innerHTML = '<div class="h-full flex flex-col items-center justify-center opacity-20"><i class="fas fa-database text-4xl mb-4"></i><p class="text-[10px] font-bold tracking-widest">Awaiting Action</p></div>';
+        }
+
+        runBtn.onclick = async () => {
+            const goal = document.getElementById('goalInput').value;
+            if (!goal) return;
+
+            runBtn.disabled = true;
+            runBtn.innerHTML = '<i class="fas fa-sync animate-spin"></i> <span>Neural Processing...</span>';
+            trace.innerHTML = ''; 
+
+            appendLog({ block: 'SYSTEM', content: `Kích hoạt Neural Core - Chế độ ${currentRole}. Đang ánh xạ dữ liệu...`, status: 'KERNEL_READY' });
+
+            try {
+                const formData = new FormData();
+                formData.append('goal', goal);
+                formData.append('role', currentRole); // Gửi role hiện tại lên backend
+
+                const response = await fetch('/run-agent', { method: 'POST', body: formData });
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    const lines = chunk.split('\n').filter(l => l.trim().startsWith('data: '));
+
+                    for (const line of lines) {
+                        try {
+                            const data = JSON.parse(line.replace('data: ', '').trim());
+                            if (data.type === 'log') appendLog(data.log);
+                            if (data.type === 'final') renderResults(data);
+                        } catch (e) { console.error("Stream Error", e); }
+                    }
+                }
+            } catch (err) {
+                appendLog({ block: 'SYSTEM', content: 'Connection Interrupted: ' + err.message, status: 'FATAL' });
+            } finally {
+                runBtn.disabled = false;
+                runBtn.innerHTML = '<i class="fas fa-bolt"></i> <span>Execute Autonomous Loop</span>';
+            }
+        };
+
+        function appendLog(log) {
+            const div = document.createElement('div');
+            const blockClass = `log-${log.block.toLowerCase()}`;
+            const colors = {
+                'PERCEIVE': 'text-blue-400', 'REASON': 'text-amber-400', 
+                'ACT': 'text-red-400', 'SYSTEM': 'text-purple-400'
+            };
+            const bgs = {
+                'PERCEIVE': 'bg-blue-400', 'REASON': 'bg-amber-400', 
+                'ACT': 'bg-red-400', 'SYSTEM': 'bg-purple-400'
+            };
+
+            div.className = `glass ${blockClass} p-6 rounded-2xl animate-fade mb-4 border border-white/5`;
+            div.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full ${bgs[log.block] || 'bg-gray-400'}"></span>
+                        <span class="text-[10px] font-black uppercase tracking-widest ${colors[log.block] || 'text-gray-400'}">${log.block}</span>
+                    </div>
+                    <span class="text-[9px] font-bold text-gray-500 uppercase mono bg-white/5 px-2 py-0.5 rounded">${log.status || 'DONE'}</span>
+                </div>
+                <div class="text-[13px] leading-relaxed text-gray-300 font-medium">${log.content}</div>
+            `;
+            trace.appendChild(div);
+            trace.scrollTop = trace.scrollHeight;
+        }
+
+        function renderResults(data) {
+            const results = data.final_result;
+            if (!results || results.length === 0) {
+                dbView.innerHTML = '<div class="p-8 text-center text-gray-600 text-xs italic">Không tìm thấy dữ liệu phù hợp trong Postgres.</div>';
+                return;
+            }
+
+            if (currentRole === 'ADMIN') {
+                // RENDER DẠNG BẢNG CHO ADMIN
+                let html = `<table class="w-full text-left text-[10px] mono border-collapse">
+                    <thead class="text-gray-500 border-b border-white/10 uppercase tracking-tighter font-black">
+                        <tr><th class="p-2">ID</th><th class="p-2">PRODUCT</th><th class="p-2 text-right">STOCK</th></tr>
+                    </thead><tbody class="divide-y divide-white/5">`;
+                results.forEach(item => {
+                    html += `<tr class="hover:bg-white/5"><td class="p-2 text-red-400 font-bold">${item.id || 'N/A'}</td><td class="p-2 text-gray-300">${item.name}</td><td class="p-2 text-right text-white font-black">${item.stock}</td></tr>`;
+                });
+                dbView.innerHTML = html + `</tbody></table>`;
+            } else {
+                // RENDER DẠNG CARD CHO CLIENT
+                let html = `<div class="grid grid-cols-1 gap-4">`;
+                results.forEach(item => {
+                    html += `
+                        <div class="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-blue-500/50 transition-all group">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-[9px] font-black px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded uppercase">${item.sku || 'PRO'}</span>
+                                <span class="text-[11px] font-black text-green-400">${item.price.toLocaleString()}đ</span>
+                            </div>
+                            <h4 class="text-xs font-bold text-gray-200 group-hover:text-white transition-colors">${item.name}</h4>
+                            <div class="mt-3 flex items-center justify-between">
+                                <span class="text-[9px] text-gray-500 mono">Stock: ${item.stock} units</span>
+                                <button class="text-[9px] font-black text-blue-400 uppercase tracking-tighter hover:underline">Chi tiết <i class="fas fa-arrow-right ml-1"></i></button>
+                            </div>
+                        </div>`;
+                });
+                dbView.innerHTML = html + `</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

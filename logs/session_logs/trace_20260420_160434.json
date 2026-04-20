@@ -1,0 +1,31 @@
+{
+    "goal": "tôi cần mau đồ để đi căm trại\r\ngọi ý giúp tôi",
+    "role": "BUYER",
+    "plan": [
+        "Search products in Postgres",
+        "Analyze product attributes",
+        "Format recommendations"
+    ],
+    "observations": [],
+    "node_logs": [
+        {
+            "block": "ACT",
+            "content": "Đã truy vấn Postgres. Tìm thấy 0 sản phẩm cho từ khóa 'tôi cần mau  để đi căm trại\r\ngọi ý giúp tôi'.",
+            "status": "SUCCESS"
+        }
+    ],
+    "is_finished": true,
+    "iteration": 3,
+    "max_iterations": 3,
+    "current_context": {
+        "role": "BUYER",
+        "intent": "Mua đồ dùng cho cắm trại",
+        "entities": [
+            "đồ cắm trại",
+            "giá cả"
+        ],
+        "is_danger": false
+    },
+    "current_observation": [],
+    "final_result": []
+}
