@@ -1,8 +1,16 @@
+import re
+
 def perception_node(state: dict):
-    raw_goal = state.get("goal", "").strip()
-    clean_goal = " ".join(raw_goal.split())
+    goal = state.get("goal", "")
+    # Xóa khoảng trắng thừa và ký tự đặc biệt gây nhiễu LLM
+    clean_goal = re.sub(r'[^\w\sàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]', ' ', goal)
+    clean_goal = " ".join(clean_goal.split())
+    
+    # Xác định Role sơ bộ dựa trên từ khóa (Phú có thể để AI làm ở Brain)
+    role = "ADMIN" if any(word in clean_goal.lower() for word in ["thống kê", "báo cáo", "tồn kho"]) else "BUYER"
     
     return {
         "goal": clean_goal,
-        "status": "INPUT_NORMALIZED"
+        "role": role,
+        "status": "NORMALIZED"
     }

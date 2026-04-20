@@ -1,8 +1,12 @@
 import ollama
-# Phú có thể dùng một thư viện máy học nhẹ như scikit-learn hoặc dùng chính LLM làm Router
+
 def semantic_router(goal: str):
-    # Đây là nơi máy học quyết định câu hỏi thuộc về Domain nào
-    # Ví dụ: "Cắm trại" -> Domain: SALES, "Thống kê" -> Domain: ADMIN
-    prompt = f"Phân loại domain cho: {goal}. Trả về 1 từ duy nhất: ADMIN, BUYER, SUPPORT."
-    response = ollama.generate(model='gemma2:2b', prompt=prompt)
-    return response['response'].strip()
+    """Máy học phân loại: Quyết định xem câu hỏi thuộc Domain nào"""
+    prompt = f"""
+    Dựa vào câu hỏi: "{goal}"
+    Phân loại vào 1 trong các nhóm sau: INVENTORY_DOMAIN, SALES_DOMAIN, ACCOUNTING_HOME.
+    Chỉ trả về TÊN NHÓM duy nhất.
+    """
+    response = ollama.generate(model='llama3:latest', prompt=prompt, options={'temperature': 0})
+    domain = response['response'].strip()
+    return domain if domain in ["INVENTORY_DOMAIN", "SALES_DOMAIN", "ACCOUNTING_HOME"] else "INVENTORY_DOMAIN"

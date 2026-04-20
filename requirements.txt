@@ -13,4 +13,5 @@ pydantic
 # --- Ollama & Utilities ---
 requests
 aiohttp
+ollama
 langchain-ollama
