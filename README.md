@@ -13,30 +13,34 @@
 ## 📊 Sơ đồ hoạt động (System Flow)
 
 ```mermaid
-graph TD
-    User((Người dùng)) --> API[FastAPI Entrypoint]
-    API --> Orchestrator{Orchestrator}
-    
-    subgraph agent[🧠 Cognitive Core]
-        Orchestrator --> Perception[Perception Node]
-        Perception --> Brain[Brain / Reasoning]
-        Brain --> Action[Action Node]
-        Action --> Evaluator[Evaluator Node]
-        Evaluator -->|Chưa đạt| Brain
+graph LR
+    User((Người dùng)) --> API[FastAPI]
+    API --> Orch{Orchestrator}
+
+    subgraph Core [🧠 Cognitive Cycle]
+        direction TB
+        Orch --> Perc[Perception]
+        Perc --> Brain[Brain / Reasoning]
+        Brain --> Act[Action Node]
+        Act --> Eval[Evaluator]
+        Eval -->|Chưa đạt| Brain
     end
 
-    subgraph memory[💾 Memory & Knowledge]
-        Brain -.-> RAG[(Vector Store)]
-        Brain -.-> History[(Episodic Memory)]
-        Action -.-> Learning[Learning Manager]
+    subgraph Data [💾 Knowledge & Storage]
+        direction TB
+        RAG[(Vector Store)]
+        Mem[(Episodic Memory)]
+        DB[(PostgreSQL)]
     end
 
-    subgraph storage[🗄️ Persistence]
-        Action --> DB[(PostgreSQL)]
-    end
-
-    Evaluator -->|Đạt mục tiêu| Final[Kết quả cuối]
+    Brain --- RAG
+    Brain --- Mem
+    Act --- DB
+    Eval -->|Hoàn tất| Final[Kết quả]
     Final --> User
+
+    style Core fill:#f9f9f9,stroke:#333,stroke-width:2px
+    style Data fill:#e1f5fe,stroke:#01579b,stroke-width:2px
 ```
 
 ---
