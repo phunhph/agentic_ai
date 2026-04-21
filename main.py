@@ -6,6 +6,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, StreamingResponse
 from agent.orchestrator import AgentOrchestrator
 from infra.settings import APP_HOST, APP_PORT
+from infra.schemas import PlannerFeedbackPayload
 from storage.database import SessionLocal
 from storage.models import MODEL_MAP
 
@@ -138,7 +139,15 @@ async def run_agent(
     history: str = Form("[]"),
     session_id: str = Form(""),
     conversation_id: str = Form(""),
+    feedback: str = Form(""),
 ):
+    feedback_lesson_id = None
+    if feedback.strip():
+        try:
+            feedback_payload = PlannerFeedbackPayload.model_validate_json(feedback)
+            feedback_lesson_id = orchestrator.ingest_feedback(feedback_payload.model_dump())
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Invalid feedback payload: {str(e)}")
     return StreamingResponse(
         orchestrator.run(
             goal=goal,
@@ -148,7 +157,17 @@ async def run_agent(
             conversation_id=conversation_id,
         ),
         media_type="text/event-stream",
+        headers={"X-Feedback-Lesson-Id": feedback_lesson_id or ""},
     )
+
+
+@app.post("/api/planner-feedback")
+async def planner_feedback(payload: PlannerFeedbackPayload):
+    try:
+        lesson_id = orchestrator.ingest_feedback(payload.model_dump())
+        return {"ok": True, "lesson_id": lesson_id}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 if __name__ == "__main__":

@@ -1,0 +1,271 @@
+[
+  {
+    "query": "Lấy danh sách account tuần này cần xử lý",
+    "expected_tool": "list_accounts",
+    "expected_entities": [
+      "hbl_account"
+    ]
+  },
+  {
+    "query": "Cho tôi các hợp đồng của khách hàng MIMS",
+    "expected_tool": "list_contracts",
+    "expected_entities": [
+      "hbl_contract",
+      "hbl_account"
+    ],
+    "expected_path": [
+      [
+        {
+          "from_table": "hbl_contract",
+          "to_table": "hbl_opportunities",
+          "relation_type": "lookup",
+          "join_table": null
+        },
+        {
+          "from_table": "hbl_opportunities",
+          "to_table": "hbl_account",
+          "relation_type": "lookup",
+          "join_table": null
+        }
+      ],
+      [
+        {
+          "from_table": "hbl_contract",
+          "to_table": "systemuser",
+          "relation_type": "lookup",
+          "join_table": null
+        },
+        {
+          "from_table": "systemuser",
+          "to_table": "hbl_account",
+          "relation_type": "lookup",
+          "join_table": null
+        }
+      ],
+      [
+        {
+          "from_table": "hbl_contract",
+          "to_table": "systemuser",
+          "relation_type": "lookup",
+          "join_table": null
+        },
+        {
+          "from_table": "systemuser",
+          "to_table": "hbl_account",
+          "relation_type": "lookup",
+          "join_table": null
+        }
+      ],
+      [
+        {
+          "from_table": "hbl_contract",
+          "to_table": "choice_option",
+          "relation_type": "choice",
+          "join_table": "hbl_contract_status_choice_map"
+        },
+        {
+          "from_table": "choice_option",
+          "to_table": "hbl_account",
+          "relation_type": "choice",
+          "join_table": "hbl_account_industry_choice"
+        }
+      ],
+      [
+        {
+          "from_table": "hbl_contract",
+          "to_table": "choice_option",
+          "relation_type": "choice",
+          "join_table": "hbl_contract_status_choice_map"
+        },
+        {
+          "from_table": "choice_option",
+          "to_table": "hbl_account",
+          "relation_type": "choice",
+          "join_table": "hbl_account_country_choice"
+        }
+      ],
+      [
+        {
+          "from_table": "hbl_contract",
+          "to_table": "choice_option",
+          "relation_type": "choice",
+          "join_table": "hbl_contract_status_choice_map"
+        },
+        {
+          "from_table": "choice_option",
+          "to_table": "hbl_account",
+          "relation_type": "choice",
+          "join_table": "hbl_account_revenue_choice"
+        }
+      ],
+      [
+        {
+          "from_table": "hbl_contract",
+          "to_table": "choice_option",
+          "relation_type": "choice",
+          "join_table": "hbl_contract_invoiced_month_choice_map"
+        },
+        {
+          "from_table": "choice_option",
+          "to_table": "hbl_account",
+          "relation_type": "choice",
+          "join_table": "hbl_account_industry_choice"
+        }
+      ],
+      [
+        {
+          "from_table": "hbl_contract",
+          "to_table": "choice_option",
+          "relation_type": "choice",
+          "join_table": "hbl_contract_invoiced_month_choice_map"
+        },
+        {
+          "from_table": "choice_option",
+          "to_table": "hbl_account",
+          "relation_type": "choice",
+          "join_table": "hbl_account_country_choice"
+        }
+      ],
+      [
+        {
+          "from_table": "hbl_contract",
+          "to_table": "choice_option",
+          "relation_type": "choice",
+          "join_table": "hbl_contract_invoiced_month_choice_map"
+        },
+        {
+          "from_table": "choice_option",
+          "to_table": "hbl_account",
+          "relation_type": "choice",
+          "join_table": "hbl_account_revenue_choice"
+        }
+      ],
+      [
+        {
+          "from_table": "hbl_contract",
+          "to_table": "choice_option",
+          "relation_type": "choice",
+          "join_table": "hbl_contract_paid_month_choice_map"
+        },
+        {
+          "from_table": "choice_option",
+          "to_table": "hbl_account",
+          "relation_type": "choice",
+          "join_table": "hbl_account_industry_choice"
+        }
+      ],
+      [
+        {
+          "from_table": "hbl_contract",
+          "to_table": "choice_option",
+          "relation_type": "choice",
+          "join_table": "hbl_contract_paid_month_choice_map"
+        },
+        {
+          "from_table": "choice_option",
+          "to_table": "hbl_account",
+          "relation_type": "choice",
+          "join_table": "hbl_account_country_choice"
+        }
+      ],
+      [
+        {
+          "from_table": "hbl_contract",
+          "to_table": "choice_option",
+          "relation_type": "choice",
+          "join_table": "hbl_contract_paid_month_choice_map"
+        },
+        {
+          "from_table": "choice_option",
+          "to_table": "hbl_account",
+          "relation_type": "choice",
+          "join_table": "hbl_account_revenue_choice"
+        }
+      ],
+      [
+        {
+          "from_table": "hbl_contract",
+          "to_table": "choice_option",
+          "relation_type": "choice",
+          "join_table": "hbl_contract_contract_month_choice_map"
+        },
+        {
+          "from_table": "choice_option",
+          "to_table": "hbl_account",
+          "relation_type": "choice",
+          "join_table": "hbl_account_industry_choice"
+        }
+      ],
+      [
+        {
+          "from_table": "hbl_contract",
+          "to_table": "choice_option",
+          "relation_type": "choice",
+          "join_table": "hbl_contract_contract_month_choice_map"
+        },
+        {
+          "from_table": "choice_option",
+          "to_table": "hbl_account",
+          "relation_type": "choice",
+          "join_table": "hbl_account_country_choice"
+        }
+      ],
+      [
+        {
+          "from_table": "hbl_contract",
+          "to_table": "choice_option",
+          "relation_type": "choice",
+          "join_table": "hbl_contract_contract_month_choice_map"
+        },
+        {
+          "from_table": "choice_option",
+          "to_table": "hbl_account",
+          "relation_type": "choice",
+          "join_table": "hbl_account_revenue_choice"
+        }
+      ]
+    ]
+  },
+  {
+    "query": "khách hàng thuộc nhóm SI",
+    "expected_tool": "list_accounts",
+    "choice_group": "hbl_cust_choice_industry",
+    "choice_label": "SI"
+  },
+  {
+    "query": "khách hàng thuộc nhóm Singapore",
+    "expected_tool": "list_accounts",
+    "choice_group": "hbl_cust_choice_country",
+    "choice_label": "Singapore"
+  },
+  {
+    "query": "khách hàng thuộc nhóm <10M",
+    "expected_tool": "list_accounts",
+    "choice_group": "hbl_cust_choice_revenue",
+    "choice_label": "<10M"
+  },
+  {
+    "query": "khách hàng thuộc nhóm Linkedin",
+    "expected_tool": "list_accounts",
+    "choice_group": "mc_contact_source_choice",
+    "choice_label": "Linkedin"
+  },
+  {
+    "query": "khách hàng thuộc nhóm Following",
+    "expected_tool": "list_accounts",
+    "choice_group": "hbl_opportunities_status_choice",
+    "choice_label": "Following"
+  },
+  {
+    "query": "khách hàng thuộc nhóm Adapting",
+    "expected_tool": "list_accounts",
+    "choice_group": "hbl_contract_status_choice",
+    "choice_label": "Adapting"
+  },
+  {
+    "query": "khách hàng thuộc nhóm 1",
+    "expected_tool": "list_accounts",
+    "choice_group": "mc_monthchoice",
+    "choice_label": "1"
+  }
+]

@@ -18,6 +18,8 @@
         .custom-scroll::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
         .trace-view-btn-active { background: rgba(59, 130, 246, 0.2); color: #bfdbfe; border-color: rgba(59, 130, 246, 0.4); }
         .graph-node { background: linear-gradient(135deg, rgba(15,23,42,.75), rgba(2,6,23,.8)); border: 1px solid rgba(148,163,184,.18); }
+        .trace-card { width: 100%; max-width: 100%; overflow: hidden; }
+        .trace-text-wrap { overflow-wrap: anywhere; word-break: break-word; white-space: pre-wrap; }
     </style>
 </head>
 <body class="h-screen flex flex-col">
@@ -38,7 +40,7 @@
     <main class="flex-grow flex p-6 gap-6 overflow-hidden">
 
         <!-- SIDEBAR: Control & Preview -->
-        <aside class="w-[450px] flex flex-col gap-6">
+        <aside class="w-[450px] shrink-0 flex flex-col gap-6">
             <div class="glass rounded-2xl p-6 flex flex-col gap-4">
                 <div class="relative">
                     <textarea id="goalInput" class="w-full h-32 bg-black/60 border border-white/10 rounded-xl p-5 text-sm mono outline-none focus:border-blue-500/50 transition-all resize-none" placeholder="Lệnh cho Agent..."></textarea>
@@ -63,7 +65,7 @@
         </aside>
 
         <!-- TRACE: Reasoning & Logs -->
-        <section class="flex-grow glass rounded-2xl flex flex-col overflow-hidden border-t-2 border-purple-500/20">
+        <section class="flex-grow min-w-0 glass rounded-2xl flex flex-col overflow-hidden border-t-2 border-purple-500/20">
             <div class="h-12 flex items-center justify-between px-8 border-b border-white/5 bg-white/[0.01] gap-4">
                 <span class="text-[10px] font-black uppercase tracking-widest text-gray-500 shrink-0">Traces (theo context)</span>
                 <select id="traceThreadSelect" onchange="onTraceThreadChange(this.value)" class="flex-1 max-w-md text-[9px] mono bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-gray-300 outline-none"></select>
@@ -74,7 +76,7 @@
                     <button onclick="clearSystem()" class="text-[9px] font-bold text-gray-600 hover:text-red-400 transition uppercase">Clear</button>
                 </div>
             </div>
-            <div id="traceContent" class="flex-grow overflow-y-auto p-6 space-y-4 custom-scroll">
+            <div id="traceContent" class="flex-grow overflow-y-auto overflow-x-hidden p-6 space-y-4 custom-scroll">
                 <div id="traceEmptyState" class="max-w-md mx-auto text-center py-32 opacity-10">
                     <i class="fas fa-microchip text-6xl mb-4 text-purple-500"></i>
                     <p class="font-bold uppercase tracking-widest">System Ready</p>
@@ -361,7 +363,7 @@
             const bgs = { 'PERCEIVE': 'bg-cyan-400', 'REASON': 'bg-amber-400', 'ACT': 'bg-red-400', 'EVAL': 'bg-green-400', 'SYSTEM': 'bg-purple-400', 'TRACE': 'bg-violet-400', 'LEARN': 'bg-fuchsia-400', 'POLICY': 'bg-orange-400' };
             const roleTag = (log.role || FIXED_ROLE).toUpperCase();
 
-            div.className = "glass p-4 rounded-xl animate-fade mb-3 border border-white/5";
+            div.className = "trace-card glass p-4 rounded-xl animate-fade mb-3 border border-white/5";
             div.innerHTML = `
                 <div class="flex justify-between items-center mb-2">
                     <span class="text-[9px] font-black uppercase tracking-widest ${colors[log.block] || 'text-gray-400'} flex items-center gap-1.5">
@@ -372,8 +374,8 @@
                         <span class="text-white/40" title="${log.context_key || ''}"> · ${(log.session_id || '').slice(0, 8)}</span>
                     </span>
                 </div>
-                <div class="text-[10px] mono text-white/25 mb-1 truncate" title="${log.context_key || ''}">${(log.context_key || '').slice(0, 48)}${(log.context_key || '').length > 48 ? '…' : ''}</div>
-                <div class="text-[12px] text-slate-200 font-medium leading-relaxed">${log.content}</div>
+                <div class="text-[10px] mono text-white/25 mb-1 trace-text-wrap" title="${log.context_key || ''}">${(log.context_key || '').slice(0, 96)}${(log.context_key || '').length > 96 ? '…' : ''}</div>
+                <div class="text-[12px] text-slate-200 font-medium leading-relaxed trace-text-wrap">${log.content}</div>
             `;
             trace.appendChild(div);
             trace.scrollTop = trace.scrollHeight;

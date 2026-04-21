@@ -1,0 +1,264 @@
+{
+  "total_cases": 9,
+  "tool_accuracy": 1.0,
+  "path_resolution_success": 1.0,
+  "choice_constraint_success": 0.8888888888888888,
+  "rows": [
+    {
+      "query": "Lấy danh sách account tuần này cần xử lý",
+      "tool": "list_accounts",
+      "tool_match": true,
+      "path_match": true,
+      "choice_match": true,
+      "trace": {
+        "planner_mode": "dynamic_metadata",
+        "selected_entities": [
+          "hbl_account"
+        ],
+        "join_path": [],
+        "choice_constraints": [],
+        "knowledge_hits": [],
+        "fallback_reason": ""
+      }
+    },
+    {
+      "query": "Cho tôi các hợp đồng của khách hàng MIMS",
+      "tool": "list_contracts",
+      "tool_match": true,
+      "path_match": true,
+      "choice_match": true,
+      "trace": {
+        "planner_mode": "dynamic_metadata",
+        "selected_entities": [
+          "hbl_contract",
+          "hbl_account"
+        ],
+        "join_path": [
+          {
+            "from_table": "hbl_contract",
+            "to_table": "hbl_opportunities",
+            "relation_type": "lookup",
+            "join_table": null,
+            "choice_group": null
+          },
+          {
+            "from_table": "hbl_opportunities",
+            "to_table": "hbl_account",
+            "relation_type": "lookup",
+            "join_table": null,
+            "choice_group": null
+          }
+        ],
+        "choice_constraints": [],
+        "knowledge_hits": [],
+        "fallback_reason": ""
+      }
+    },
+    {
+      "query": "khách hàng thuộc nhóm SI",
+      "tool": "list_accounts",
+      "tool_match": true,
+      "path_match": true,
+      "choice_match": true,
+      "trace": {
+        "planner_mode": "dynamic_metadata",
+        "selected_entities": [
+          "hbl_account"
+        ],
+        "join_path": [],
+        "choice_constraints": [
+          {
+            "left_table": "hbl_account",
+            "join_table": "hbl_account_industry_choice",
+            "right_table": "choice_option",
+            "left_fk": "hbl_accountid",
+            "right_fk": "choice_optionid",
+            "choice_group": "hbl_cust_choice_industry",
+            "choice_code": "135150001",
+            "choice_label": "SI"
+          }
+        ],
+        "knowledge_hits": [],
+        "fallback_reason": ""
+      }
+    },
+    {
+      "query": "khách hàng thuộc nhóm Singapore",
+      "tool": "list_accounts",
+      "tool_match": true,
+      "path_match": true,
+      "choice_match": true,
+      "trace": {
+        "planner_mode": "dynamic_metadata",
+        "selected_entities": [
+          "hbl_account"
+        ],
+        "join_path": [],
+        "choice_constraints": [
+          {
+            "left_table": "hbl_account",
+            "join_table": "hbl_account_industry_choice",
+            "right_table": "choice_option",
+            "left_fk": "hbl_accountid",
+            "right_fk": "choice_optionid",
+            "choice_group": "hbl_cust_choice_industry",
+            "choice_code": "135150001",
+            "choice_label": "SI"
+          },
+          {
+            "left_table": "hbl_account",
+            "join_table": "hbl_account_country_choice",
+            "right_table": "choice_option",
+            "left_fk": "hbl_accountid",
+            "right_fk": "choice_optionid",
+            "choice_group": "hbl_cust_choice_country",
+            "choice_code": "135150000",
+            "choice_label": "Singapore"
+          }
+        ],
+        "knowledge_hits": [],
+        "fallback_reason": ""
+      }
+    },
+    {
+      "query": "khách hàng thuộc nhóm <10M",
+      "tool": "list_accounts",
+      "tool_match": true,
+      "path_match": true,
+      "choice_match": false,
+      "trace": {
+        "planner_mode": "dynamic_metadata",
+        "selected_entities": [
+          "hbl_account"
+        ],
+        "join_path": [],
+        "choice_constraints": [
+          {
+            "left_table": "hbl_contract",
+            "join_table": "hbl_contract_invoiced_month_choice_map",
+            "right_table": "choice_option",
+            "left_fk": "hbl_contractid",
+            "right_fk": "choice_optionid",
+            "choice_group": "mc_monthchoice",
+            "choice_code": "1",
+            "choice_label": "1"
+          }
+        ],
+        "knowledge_hits": [],
+        "fallback_reason": ""
+      }
+    },
+    {
+      "query": "khách hàng thuộc nhóm Linkedin",
+      "tool": "list_accounts",
+      "tool_match": true,
+      "path_match": true,
+      "choice_match": true,
+      "trace": {
+        "planner_mode": "dynamic_metadata",
+        "selected_entities": [
+          "hbl_account"
+        ],
+        "join_path": [],
+        "choice_constraints": [
+          {
+            "left_table": "hbl_contact",
+            "join_table": "hbl_contact_source_choice_map",
+            "right_table": "choice_option",
+            "left_fk": "hbl_contactid",
+            "right_fk": "choice_optionid",
+            "choice_group": "mc_contact_source_choice",
+            "choice_code": "758130000",
+            "choice_label": "Linkedin"
+          }
+        ],
+        "knowledge_hits": [],
+        "fallback_reason": ""
+      }
+    },
+    {
+      "query": "khách hàng thuộc nhóm Following",
+      "tool": "list_accounts",
+      "tool_match": true,
+      "path_match": true,
+      "choice_match": true,
+      "trace": {
+        "planner_mode": "dynamic_metadata",
+        "selected_entities": [
+          "hbl_account"
+        ],
+        "join_path": [],
+        "choice_constraints": [
+          {
+            "left_table": "hbl_opportunities",
+            "join_table": "hbl_opportunities_status_choice_map",
+            "right_table": "choice_option",
+            "left_fk": "hbl_opportunitiesid",
+            "right_fk": "choice_optionid",
+            "choice_group": "hbl_opportunities_status_choice",
+            "choice_code": "135150000",
+            "choice_label": "Following"
+          }
+        ],
+        "knowledge_hits": [],
+        "fallback_reason": ""
+      }
+    },
+    {
+      "query": "khách hàng thuộc nhóm Adapting",
+      "tool": "list_accounts",
+      "tool_match": true,
+      "path_match": true,
+      "choice_match": true,
+      "trace": {
+        "planner_mode": "dynamic_metadata",
+        "selected_entities": [
+          "hbl_account"
+        ],
+        "join_path": [],
+        "choice_constraints": [
+          {
+            "left_table": "hbl_contract",
+            "join_table": "hbl_contract_status_choice_map",
+            "right_table": "choice_option",
+            "left_fk": "hbl_contractid",
+            "right_fk": "choice_optionid",
+            "choice_group": "hbl_contract_status_choice",
+            "choice_code": "135150000",
+            "choice_label": "Adapting"
+          }
+        ],
+        "knowledge_hits": [],
+        "fallback_reason": ""
+      }
+    },
+    {
+      "query": "khách hàng thuộc nhóm 1",
+      "tool": "list_accounts",
+      "tool_match": true,
+      "path_match": true,
+      "choice_match": true,
+      "trace": {
+        "planner_mode": "dynamic_metadata",
+        "selected_entities": [
+          "hbl_account"
+        ],
+        "join_path": [],
+        "choice_constraints": [
+          {
+            "left_table": "hbl_contract",
+            "join_table": "hbl_contract_invoiced_month_choice_map",
+            "right_table": "choice_option",
+            "left_fk": "hbl_contractid",
+            "right_fk": "choice_optionid",
+            "choice_group": "mc_monthchoice",
+            "choice_code": "1",
+            "choice_label": "1"
+          }
+        ],
+        "knowledge_hits": [],
+        "fallback_reason": ""
+      }
+    }
+  ]
+}

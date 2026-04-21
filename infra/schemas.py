@@ -43,3 +43,15 @@ class PlannerDecision(BaseModel):
     thought: str = "..."
     tool: str = "list_accounts"
     args: dict[str, Any] = Field(default_factory=dict)
+
+
+class PlannerFeedbackPayload(BaseModel):
+    context_key: str = ""
+    role: str = "BUYER"
+    domain: str = "general"
+    original_query: str
+    wrong_answer_excerpt: str = ""
+    correction_text: str
+    error_type: str = "explicit_feedback"
+    resolved_intent: str = ""
+    resolved_entities: dict[str, Any] = Field(default_factory=dict)
