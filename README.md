@@ -13,54 +13,47 @@
 ## 📊 Sơ đồ hoạt động (System Flow)
 
 ```mermaid
-graph TD
-    User((Người dùng)) --> API[FastAPI Entrypoint]
-    API --> Orch{Orchestrator}
+graph LR
+    User((Người dùng)) --> API[FastAPI]
+    API --> Orch{Orch}
 
-    subgraph agent [🧠 Cognitive Core]
-        Orch --> Perc[Perception Node]
-        Perc --> Brain[Brain / Reasoning]
-        Brain --> Act[Action Node]
-        Act --> Eval[Evaluator Node]
-        Eval -.->|Quay lại| Brain
+    subgraph agent [🧠 Agent Core]
+        Orch --> Perc[Perc]
+        Perc --> Brain[Brain]
+        Brain --> Act[Act]
+        Act --> Eval[Eval]
+        Eval -.->|Retry| Brain
     end
 
     subgraph storage [💾 Knowledge & Data]
-        RAG[(Vector Store)]
-        Mem[(Episodic Memory)]
-        DB[(PostgreSQL)]
-        Learn{Learning Manager}
+        RAG[(RAG)]
+        Mem[(Memory)]
+        DB[(Postgres)]
+        Lrn{Learning}
     end
 
     Brain ==> RAG
     Brain ==> Mem
     Act ==> DB
-    Act -.->|Ghi nhớ bài học| Learn
-    Eval ==>|Hoàn tất| Final[Kết quả cuối]
-    Final -.->|Lưu trải nghiệm| Learn
-    Learn -.->|Cập nhật tri thức| Mem
+    Act -.->|Learn| Lrn
+    Eval ==>|Done| Final[Final]
+    Final -.->|Save| Lrn
+    Lrn -.->|Update| Mem
     Final --> User
 
-    %% Styling for Dark Mode visibility
+    %% Dark Mode Style
     linkStyle default stroke:#fff,stroke-width:2px
-    style agent fill:#0a0d14,stroke:#3b82f6,stroke-width:2px,color:#fff
-    style storage fill:#0a0d14,stroke:#ef4444,stroke-width:2px,color:#fff
-    style API fill:#1e293b,stroke:#fff,stroke-width:1px,color:#fff
-    style Orch fill:#1e293b,stroke:#fff,stroke-width:1px,color:#fff
-    style Final fill:#1e293b,stroke:#fff,stroke-width:1px,color:#fff
+    style agent fill:#0a0d14,stroke:#3b82f6,color:#fff
+    style storage fill:#0a0d14,stroke:#ef4444,color:#fff
 ```
 
 ### 🧠 Giải thích luồng vận hành (Agentic Workflow):
 
-1.  **Perception (Tiếp nhận)**: Agent nhận câu hỏi từ người dùng thông qua FastAPI, thực hiện chuẩn hóa văn bản và xác định vai trò (`BUYER` hoặc `ADMIN`).
-2.  **Reasoning (Suy luận)**:
-    *   Sử dụng **Llama 3** để phân tích mục tiêu.
-    *   **RAG (Vector Store)**: Tìm kiếm các bảng dữ liệu liên quan trong Database Schema.
-    *   **Memory**: Truy xuất các bài học thành công trong quá khứ và lời khuyên từ phiên làm việc hiện tại.
-3.  **Action (Hành động)**: Gọi các công cụ (Tools) thực tế như `search_products`, `get_orders` để truy vấn dữ liệu từ PostgreSQL.
-4.  **Evaluation (Đánh giá)**:
-    *   Kiểm tra kết quả thu được. Nếu đã đủ thông tin, Agent sẽ trả về kết quả cuối cùng.
-    *   Nếu chưa đủ (ví dụ: không thấy sản phẩm), Agent sẽ tự động quay lại bước **Reasoning** để lập kế hoạch mới (thử từ khóa khác, tìm bảng khác).
+1.  **Perception (Tiếp nhận)**: Agent nhận thông tin, chuẩn hóa văn bản và xác định vai trò người dùng.
+2.  **Reasoning (Suy luận)**: LLM kết hợp với **RAG** (để hiểu database) và **Episodic Memory** (để nhớ lịch sử) để lập kế hoạch.
+3.  **Action (Hành động)**: Thực thi công cụ và truy vấn Database thực tế.
+4.  **Learning (Học tập)**: Mọi hành động và kết quả đều được **Learning Manager** ghi lại để Agent "rút kinh nghiệm" cho lần sau.
+5.  **Evaluation (Đánh giá)**: Kiểm tra xem kết quả đã đáp ứng yêu cầu chưa. Nếu chưa đạt, Agent sẽ tự động quay lại bước suy luận để tìm phương án khác.
 
 ---
 
