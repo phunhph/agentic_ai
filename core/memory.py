@@ -3,11 +3,12 @@ import os
 import ollama
 import math
 from datetime import datetime
+from core.settings import OLLAMA_EMBEDDING_MODEL
 
 class AgentMemory:
     def __init__(self, file_path="logs/experience.json"):
         self.file_path = file_path
-        self.model = "llama3:latest"
+        self.model = OLLAMA_EMBEDDING_MODEL
         os.makedirs(os.path.dirname(self.file_path), exist_ok=True)
 
     def _get_embedding(self, text):

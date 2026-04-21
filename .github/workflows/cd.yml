@@ -1,0 +1,70 @@
+name: CD
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - staging
+          - production
+      dry_run:
+        description: "Run deploy in debug mode only"
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          set -x
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build release artifact
+        run: |
+          set -x
+          mkdir -p dist
+          tar --exclude-vcs --exclude='./.venv' --exclude='./venv' --exclude='./__pycache__' -czf dist/agentic_system.tar.gz .
+          ls -lh dist
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: agentic-system-${{ github.sha }}
+          path: dist/agentic_system.tar.gz
+
+      - name: Deploy (debug-first)
+        env:
+          DRY_RUN: ${{ inputs.dry_run }}
+          TARGET_ENV: ${{ inputs.environment }}
+        run: |
+          set -x
+          echo "Preparing deploy for env: $TARGET_ENV"
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "Dry-run enabled. No real deploy executed."
+            exit 0
+          fi
+          echo "No production deploy command configured yet."
+          echo "Add your real deploy command here (SSH/K8s/Cloud CLI)."

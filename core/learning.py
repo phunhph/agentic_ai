@@ -2,11 +2,12 @@ import json
 import os
 import ollama
 import math
+from core.settings import OLLAMA_EMBEDDING_MODEL
 
 class AgentLearning:
     def __init__(self):
         self.path = "logs/learning_data.json"
-        self.model = "llama3:latest"
+        self.model = OLLAMA_EMBEDDING_MODEL
         os.makedirs(os.path.dirname(self.path), exist_ok=True)
         if not os.path.exists(self.path):
             with open(self.path, 'w', encoding='utf-8') as f:

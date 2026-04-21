@@ -15,3 +15,6 @@ requests
 aiohttp
 ollama
 langchain-ollama
+
+# --- Dev Tools ---
+pre-commit

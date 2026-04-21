@@ -1,6 +1,7 @@
 import json
 import ollama
 import math
+from core.settings import OLLAMA_EMBEDDING_MODEL
 
 class MetadataRAG:
     def __init__(self):
@@ -13,7 +14,7 @@ class MetadataRAG:
             "customers": "Khách hàng: id, name, email, address. Dùng khi tìm kiếm thông tin khách hàng.",
             "order_items": "Chi tiết đơn hàng: id, order_id, product_id, quantity, price_at_order. Dùng khi xem chi tiết các món trong đơn."
         }
-        self.model = "llama3:latest"
+        self.model = OLLAMA_EMBEDDING_MODEL
         self.embeddings = {}
         self._initialize_embeddings()
 

@@ -9,6 +9,7 @@ from layers.perception import perception_node
 from layers.action import action_node
 from layers.evaluator import evaluator_node
 from core.memory import AgentMemory
+from core.settings import APP_HOST, APP_PORT
 
 app = FastAPI()
 memory = AgentMemory()
@@ -92,4 +93,4 @@ async def run_agent(goal: str = Form(...), role: str = Form("BUYER"), history: s
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host=APP_HOST, port=APP_PORT)

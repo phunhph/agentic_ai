@@ -2,6 +2,7 @@ import ollama
 import json
 from core.vector_store import MetadataRAG
 from core.learning import AgentLearning
+from core.settings import OLLAMA_CHAT_MODEL
 
 rag = MetadataRAG()
 learning = AgentLearning()
@@ -44,7 +45,7 @@ def agent_brain(state: dict):
     max_retries = 2
     for attempt in range(max_retries + 1):
         try:
-            response = ollama.generate(model='llama3:latest', prompt=prompt, format='json')
+            response = ollama.generate(model=OLLAMA_CHAT_MODEL, prompt=prompt, format='json')
             result = json.loads(response['response'])
             
             # Validation

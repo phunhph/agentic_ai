@@ -2,6 +2,7 @@ import ollama
 import json
 from core.schema import get_relevant_schema
 from layers.router import semantic_router
+from core.settings import OLLAMA_REASONING_MODEL
 
 def reasoning_node(state: dict):
     goal = state["goal"]
@@ -24,7 +25,7 @@ def reasoning_node(state: dict):
     Format JSON: {{"thought": "...", "tool": "...", "args": {{...}}}}
     """
     
-    response = ollama.generate(model='gemma3:4b', prompt=prompt, format='json')
+    response = ollama.generate(model=OLLAMA_REASONING_MODEL, prompt=prompt, format='json')
     decision = json.loads(response['response'])
     
     return {
