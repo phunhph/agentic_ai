@@ -58,7 +58,7 @@ class MetadataRAG:
 
         # Sắp xếp và lấy các bảng có điểm cao nhất (> 0.4)
         relevant = [text for score, text in sorted(scores, reverse=True) if score > 0.4]
-        
+
         # Nếu không có cái nào đạt ngưỡng, lấy cái cao nhất
         if not relevant and scores:
             relevant = [sorted(scores, reverse=True)[0][1]]

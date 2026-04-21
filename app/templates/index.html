@@ -36,7 +36,7 @@
     </nav>
 
     <main class="flex-grow flex p-6 gap-6 overflow-hidden">
-        
+
         <!-- SIDEBAR: Control & Preview -->
         <aside class="w-[450px] flex flex-col gap-6">
             <div class="glass rounded-2xl p-6 flex flex-col gap-4">
@@ -109,7 +109,7 @@
 
             runBtn.disabled = true;
             runBtn.innerHTML = '<i class="fas fa-sync animate-spin"></i> <span>Processing...</span>';
-            
+
             appendLog({ block: 'SYSTEM', content: `Kích hoạt Agent Loop - Goal: ${goal}`, status: 'INIT' });
 
             const formData = new FormData();
@@ -125,7 +125,7 @@
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
-                    
+
                     const chunk = decoder.decode(value);
                     const lines = chunk.split('\n').filter(l => l.startsWith('data: '));
                     for (const line of lines) {
@@ -149,7 +149,7 @@
             const div = document.createElement('div');
             const colors = { 'PERCEIVE': 'text-cyan-400', 'REASON': 'text-amber-400', 'ACT': 'text-red-400', 'EVAL': 'text-green-400', 'SYSTEM': 'text-purple-400' };
             const bgs = { 'PERCEIVE': 'bg-cyan-400', 'REASON': 'bg-amber-400', 'ACT': 'bg-red-400', 'EVAL': 'bg-green-400', 'SYSTEM': 'bg-purple-400' };
-            
+
             div.className = "glass p-4 rounded-xl animate-fade mb-3 border border-white/5";
             div.innerHTML = `
                 <div class="flex justify-between items-center mb-2">
@@ -173,7 +173,7 @@
             let html = '';
             // Kiểm tra xem là loại dữ liệu gì để render phù hợp
             const first = results[0];
-            
+
             if (first.category && (first.product_count !== undefined || first.total_quantity !== undefined)) {
                 // RENDER STATS (ADMIN)
                 html = '<div class="space-y-4">';

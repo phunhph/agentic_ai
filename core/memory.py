@@ -34,14 +34,14 @@ class AgentMemory:
             "timestamp": str(datetime.now()),
             "vector": vector
         }
-        
+
         data = []
         if os.path.exists(self.file_path):
             try:
                 with open(self.file_path, 'r', encoding='utf-8') as f:
                     data = json.load(f)
             except Exception: data = []
-        
+
         data.append(experience)
         with open(self.file_path, 'w', encoding='utf-8') as f:
             json.dump(data[-50:], f, ensure_ascii=False, indent=4)
@@ -51,16 +51,16 @@ class AgentMemory:
         try:
             if not os.path.exists(self.file_path):
                 return "Chưa có kinh nghiệm cũ."
-            
+
             with open(self.file_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            
+
             query_vector = self._get_embedding(goal)
             if not query_vector or not data: return "Hệ thống đang tích lũy kinh nghiệm."
 
             best_match = None
             max_score = -1.0
-            
+
             for d in data:
                 if d.get("success") and "vector" in d and d["vector"]:
                     score = self._cosine_similarity(query_vector, d["vector"])
@@ -70,7 +70,7 @@ class AgentMemory:
 
             if best_match and max_score > 0.7:
                 return f"Gợi ý ML: Với yêu cầu '{best_match['goal']}', hành động '{best_match['action']}' đã thành công."
-            
+
             return "Hãy thử phân tích các bảng dữ liệu liên quan."
         except Exception:
             return "Đã xảy ra lỗi khi truy xuất bộ nhớ."

@@ -32,9 +32,9 @@ def action_node(state: dict):
     tool = state.get("next_action")
     args = state.get("next_args", {})
     goal = state.get("goal")
-    
+
     observation = []
-    
+
     if tool in TOOL_REGISTRY:
         try:
             tool_info = TOOL_REGISTRY[tool]
@@ -58,17 +58,17 @@ def action_node(state: dict):
             "status": "UNKNOWN_TOOL"
         }
         return {"observations": [], "node_logs": [log]}
-    
+
     # TẦNG HỌC HỎI: Ghi lại kết quả để AI tự rút kinh nghiệm
     success = len(observation) > 0
     learning.record_lesson(goal, tool, success)
-    
+
     log = {
         "block": "ACT",
         "content": f"Đã gọi {tool}. Tìm thấy {len(observation)} bản ghi.",
         "status": "SUCCESS" if success else "NOT_FOUND"
     }
-    
+
     return {
         "observations": observation,
         "node_logs": [log]

@@ -1,7 +1,7 @@
 """setup_enterprise_schema
 
 Revision ID: dec5e7bb7491
-Revises: 
+Revises:
 Create Date: 2026-04-20 15:09:35.598109
 
 """

@@ -32,24 +32,24 @@ async def run_agent(goal: str = Form(...), role: str = Form("BUYER"), history: s
         perception_result = perception_node({"goal": goal, "role": role})
         clean_goal = perception_result["goal"]
         detected_role = perception_result.get("role", role)
-        
+
         yield f"data: {json.dumps({'type': 'log', 'log': {'block': 'PERCEIVE', 'content': f'Input: \"{clean_goal}\" | Role: {detected_role}', 'status': 'DONE'}}, ensure_ascii=False)}\n\n"
         await asyncio.sleep(0.2)
 
         # STATE
         state = {
-            "goal": clean_goal, 
-            "role": detected_role, 
+            "goal": clean_goal,
+            "role": detected_role,
             "history": chat_history,
             "is_finished": False,
-            "iteration": 0, 
-            "steps": [], 
+            "iteration": 0,
+            "steps": [],
             "observations": []
         }
 
         while not state["is_finished"] and state["iteration"] < 5:
             state["iteration"] += 1
-            
+
             # 2. PLANNING
             decision = agent_brain(state)
             thought = decision.get("thought", "...")
@@ -64,7 +64,7 @@ async def run_agent(goal: str = Form(...), role: str = Form("BUYER"), history: s
                 memory.save_experience(clean_goal, "completed", len(state["observations"]))
                 yield f"data: {json.dumps({'type': 'log', 'log': {'block': 'EVAL', 'content': 'Hoàn tất mục tiêu.', 'status': 'DONE'}}, ensure_ascii=False)}\n\n"
                 break
-            
+
             if tool == "error":
                 state["is_finished"] = True
                 break
@@ -74,7 +74,7 @@ async def run_agent(goal: str = Form(...), role: str = Form("BUYER"), history: s
             state["next_args"] = args
             act_res = action_node(state)
             state["observations"] = act_res["observations"]
-            
+
             yield f"data: {json.dumps({'type': 'log', 'log': act_res['node_logs'][0]}, ensure_ascii=False)}\n\n"
             await asyncio.sleep(0.2)
 

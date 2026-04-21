@@ -7,7 +7,7 @@ def get_orders(customer_name: str = None):
         query = db.query(Order).join(Customer)
         if customer_name:
             query = query.filter(Customer.name.ilike(f"%{customer_name}%"))
-        
+
         results = query.all()
         return [{
             "order_id": o.id,
@@ -23,7 +23,7 @@ def get_order_details(order_id: int):
         order = db.query(Order).filter(Order.id == order_id).first()
         if not order:
             return {"error": "Không tìm thấy đơn hàng"}
-            
+
         items = db.query(OrderItem).join(Product).filter(OrderItem.order_id == order_id).all()
         return {
             "order_id": order.id,

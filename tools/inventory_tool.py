@@ -7,10 +7,10 @@ def search_products(keyword: str):
         try:
             # Tìm kiếm kết hợp Category và Product
             results = db.query(Product).join(Category).filter(
-                (Product.name.ilike(f"%{keyword}%")) | 
+                (Product.name.ilike(f"%{keyword}%")) |
                 (Category.name.ilike(f"%{keyword}%"))
             ).all()
-            
+
             return [{
                 "id": p.id,
                 "name": p.name,
@@ -27,13 +27,13 @@ def get_inventory_stats():
         try:
             # Thống kê chuyên sâu cho ADMIN - Sửa lỗi Ambiguous join
             stats = db.query(
-                Category.name, 
+                Category.name,
                 func.count(Product.id).label('total_items'),
                 func.sum(Inventory.quantity).label('total_qty')
             ).join(Product, Category.id == Product.category_id) \
              .join(Inventory, Product.id == Inventory.product_id) \
              .group_by(Category.name).all()
-            
+
             return [{
                 "category": s[0],
                 "product_count": s[1],

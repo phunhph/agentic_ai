@@ -35,8 +35,8 @@ class AgentLearning:
         with open(self.path, 'r+', encoding='utf-8') as f:
             data = json.load(f)
             data.append({
-                "goal": goal, 
-                "tool": tool_used, 
+                "goal": goal,
+                "tool": tool_used,
                 "success": success,
                 "vector": vector
             })
@@ -52,7 +52,7 @@ class AgentLearning:
         try:
             with open(self.path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            
+
             if not data:
                 return "Hệ thống chưa có kinh nghiệm thực tế."
 
@@ -67,7 +67,7 @@ class AgentLearning:
             for entry in data:
                 if not entry.get("success") or "vector" not in entry or not entry["vector"]:
                     continue
-                
+
                 score = self._cosine_similarity(query_vector, entry["vector"])
                 if score > max_score and score > 0.7: # Ngưỡng tin cậy 0.7
                     max_score = score
@@ -75,7 +75,7 @@ class AgentLearning:
 
             if best_match:
                 return f"BÀI HỌC ML: Với yêu cầu tương tự '{best_match['goal']}' (độ khớp {int(max_score*100)}%), tool '{best_match['tool']}' đã thành công."
-            
+
             return "Chưa tìm thấy bài học tương tự chặt chẽ trong quá khứ."
         except Exception as e:
             return f"Lỗi truy xuất bộ nhớ: {str(e)}"

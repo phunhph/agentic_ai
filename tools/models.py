@@ -8,7 +8,7 @@ class Category(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), unique=True, nullable=False)
     description = Column(String(255))
-    
+
     products = relationship("Product", back_populates="category")
 
 class Product(Base):
@@ -38,7 +38,7 @@ class Customer(Base):
     name = Column(String(100), nullable=False)
     email = Column(String(100), unique=True)
     address = Column(String(255))
-    
+
     orders = relationship("Order", back_populates="customer")
 
 class Order(Base):
@@ -48,7 +48,7 @@ class Order(Base):
     status = Column(String(50), default="PENDING") # PENDING, SHIPPED, DELIVERED
     total_price = Column(Float, default=0.0)
     created_at = Column(DateTime, default=datetime.utcnow)
-    
+
     customer = relationship("Customer", back_populates="orders")
     items = relationship("OrderItem", back_populates="order")
 
@@ -59,6 +59,6 @@ class OrderItem(Base):
     product_id = Column(Integer, ForeignKey("products.id"))
     quantity = Column(Integer, nullable=False)
     price_at_order = Column(Float, nullable=False)
-    
+
     order = relationship("Order", back_populates="items")
     product = relationship("Product")
