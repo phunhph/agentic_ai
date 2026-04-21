@@ -1,13 +1,16 @@
 DOMAIN_MAP = {
-    "INVENTORY_DOMAIN": ["products", "inventories", "categories"],
-    "SALES_DOMAIN": ["orders", "order_items", "customers"],
-    "ACCOUNTING_HOME": ["invoices", "payments"],
+    "INVENTORY_DOMAIN": ["hbl_account", "choice_option"],
+    "SALES_DOMAIN": ["hbl_contact", "hbl_opportunities", "hbl_contract", "systemuser"],
+    "ACCOUNTING_HOME": ["hbl_contract"],
 }
 
 DETAILED_SCHEMA = {
-    "products": "Columns: id, sku, name, price, category_id. Relation: categories.id",
-    "inventories": "Columns: id, product_id, quantity, location. Relation: products.id",
-    "categories": "Columns: id, name, description",
+    "hbl_account": "Columns: hbl_accountid, hbl_account_name, cr987_account_am_salesid, cr987_account_bdid, createdon, modifiedon",
+    "hbl_contact": "Columns: hbl_contactid, hbl_contact_name, hbl_contact_accountid, mc_contact_assigneeid, email/phone/time fields",
+    "hbl_opportunities": "Columns: hbl_opportunitiesid, hbl_opportunities_name, hbl_opportunities_accountid, mc_opportunities_ownerid",
+    "hbl_contract": "Columns: hbl_contractid, hbl_contract_name, hbl_contract_opportunityid, mc_contract_assigneeid, jan..dec",
+    "systemuser": "Columns: systemuserid, fullname, email",
+    "choice_option": "Columns: choice_optionid, choice_group, choice_code, choice_label",
 }
 
 

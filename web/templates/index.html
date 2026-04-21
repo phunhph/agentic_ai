@@ -8,12 +8,10 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;900&display=swap');
-        :root { --bg: #030508; --card: #0a0d14; --admin: #ef4444; --client: #3b82f6; }
+        :root { --bg: #0b1220; --card: #121a2b; --primary: #2563eb; --text-soft: #cbd5e1; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: #f8fafc; overflow: hidden; }
         .mono { font-family: 'JetBrains Mono', monospace; }
         .glass { background: rgba(10, 13, 20, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
-        .tab-active-client { background: var(--client); color: white; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
-        .tab-active-admin { background: var(--admin); color: white; box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade { animation: fadeIn 0.3s ease-out forwards; }
         .custom-scroll::-webkit-scrollbar { width: 4px; }
@@ -32,7 +30,7 @@
                 <p class="text-[9px] text-gray-500 uppercase tracking-widest font-bold">Llama 3 Powered Autonomous Loop</p>
             </div>
         </div>
-        <div id="roleIndicator" class="px-4 py-1.5 rounded-lg text-[10px] font-black tracking-widest uppercase border border-white/10 bg-white/5">SESSION: BUYER</div>
+        <div id="roleIndicator" class="px-4 py-1.5 rounded-lg text-[10px] font-black tracking-widest uppercase border border-blue-400/30 bg-blue-500/10 text-blue-200">SESSION: AGENT</div>
     </nav>
 
     <main class="flex-grow flex p-6 gap-6 overflow-hidden">
@@ -40,10 +38,6 @@
         <!-- SIDEBAR: Control & Preview -->
         <aside class="w-[450px] flex flex-col gap-6">
             <div class="glass rounded-2xl p-6 flex flex-col gap-4">
-                <div class="flex p-1 bg-black/40 rounded-xl border border-white/5 mb-2">
-                    <button onclick="setMode('BUYER')" id="btnBuyer" class="flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all tab-active-client">Client</button>
-                    <button onclick="setMode('ADMIN')" id="btnAdmin" class="flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all text-gray-500">Admin</button>
-                </div>
                 <div class="relative">
                     <textarea id="goalInput" class="w-full h-32 bg-black/60 border border-white/10 rounded-xl p-5 text-sm mono outline-none focus:border-blue-500/50 transition-all resize-none" placeholder="Lệnh cho Agent..."></textarea>
                 </div>
@@ -52,7 +46,7 @@
                 </button>
             </div>
 
-            <div class="glass rounded-2xl p-6 flex-grow flex flex-col overflow-hidden border-t-2 border-blue-500/20" id="dbContainer">
+            <div class="glass rounded-2xl p-6 flex-grow flex flex-col overflow-hidden border-t-2 border-blue-500/30" id="dbContainer">
                 <h2 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4 flex justify-between items-center">
                     <span>Enterprise Data View</span>
                     <i class="fas fa-database text-blue-500"></i>
@@ -86,23 +80,21 @@
     </main>
 
     <script>
-        let currentRole = 'BUYER';
-        const chatHistoryByRole = { BUYER: [], ADMIN: [] };
-        /** @type {Record<string, Record<string, object[]>>} role -> context_key -> logs */
-        const traceByRoleContext = { BUYER: {}, ADMIN: {} };
-        /** @type {Record<string, string|null>} */
-        const activeContextKeyByRole = { BUYER: null, ADMIN: null };
-        const resultsByRole = { BUYER: [], ADMIN: [] };
-        const sessionIdByRole = { BUYER: createId(), ADMIN: createId() };
-        const conversationIdByRole = { BUYER: createId(), ADMIN: createId() };
+        const FIXED_ROLE = 'BUYER';
+        const chatHistory = [];
+        /** @type {Record<string, object[]>} context_key -> logs */
+        const traceByContext = {};
+        let activeContextKey = null;
+        let lastResults = [];
+        const sessionId = createId();
+        let conversationId = createId();
         const trace = document.getElementById('traceContent');
         const traceThreadSelect = document.getElementById('traceThreadSelect');
         const dbView = document.getElementById('dbView');
         const runBtn = document.getElementById('executeBtn');
 
-        function localContextKey(role) {
-            const r = (role || 'BUYER').toUpperCase();
-            return `${r}:${sessionIdByRole[r]}:${conversationIdByRole[r]}`;
+        function localContextKey() {
+            return `${FIXED_ROLE}:${sessionId}:${conversationId}`;
         }
 
         function shortContextLabel(key) {
@@ -121,46 +113,28 @@
             return `id-${Date.now()}-${Math.floor(Math.random() * 1e9)}`;
         }
 
-        function setMode(m) {
-            currentRole = m;
-            document.getElementById('btnBuyer').className = m === 'BUYER' ? 'flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all tab-active-client' : 'flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all text-gray-500';
-            document.getElementById('btnAdmin').className = m === 'ADMIN' ? 'flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all tab-active-admin' : 'flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all text-gray-500';
-            document.getElementById('roleIndicator').innerText = `SESSION: ${m}`;
-            document.getElementById('dbContainer').style.borderColor = m === 'BUYER' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(239, 68, 68, 0.2)';
-            runBtn.className = m === 'BUYER' ? 'w-full bg-blue-600 hover:bg-blue-500 text-white font-black text-xs py-4 rounded-xl shadow-xl shadow-blue-600/20 active:scale-[0.98] transition-all uppercase tracking-widest flex items-center justify-center gap-3' : 'w-full bg-red-600 hover:bg-red-500 text-white font-black text-xs py-4 rounded-xl shadow-xl shadow-red-600/20 active:scale-[0.98] transition-all uppercase tracking-widest flex items-center justify-center gap-3';
-            renderTraceThreadSelect();
-            renderTraceForRole(m);
-            renderResults(resultsByRole[m] || []);
-        }
-
         function clearSystem() {
-            chatHistoryByRole.BUYER = [];
-            chatHistoryByRole.ADMIN = [];
-            traceByRoleContext.BUYER = {};
-            traceByRoleContext.ADMIN = {};
-            activeContextKeyByRole.BUYER = null;
-            activeContextKeyByRole.ADMIN = null;
-            resultsByRole.BUYER = [];
-            resultsByRole.ADMIN = [];
+            chatHistory.length = 0;
+            Object.keys(traceByContext).forEach((k) => delete traceByContext[k]);
+            activeContextKey = null;
+            lastResults = [];
             trace.innerHTML = '';
             dbView.innerHTML = '';
             renderTraceThreadSelect();
         }
 
         function newConversation() {
-            const r = currentRole;
-            conversationIdByRole[r] = createId();
-            activeContextKeyByRole[r] = localContextKey(r);
-            if (!traceByRoleContext[r][activeContextKeyByRole[r]]) {
-                traceByRoleContext[r][activeContextKeyByRole[r]] = [];
+            conversationId = createId();
+            activeContextKey = localContextKey();
+            if (!traceByContext[activeContextKey]) {
+                traceByContext[activeContextKey] = [];
             }
             renderTraceThreadSelect();
-            renderTraceForRole(r);
+            renderTrace();
         }
 
         function renderTraceThreadSelect() {
-            const r = currentRole;
-            const bucket = traceByRoleContext[r] || {};
+            const bucket = traceByContext || {};
             const keys = Object.keys(bucket);
             traceThreadSelect.innerHTML = '';
             keys.forEach((k) => {
@@ -169,18 +143,18 @@
                 opt.textContent = shortContextLabel(k);
                 traceThreadSelect.appendChild(opt);
             });
-            const active = activeContextKeyByRole[r] && keys.includes(activeContextKeyByRole[r])
-                ? activeContextKeyByRole[r]
+            const active = activeContextKey && keys.includes(activeContextKey)
+                ? activeContextKey
                 : (keys.length ? keys[keys.length - 1] : '');
             if (active) {
                 traceThreadSelect.value = active;
-                activeContextKeyByRole[r] = active;
+                activeContextKey = active;
             }
         }
 
         function onTraceThreadChange(value) {
-            activeContextKeyByRole[currentRole] = value || null;
-            renderTraceForRole(currentRole);
+            activeContextKey = value || null;
+            renderTrace();
         }
 
         runBtn.onclick = async () => {
@@ -194,18 +168,18 @@
                 block: 'SYSTEM',
                 content: `Kích hoạt Agent Loop - Goal: ${goal}`,
                 status: 'INIT',
-                role: currentRole,
-                session_id: sessionIdByRole[currentRole],
-                conversation_id: conversationIdByRole[currentRole],
-                context_key: localContextKey(currentRole),
+                role: FIXED_ROLE,
+                session_id: sessionId,
+                conversation_id: conversationId,
+                context_key: localContextKey(),
             });
 
             const formData = new FormData();
             formData.append('goal', goal);
-            formData.append('role', currentRole);
-            formData.append('history', JSON.stringify(chatHistoryByRole[currentRole] || []));
-            formData.append('session_id', sessionIdByRole[currentRole]);
-            formData.append('conversation_id', conversationIdByRole[currentRole]);
+            formData.append('role', FIXED_ROLE);
+            formData.append('history', JSON.stringify(chatHistory || []));
+            formData.append('session_id', sessionId);
+            formData.append('conversation_id', conversationId);
 
             try {
                 const response = await fetch('/run-agent', { method: 'POST', body: formData });
@@ -222,14 +196,11 @@
                         const data = JSON.parse(line.replace('data: ', ''));
                         if (data.type === 'log') appendLog(data.log);
                         if (data.type === 'final') {
-                            const roleKey = (data.role || currentRole).toUpperCase();
-                            const ck = data.context_key || localContextKey(roleKey);
-                            activeContextKeyByRole[roleKey] = ck;
-                            resultsByRole[roleKey] = data.final_result || [];
-                            if (roleKey === currentRole) {
-                                renderResults(data.final_result);
-                            }
-                            chatHistoryByRole[roleKey].push({ goal: goal, result: JSON.stringify(data.final_result).substring(0, 200) });
+                            const ck = data.context_key || localContextKey();
+                            activeContextKey = ck;
+                            lastResults = data.final_result || [];
+                            renderResults(lastResults);
+                            chatHistory.push({ goal: goal, result: JSON.stringify(lastResults).substring(0, 200) });
                             renderTraceThreadSelect();
                         }
                     }
@@ -239,10 +210,10 @@
                     block: 'SYSTEM',
                     content: 'Connection Error: ' + e.message,
                     status: 'FATAL',
-                    role: currentRole,
-                    session_id: sessionIdByRole[currentRole],
-                    conversation_id: conversationIdByRole[currentRole],
-                    context_key: localContextKey(currentRole),
+                    role: FIXED_ROLE,
+                    session_id: sessionId,
+                    conversation_id: conversationId,
+                    context_key: localContextKey(),
                 });
             } finally {
                 runBtn.disabled = false;
@@ -251,30 +222,24 @@
         }
 
         function appendLog(log) {
-            const logRole = (log.role || currentRole).toUpperCase();
-            const ck = log.context_key || localContextKey(logRole);
-            if (!traceByRoleContext[logRole]) traceByRoleContext[logRole] = {};
-            if (!traceByRoleContext[logRole][ck]) traceByRoleContext[logRole][ck] = [];
-            traceByRoleContext[logRole][ck].push(log);
-            activeContextKeyByRole[logRole] = ck;
-            if (logRole !== currentRole) {
-                renderTraceThreadSelect();
-                return;
-            }
+            const ck = log.context_key || localContextKey();
+            if (!traceByContext[ck]) traceByContext[ck] = [];
+            traceByContext[ck].push(log);
+            activeContextKey = ck;
             renderTraceThreadSelect();
-            const showKey = activeContextKeyByRole[logRole] || ck;
+            const showKey = activeContextKey || ck;
             if (showKey !== ck) return;
             appendLogCard(log);
         }
 
-        function renderTraceForRole(role) {
+        function renderTrace() {
             trace.innerHTML = '';
-            const bucket = traceByRoleContext[role] || {};
+            const bucket = traceByContext || {};
             const keys = Object.keys(bucket);
-            let showKey = activeContextKeyByRole[role];
+            let showKey = activeContextKey;
             if (!showKey || !bucket[showKey]) {
                 showKey = keys.length ? keys[keys.length - 1] : null;
-                activeContextKeyByRole[role] = showKey;
+                activeContextKey = showKey;
             }
             renderTraceThreadSelect();
             const logs = showKey ? (bucket[showKey] || []) : [];
@@ -282,7 +247,7 @@
                 trace.innerHTML = `
                     <div class="max-w-md mx-auto text-center py-32 opacity-10">
                         <i class="fas fa-microchip text-6xl mb-4 text-purple-500"></i>
-                        <p class="font-bold uppercase tracking-widest">System Ready (${role})</p>
+                        <p class="font-bold uppercase tracking-widest">System Ready</p>
                     </div>
                 `;
                 return;
@@ -295,8 +260,7 @@
             const div = document.createElement('div');
             const colors = { 'PERCEIVE': 'text-cyan-400', 'REASON': 'text-amber-400', 'ACT': 'text-red-400', 'EVAL': 'text-green-400', 'SYSTEM': 'text-purple-400', 'TRACE': 'text-violet-400', 'LEARN': 'text-fuchsia-400', 'POLICY': 'text-orange-400' };
             const bgs = { 'PERCEIVE': 'bg-cyan-400', 'REASON': 'bg-amber-400', 'ACT': 'bg-red-400', 'EVAL': 'bg-green-400', 'SYSTEM': 'bg-purple-400', 'TRACE': 'bg-violet-400', 'LEARN': 'bg-fuchsia-400', 'POLICY': 'bg-orange-400' };
-            const roleTag = (log.role || currentRole).toUpperCase();
-            const roleClass = roleTag === 'ADMIN' ? 'text-red-400' : 'text-blue-400';
+            const roleTag = (log.role || FIXED_ROLE).toUpperCase();
 
             div.className = "glass p-4 rounded-xl animate-fade mb-3 border border-white/5";
             div.innerHTML = `
@@ -305,74 +269,151 @@
                         <span class="w-1.5 h-1.5 rounded-full ${bgs[log.block] || 'bg-gray-400'}"></span> ${log.block}
                     </span>
                     <span class="text-[8px] mono text-white/20 uppercase font-bold">
-                        ${log.status || 'OK'} · <span class="${roleClass}">${roleTag}</span>
+                        ${log.status || 'OK'} · <span class="text-blue-300">${roleTag}</span>
                         <span class="text-white/40" title="${log.context_key || ''}"> · ${(log.session_id || '').slice(0, 8)}</span>
                     </span>
                 </div>
                 <div class="text-[10px] mono text-white/25 mb-1 truncate" title="${log.context_key || ''}">${(log.context_key || '').slice(0, 48)}${(log.context_key || '').length > 48 ? '…' : ''}</div>
-                <div class="text-[12px] text-gray-400 font-medium leading-relaxed">${log.content}</div>
+                <div class="text-[12px] text-slate-200 font-medium leading-relaxed">${log.content}</div>
             `;
             trace.appendChild(div);
             trace.scrollTop = trace.scrollHeight;
         }
 
         function renderResults(results) {
-            if (!results || results.length === 0) {
-                dbView.innerHTML = '<div class="p-8 text-center text-gray-600 text-[10px] italic uppercase tracking-widest">No matching records found in Postgres.</div>';
+            const isDetailObject = (
+                results &&
+                !Array.isArray(results) &&
+                typeof results === 'object' &&
+                (
+                    Array.isArray(results.items) ||
+                    results.meta !== undefined
+                )
+            );
+
+            if (isDetailObject) {
+                const detail = results;
+                const detailItems = Array.isArray(detail.items) ? detail.items : [];
+                const meta = detail.meta && typeof detail.meta === 'object' ? detail.meta : {};
+                const metaRows = Object.entries(meta).map(([k, v]) => {
+                    const value = Array.isArray(v) ? v.join(', ') : (v ?? '-');
+                    return `
+                        <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300">
+                            <span class="text-slate-400">${k}:</span> ${value || '-'}
+                        </div>
+                    `;
+                }).join('');
+
+                const itemRows = detailItems.map((it) => `
+                    <div class="bg-slate-800/70 rounded-lg px-3 py-2 text-slate-200 text-[11px]">
+                        <div><span class="text-slate-400">item:</span> ${it.product ?? '-'}</div>
+                        <div><span class="text-slate-400">quantity:</span> ${it.quantity ?? '-'}</div>
+                        <div><span class="text-slate-400">price:</span> ${it.price ?? '-'}</div>
+                    </div>
+                `).join('');
+
+                dbView.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700">
+                            <div class="text-[10px] text-slate-400 mono">DETAIL</div>
+                            <div class="text-sm font-semibold text-slate-100 mt-1">${detail.customer ?? '-'}</div>
+                            <div class="mt-2 grid grid-cols-2 gap-2 text-[11px]">
+                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">order_id:</span> ${detail.order_id ?? '-'}</div>
+                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">status:</span> ${detail.status ?? '-'}</div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700">
+                            <div class="text-[10px] text-slate-400 uppercase mb-2">Items</div>
+                            <div class="space-y-2">${itemRows || '<div class="text-slate-400 text-[11px]">No items</div>'}</div>
+                        </div>
+                        <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700">
+                            <div class="text-[10px] text-slate-400 uppercase mb-2">Meta</div>
+                            <div class="grid grid-cols-1 gap-2 text-[11px]">${metaRows || '<div class="text-slate-400">No meta</div>'}</div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const normalizedResults = Array.isArray(results)
+                ? results
+                : (results && typeof results === 'object' ? [results] : []);
+
+            if (!normalizedResults.length) {
+                dbView.innerHTML = '<div class="p-8 text-center text-slate-400 text-[11px] italic uppercase tracking-widest">No matching records found.</div>';
                 return;
             }
 
             let html = '';
-            // Kiểm tra xem là loại dữ liệu gì để render phù hợp
-            const first = results[0];
+            const first = normalizedResults[0];
 
             if (first.category && (first.product_count !== undefined || first.total_quantity !== undefined)) {
-                // RENDER STATS (ADMIN)
                 html = '<div class="space-y-4">';
-                results.forEach(i => {
+                normalizedResults.forEach(i => {
                     html += `
-                        <div class="bg-white/5 border-l-2 border-red-500 p-4 rounded-r-xl">
-                            <div class="text-[9px] font-black text-gray-500 uppercase mb-1">${i.category}</div>
+                        <div class="bg-slate-900/60 border border-slate-700 p-4 rounded-xl">
+                            <div class="text-[10px] font-black text-slate-300 uppercase mb-2">${i.category}</div>
                             <div class="flex justify-between items-end">
-                                <div class="text-lg font-black text-white">${i.total_quantity} <span class="text-[9px] text-gray-500 uppercase">Items</span></div>
-                                <div class="text-[10px] mono text-red-400">${i.product_count} Skus</div>
+                                <div class="text-lg font-black text-white">${i.total_quantity ?? '-'} <span class="text-[9px] text-slate-400 uppercase">Items</span></div>
+                                <div class="text-[11px] mono text-blue-300">${i.product_count ?? '-'} Skus</div>
                             </div>
                         </div>`;
                 });
                 html += '</div>';
+            } else if (first.contact_count !== undefined || first.opportunity_count !== undefined || first.contract_count !== undefined) {
+                html = '<div class="grid grid-cols-1 gap-3">';
+                normalizedResults.forEach(a => {
+                    html += `
+                        <div class="bg-slate-900/60 border border-slate-700 p-4 rounded-xl hover:bg-slate-900/90 transition-all group">
+                            <div class="flex justify-between items-start gap-2 mb-2">
+                                <div>
+                                    <h4 class="text-sm font-semibold text-slate-100 group-hover:text-white">${a.name || '-'}</h4>
+                                    <div class="text-[10px] text-slate-400 mono mt-0.5">${a.id || '-'}</div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-[11px]">
+                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">AM:</span> ${a.am_sales || '-'}</div>
+                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">BD:</span> ${a.bd_owner || '-'}</div>
+                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">Contacts:</span> ${a.contact_count ?? 0}</div>
+                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">Opportunities:</span> ${a.opportunity_count ?? 0}</div>
+                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">Contracts:</span> ${a.contract_count ?? 0}</div>
+                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">Website:</span> ${a.website || '-'}</div>
+                            </div>
+                            <div class="mt-2 text-[11px] text-slate-400"><span class="text-slate-500">Domain:</span> ${a.domain || '-'}</div>
+                        </div>`;
+                });
+                html += '</div>';
             } else if (first.order_id !== undefined) {
-                // RENDER ORDERS
                 html = '<div class="space-y-3">';
-                results.forEach(o => {
+                normalizedResults.forEach(o => {
                     const statusColor = o.status === 'PENDING' ? 'text-amber-400' : 'text-green-400';
                     html += `
-                        <div class="glass p-4 rounded-xl border border-white/10 hover:border-white/20 transition-all">
+                        <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700 hover:border-slate-500 transition-all">
                             <div class="flex justify-between items-start mb-2">
-                                <span class="text-[10px] font-black text-blue-400 mono">ORD-#${o.order_id}</span>
-                                <span class="text-[9px] font-bold ${statusColor}">${o.status}</span>
+                                <span class="text-[10px] font-black text-blue-300 mono">ORD-#${o.order_id}</span>
+                                <span class="text-[10px] font-bold ${statusColor}">${o.status ?? 'N/A'}</span>
                             </div>
-                            <div class="text-xs font-bold text-gray-300 mb-1">${o.customer}</div>
+                            <div class="text-sm font-semibold text-slate-100 mb-1">${o.customer ?? '-'}</div>
                             <div class="flex justify-between items-center mt-3">
-                                <span class="text-[9px] text-gray-500 mono">${o.date.split(' ')[0]}</span>
-                                <span class="text-sm font-black text-white">${o.total.toLocaleString()}đ</span>
+                                <span class="text-[10px] text-slate-400 mono">${String(o.date || '').split(' ')[0] || '-'}</span>
+                                <span class="text-sm font-black text-white">${o.total != null ? o.total.toLocaleString() + 'đ' : '-'}</span>
                             </div>
                         </div>`;
                 });
                 html += '</div>';
             } else {
-                // RENDER PRODUCTS
                 html = '<div class="grid grid-cols-1 gap-3">';
-                results.forEach(p => {
+                normalizedResults.forEach(p => {
                     html += `
-                        <div class="bg-white/[0.03] border border-white/5 p-4 rounded-xl hover:bg-white/[0.05] transition-all group">
+                        <div class="bg-slate-900/60 border border-slate-700 p-4 rounded-xl hover:bg-slate-900/90 transition-all group">
                             <div class="flex justify-between items-start mb-1">
-                                <span class="text-[9px] font-black text-gray-500 mono">${p.sku}</span>
-                                <span class="text-xs font-black text-green-400">${p.price.toLocaleString()}đ</span>
+                                <span class="text-[10px] font-black text-slate-400 mono">${p.sku || '-'}</span>
+                                <span class="text-sm font-black text-emerald-300">${p.price != null ? p.price.toLocaleString() + 'đ' : '-'}</span>
                             </div>
-                            <h4 class="text-xs font-bold text-gray-300 group-hover:text-white">${p.name}</h4>
-                            <div class="mt-3 flex justify-between items-center text-[9px] mono">
-                                <span class="text-gray-500">Stock: ${p.stock || 0}</span>
-                                <span class="text-gray-600">${p.category}</span>
+                            <h4 class="text-sm font-semibold text-slate-100 group-hover:text-white">${p.name || '-'}</h4>
+                            <div class="mt-3 grid grid-cols-2 gap-2 text-[11px]">
+                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">Stock:</span> ${p.stock ?? 0}</div>
+                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">Category:</span> ${p.category || '-'}</div>
                             </div>
                         </div>`;
                 });

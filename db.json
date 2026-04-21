@@ -1,0 +1,178 @@
+{
+  "version": 2,
+  "tables": [
+    {
+      "name": "systemuser",
+      "primary_key": "systemuserid",
+      "fields": [
+        {"name": "systemuserid", "type": "uuid", "nullable": false},
+        {"name": "fullname", "type": "text", "nullable": false},
+        {"name": "email", "type": "text", "nullable": true},
+        {"name": "createdon", "type": "datetime", "nullable": true},
+        {"name": "modifiedon", "type": "datetime", "nullable": true}
+      ]
+    },
+    {
+      "name": "hbl_account",
+      "primary_key": "hbl_accountid",
+      "fields": [
+        {"name": "hbl_accountid", "type": "uuid", "nullable": false},
+        {"name": "hbl_account_name", "type": "text", "nullable": false},
+        {"name": "hbl_account_physical_address", "type": "text", "nullable": true},
+        {"name": "hbl_account_website", "type": "text", "nullable": true},
+        {"name": "hbl_account_special_domain", "type": "text", "nullable": true},
+        {"name": "hbl_account_development_ratio", "type": "decimal", "nullable": true},
+        {"name": "hbl_account_annual_it_budget", "type": "decimal", "nullable": true},
+        {"name": "hbl_account_year_found", "type": "int", "nullable": true},
+        {"name": "cr987_account_am_salesid", "type": "uuid", "nullable": true},
+        {"name": "cr987_account_bdid", "type": "uuid", "nullable": true},
+        {"name": "createdon", "type": "datetime", "nullable": true},
+        {"name": "modifiedon", "type": "datetime", "nullable": true}
+      ]
+    },
+    {
+      "name": "hbl_contact",
+      "primary_key": "hbl_contactid",
+      "fields": [
+        {"name": "hbl_contactid", "type": "uuid", "nullable": false},
+        {"name": "hbl_contact_name", "type": "text", "nullable": false},
+        {"name": "hbl_contact_title", "type": "text", "nullable": true},
+        {"name": "hbl_contact_accountid", "type": "uuid", "nullable": true},
+        {"name": "mc_contact_assigneeid", "type": "uuid", "nullable": true},
+        {"name": "hbl_contact_email", "type": "text", "nullable": true},
+        {"name": "hbl_contact_phone", "type": "text", "nullable": true},
+        {"name": "hbl_contact_linkedin", "type": "text", "nullable": true},
+        {"name": "hbl_contact_birthday", "type": "datetime", "nullable": true},
+        {"name": "hbl_contact_1st_mtg_time", "type": "datetime", "nullable": true},
+        {"name": "hbl_contacht_last_engaged_time", "type": "datetime", "nullable": true},
+        {"name": "hbl_contact_next_action_date", "type": "datetime", "nullable": true},
+        {"name": "hbl_contact_social_engagement", "type": "decimal", "nullable": true},
+        {"name": "mc_contact_interactions", "type": "richtext", "nullable": true},
+        {"name": "hbl_contact_investigated_info", "type": "richtext", "nullable": true},
+        {"name": "mc_contact_summary_working_history", "type": "richtext", "nullable": true},
+        {"name": "createdon", "type": "datetime", "nullable": true},
+        {"name": "modifiedon", "type": "datetime", "nullable": true}
+      ]
+    },
+    {
+      "name": "hbl_opportunities",
+      "primary_key": "hbl_opportunitiesid",
+      "fields": [
+        {"name": "hbl_opportunitiesid", "type": "uuid", "nullable": false},
+        {"name": "hbl_opportunities_name", "type": "text", "nullable": false},
+        {"name": "hbl_opportunities_accountid", "type": "uuid", "nullable": true},
+        {"name": "mc_opportunities_ownerid", "type": "uuid", "nullable": true},
+        {"name": "hbl_opportunities_bant_authority", "type": "richtext", "nullable": true},
+        {"name": "hbl_opportunities_bant_need", "type": "richtext", "nullable": true},
+        {"name": "hbl_opportunities_bant_time", "type": "richtext", "nullable": true},
+        {"name": "hbl_opportunities_estimated_value", "type": "decimal", "nullable": true},
+        {"name": "hbl_opportunities_start_time_est", "type": "datetime", "nullable": true},
+        {"name": "hbl_opportunities_end_time_est", "type": "datetime", "nullable": true},
+        {"name": "hbl_opportunities_deadline", "type": "datetime", "nullable": true},
+        {"name": "mc_opportunities_presales", "type": "text", "nullable": true},
+        {"name": "hbl_opportunitiest_next_time_action", "type": "text", "nullable": true},
+        {"name": "hbl_opportunities_interactions", "type": "richtext", "nullable": true},
+        {"name": "createdon", "type": "datetime", "nullable": true},
+        {"name": "modifiedon", "type": "datetime", "nullable": true}
+      ]
+    },
+    {
+      "name": "hbl_contract",
+      "primary_key": "hbl_contractid",
+      "fields": [
+        {"name": "hbl_contractid", "type": "uuid", "nullable": false},
+        {"name": "hbl_contract_name", "type": "text", "nullable": false},
+        {"name": "hbl_contract_opportunityid", "type": "uuid", "nullable": true},
+        {"name": "mc_contract_assigneeid", "type": "uuid", "nullable": true},
+        {"name": "hbl_contract_contract_drive", "type": "text", "nullable": true},
+        {"name": "hbl_contract_invoices_drive", "type": "text", "nullable": true},
+        {"name": "hbl_contract_start_date", "type": "datetime", "nullable": true},
+        {"name": "hbl_contract_end_date", "type": "datetime", "nullable": true},
+        {"name": "hbl_contract_action_date", "type": "datetime", "nullable": true},
+        {"name": "hbl_contract_interactions", "type": "richtext", "nullable": true},
+        {"name": "hbl_contract_invoice_interaction", "type": "richtext", "nullable": true},
+        {"name": "hbl_contract_jan", "type": "decimal", "nullable": true},
+        {"name": "hbl_contract_feb", "type": "decimal", "nullable": true},
+        {"name": "hbl_contract_mar", "type": "decimal", "nullable": true},
+        {"name": "hbl_contract_apr", "type": "decimal", "nullable": true},
+        {"name": "hbl_contract_may", "type": "decimal", "nullable": true},
+        {"name": "hbl_contract_jun", "type": "decimal", "nullable": true},
+        {"name": "hbl_contract_jul", "type": "decimal", "nullable": true},
+        {"name": "hbl_contract_aug", "type": "decimal", "nullable": true},
+        {"name": "hbl_contract_sep", "type": "decimal", "nullable": true},
+        {"name": "hbl_contract_oct", "type": "decimal", "nullable": true},
+        {"name": "hbl_contract_nov", "type": "decimal", "nullable": true},
+        {"name": "hbl_contract_dec", "type": "decimal", "nullable": true},
+        {"name": "createdon", "type": "datetime", "nullable": true},
+        {"name": "modifiedon", "type": "datetime", "nullable": true}
+      ]
+    },
+    {
+      "name": "choice_option",
+      "primary_key": "choice_optionid",
+      "fields": [
+        {"name": "choice_optionid", "type": "uuid", "nullable": false},
+        {"name": "choice_group", "type": "text", "nullable": false},
+        {"name": "choice_code", "type": "text", "nullable": false},
+        {"name": "choice_label", "type": "text", "nullable": false}
+      ]
+    }
+  ],
+  "relations": {
+    "lookup": [
+      {"from_table": "hbl_contact", "from_field": "hbl_contact_accountid", "to_table": "hbl_account", "to_field": "hbl_accountid"},
+      {"from_table": "hbl_contact", "from_field": "mc_contact_assigneeid", "to_table": "systemuser", "to_field": "systemuserid"},
+      {"from_table": "hbl_opportunities", "from_field": "hbl_opportunities_accountid", "to_table": "hbl_account", "to_field": "hbl_accountid"},
+      {"from_table": "hbl_opportunities", "from_field": "mc_opportunities_ownerid", "to_table": "systemuser", "to_field": "systemuserid"},
+      {"from_table": "hbl_contract", "from_field": "hbl_contract_opportunityid", "to_table": "hbl_opportunities", "to_field": "hbl_opportunitiesid"},
+      {"from_table": "hbl_contract", "from_field": "mc_contract_assigneeid", "to_table": "systemuser", "to_field": "systemuserid"},
+      {"from_table": "hbl_account", "from_field": "cr987_account_am_salesid", "to_table": "systemuser", "to_field": "systemuserid"},
+      {"from_table": "hbl_account", "from_field": "cr987_account_bdid", "to_table": "systemuser", "to_field": "systemuserid"}
+    ],
+    "choice": [
+      {"left_table": "hbl_account", "right_table": "choice_option", "join_table": "hbl_account_industry_choice", "left_fk": "hbl_accountid", "right_fk": "choice_optionid", "right_group": "hbl_cust_choice_industry"},
+      {"left_table": "hbl_account", "right_table": "choice_option", "join_table": "hbl_account_country_choice", "left_fk": "hbl_accountid", "right_fk": "choice_optionid", "right_group": "hbl_cust_choice_country"},
+      {"left_table": "hbl_account", "right_table": "choice_option", "join_table": "hbl_account_revenue_choice", "left_fk": "hbl_accountid", "right_fk": "choice_optionid", "right_group": "hbl_cust_choice_revenue"},
+      {"left_table": "hbl_contact", "right_table": "choice_option", "join_table": "hbl_contact_source_choice_map", "left_fk": "hbl_contactid", "right_fk": "choice_optionid", "right_group": "mc_contact_source_choice"},
+      {"left_table": "hbl_opportunities", "right_table": "choice_option", "join_table": "hbl_opportunities_status_choice_map", "left_fk": "hbl_opportunitiesid", "right_fk": "choice_optionid", "right_group": "hbl_opportunities_status_choice"},
+      {"left_table": "hbl_contract", "right_table": "choice_option", "join_table": "hbl_contract_status_choice_map", "left_fk": "hbl_contractid", "right_fk": "choice_optionid", "right_group": "hbl_contract_status_choice"},
+      {"left_table": "hbl_contract", "right_table": "choice_option", "join_table": "hbl_contract_invoiced_month_choice_map", "left_fk": "hbl_contractid", "right_fk": "choice_optionid", "right_group": "mc_monthchoice"},
+      {"left_table": "hbl_contract", "right_table": "choice_option", "join_table": "hbl_contract_paid_month_choice_map", "left_fk": "hbl_contractid", "right_fk": "choice_optionid", "right_group": "mc_monthchoice"},
+      {"left_table": "hbl_contract", "right_table": "choice_option", "join_table": "hbl_contract_contract_month_choice_map", "left_fk": "hbl_contractid", "right_fk": "choice_optionid", "right_group": "mc_monthchoice"}
+    ]
+  },
+  "choice_options": {
+    "hbl_cust_choice_industry": [
+      {"code": "135150001", "label": "SI"},
+      {"code": "135150002", "label": "Managed Services"},
+      {"code": "135150003", "label": "Finance"}
+    ],
+    "hbl_cust_choice_country": [
+      {"code": "135150000", "label": "Singapore"},
+      {"code": "135150001", "label": "Australia"},
+      {"code": "135150011", "label": "Vietnam"}
+    ],
+    "hbl_cust_choice_revenue": [
+      {"code": "135150000", "label": "<10M"},
+      {"code": "135150001", "label": "10-50M"},
+      {"code": "135150006", "label": ">1B"}
+    ],
+    "mc_contact_source_choice": [
+      {"code": "758130000", "label": "Linkedin"},
+      {"code": "758130001", "label": "Email/Apollo"}
+    ],
+    "hbl_opportunities_status_choice": [
+      {"code": "135150000", "label": "Following"},
+      {"code": "135150003", "label": "Won deal, Running"}
+    ],
+    "hbl_contract_status_choice": [
+      {"code": "135150000", "label": "Adapting"},
+      {"code": "135150006", "label": "Finished"}
+    ],
+    "mc_monthchoice": [
+      {"code": "1", "label": "1"},
+      {"code": "2", "label": "2"},
+      {"code": "12", "label": "12"}
+    ]
+  }
+}

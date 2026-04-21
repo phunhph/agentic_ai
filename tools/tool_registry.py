@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable
+from typing import Any
 
 from tools.inventory_tool import get_inventory_stats, search_products
 from tools.order_tool import get_order_details, get_orders
@@ -10,6 +10,8 @@ from tools.order_tool import get_order_details, get_orders
 
 def _normalize_args(tool: str, args: dict[str, Any] | None) -> dict[str, Any]:
     out = dict(args or {})
+    if tool == "search_products" and not out.get("keyword"):
+        out["keyword"] = out.get("customer_name") or out.get("name") or ""
     if tool == "get_orders" and out.get("status") is not None:
         s = out["status"]
         if isinstance(s, str) and s.strip():
@@ -37,22 +39,22 @@ TOOL_REGISTRY: dict[str, dict[str, Any]] = {
     "search_products": {
         "func": search_products,
         "extract_args": _args_search_products,
-        "description": "Tìm kiếm sản phẩm theo từ khóa",
+        "description": "Tìm kiếm account theo từ khóa",
     },
     "get_inventory_stats": {
         "func": get_inventory_stats,
         "extract_args": _args_get_inventory_stats,
-        "description": "Thống kê tồn kho theo danh mục",
+        "description": "Thống kê tổng quan account",
     },
     "get_orders": {
         "func": get_orders,
         "extract_args": _args_get_orders,
-        "description": "Lấy danh sách đơn hàng",
+        "description": "Lấy danh sách hợp đồng",
     },
     "get_order_details": {
         "func": get_order_details,
         "extract_args": _args_get_order_details,
-        "description": "Lấy chi tiết đơn hàng theo ID",
+        "description": "Lấy chi tiết hợp đồng theo ID",
     },
 }
 

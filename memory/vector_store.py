@@ -8,12 +8,13 @@ class MetadataRAG:
     def __init__(self):
         # Kho tri thức về Schema
         self.schema_kb = {
-            "products": "Thông tin sản phẩm: name, price, sku, category_id, base_price. Mối quan hệ với categories.id. Dùng khi hỏi về hàng hóa, giá cả.",
-            "inventories": "Thông tin kho: quantity, location, product_id, warehouse_location. Mối quan hệ với products.id. Dùng khi hỏi về số lượng tồn kho, vị trí kho.",
-            "categories": "Danh mục: name, description. Dùng khi phân loại sản phẩm, tra cứu nhóm hàng.",
-            "orders": "Đơn hàng: id, customer_id, status, total_price. Quan hệ: customers.id. Dùng khi tra cứu lịch sử mua bán, trạng thái đơn hàng.",
-            "customers": "Khách hàng: id, name, email, address. Dùng khi tìm kiếm thông tin khách hàng.",
-            "order_items": "Chi tiết đơn hàng: id, order_id, product_id, quantity, price_at_order. Dùng khi xem chi tiết các món trong đơn.",
+            "hbl_account": "Tài khoản khách hàng doanh nghiệp: hbl_accountid, hbl_account_name, thông tin website/domain/budget. Quan hệ lookup đến systemuser.",
+            "hbl_contact": "Liên hệ khách hàng: hbl_contactid, hbl_contact_name, hbl_contact_accountid, mc_contact_assigneeid, email/phone. Quan hệ cha-con với hbl_account.",
+            "hbl_opportunities": "Cơ hội bán hàng: hbl_opportunitiesid, hbl_opportunities_name, hbl_opportunities_accountid, owner, BANT. Quan hệ với account và contract.",
+            "hbl_contract": "Hợp đồng: hbl_contractid, hbl_contract_name, hbl_contract_opportunityid, mc_contract_assigneeid, doanh thu theo tháng. Quan hệ với opportunities.",
+            "systemuser": "Người dùng hệ thống (sales/owner/assignee): systemuserid, fullname, email. Được tham chiếu bởi account/contact/opportunities/contract.",
+            "choice_option": "Bảng lựa chọn chuẩn: choice_optionid, choice_group, choice_code, choice_label. Dùng qua các bảng join n-n cho industry/status/month...",
+            "choice_links": "Các bảng bắc cầu n-n: hbl_account_industry_choice, hbl_contact_source_choice_map, hbl_contract_status_choice_map, ...",
         }
         self.model = OLLAMA_EMBEDDING_MODEL
         self.embeddings = {}

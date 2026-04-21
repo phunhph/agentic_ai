@@ -52,29 +52,38 @@ class AgentOrchestrator:
             chat_history = []
 
         # 1. PERCEPTION
+        yield await emit_log("TRACE", f"INPUT [Goal]: {goal}", "RECEIVING")
         perception_result = perception_node({"goal": goal, "role": session_role})
+        
         clean_goal = perception_result["goal"]
+        planner_goal = perception_result.get("planner_goal", clean_goal)
         detected_role = perception_result.get("role", role)
+        intent = perception_result.get("intent", "UNKNOWN")
+        entities = perception_result.get("entities", {})
+        request_contract = perception_result.get("request_contract", {})
         domain = normalize_domain_key(infer_domain(clean_goal))
 
         yield await emit_log(
-            "TRACE",
-            "Bắt đầu luồng Agent (PERCEIVE -> REASON -> ACT -> EVAL -> LEARN -> FINAL)",
-            "START",
-        )
-        await asyncio.sleep(0.1)
-        yield await emit_log(
             "PERCEIVE",
-            f'Input chuẩn hóa: "{clean_goal}" | Role: {detected_role} | Domain: {domain}',
+            (
+                f'OUTPUT: Goal="{clean_goal}" | PlannerGoal="{planner_goal}" | '
+                f"Intent={intent} | Entities={json.dumps(entities, ensure_ascii=False)} | "
+                f"ContractValid={request_contract.get('valid', True)} | "
+                f"Role={detected_role} | Domain={domain}"
+            ),
             "DONE",
         )
         await asyncio.sleep(0.1)
 
         # STATE
         state = {
-            "goal": clean_goal,
+            "goal": planner_goal,
+            "raw_goal": clean_goal,
             "role": detected_role,
             "domain": domain,
+            "intent": intent,
+            "entities": entities,
+            "request_contract": request_contract,
             "session_id": current_session_id,
             "conversation_id": current_conversation_id,
             "context_key": context_key,
@@ -87,120 +96,82 @@ class AgentOrchestrator:
 
         while not state["is_finished"] and state["iteration"] < 5:
             state["iteration"] += 1
-            yield await emit_log(
-                "TRACE", f"Bắt đầu iteration {state['iteration']}/5", "ITERATING"
-            )
-            await asyncio.sleep(0.1)
+            yield await emit_log("TRACE", f"--- ITERATION {state['iteration']} ---", "START")
 
-            # 2. PLANNING
+            # 2. PLANNING (BRAIN)
+            yield await emit_log("REASON", f"INPUT [Context]: Goal + Memory + RAG", "PROCESSING")
             decision = agent_brain(state)
+            
             thought = decision.get("thought", "...")
             tool = decision.get("tool", "error")
             args = decision.get("args", {})
             trace = decision.get("trace", {})
 
-            yield await emit_log("REASON", thought, "THINKING")
-            await asyncio.sleep(0.1)
             yield await emit_log(
-                "REASON",
-                f"Chọn tool='{tool}' args={json.dumps(args, ensure_ascii=False)} | obs_prev={trace.get('previous_observations_count', 0)}",
-                "DECIDED",
+                "REASON", 
+                f"OUTPUT [Decision]: Thought='{thought}' | Tool='{tool}' | Args={json.dumps(args, ensure_ascii=False)}", 
+                "DECIDED"
             )
             await asyncio.sleep(0.1)
-            yield await emit_log(
-                "REASON",
-                f"Schema context: {trace.get('relevant_schema', 'N/A')}",
-                "CONTEXT",
-            )
-            await asyncio.sleep(0.1)
+            
             yield await emit_log(
                 "LEARN",
-                f"Bài học vector: {trace.get('past_experience', 'N/A')} | Episodic: {trace.get('episodic_advice', 'N/A')}",
-                "CONTEXT",
+                f"TRACE [Knowledge]: Recall='{trace.get('past_experience', 'N/A')}'",
+                "MEMORY"
             )
-            await asyncio.sleep(0.1)
 
             if tool not in ("final_answer", "error"):
                 allowed, deny_reason = is_tool_allowed(detected_role, tool)
                 if not allowed:
-                    yield await emit_log("POLICY", deny_reason, "DENIED")
-                    await asyncio.sleep(0.1)
+                    yield await emit_log("POLICY", f"DENIED: {deny_reason}", "BLOCK")
                     state["observations"] = []
                     eval_result = evaluator_node(state)
                     state["is_finished"] = eval_result.get("is_finished", False)
-                    for eval_log in eval_result.get("node_logs", []):
-                        yield await emit_log(
-                            eval_log.get("block", "EVAL"),
-                            eval_log.get("content", ""),
-                            eval_log.get("status", "INFO"),
-                        )
-                        await asyncio.sleep(0.1)
                     continue
 
             if tool == "final_answer":
                 state["is_finished"] = True
-                self.memory.save_experience(
-                    clean_goal,
-                    "completed",
-                    len(state["observations"]),
-                    context_key=context_key,
-                )
-                yield await emit_log(
-                    "LEARN", "Đã lưu final experience vào memory.", "RECORDED"
-                )
-                await asyncio.sleep(0.1)
-                yield await emit_log("EVAL", "Hoàn tất mục tiêu.", "DONE")
-                await asyncio.sleep(0.1)
+                self.memory.save_experience(clean_goal, "completed", len(state["observations"]), context_key=context_key)
+                yield await emit_log("EVAL", "OUTPUT: Hoàn tất với dữ liệu hiện có.", "DONE")
                 break
 
             if tool == "error":
                 state["is_finished"] = True
-                yield await emit_log(
-                    "EVAL", "Không chọn được tool hợp lệ. Dừng vòng lặp.", "FAILED"
-                )
-                await asyncio.sleep(0.1)
+                yield await emit_log("EVAL", "OUTPUT: Thất bại (Lỗi suy luận).", "FAILED")
                 break
 
-            # 3. EXECUTION
+            # 3. EXECUTION (ACTION)
+            yield await emit_log("ACT", f"INPUT [Action]: Tool='{tool}' | Args={json.dumps(args, ensure_ascii=False)}", "EXECUTING")
             state["next_action"] = tool
             state["next_args"] = args
             act_res = action_node(state)
+            
             state["observations"] = act_res["observations"]
-
-            for log_item in act_res.get("node_logs", []):
-                yield await emit_log(
-                    log_item.get("block", "ACT"),
-                    log_item.get("content", ""),
-                    log_item.get("status", "INFO"),
-                )
-                await asyncio.sleep(0.1)
+            
             yield await emit_log(
-                "TRACE",
-                f"Observation count hiện tại: {len(state['observations'])}",
-                "OBSERVED",
+                "ACT", 
+                f"OUTPUT [Obs]: Tìm thấy {len(state['observations'])} bản ghi.", 
+                "SUCCESS" if state["observations"] else "NOT_FOUND"
             )
-            await asyncio.sleep(0.1)
 
-            # 4. EVALUATOR
+            # --- OPTIMIZATION: SHORT-CIRCUIT ---
+            # Nếu đã có dữ liệu và tool là search/get, kết thúc sớm để tiết kiệm LLM call (Evaluator)
+            if state["observations"] and len(state["observations"]) > 0:
+                if tool in ("search_products", "get_orders", "get_order_details"):
+                     yield await emit_log("EVAL", "FAST-TRACK: Đã tìm thấy dữ liệu. Bỏ qua bước kiểm tra chậm.", "SUCCESS")
+                     state["is_finished"] = True
+                     break
+
+            # 4. EVALUATOR (Chỉ gọi khi thực sự cần thiết)
+            yield await emit_log("EVAL", f"INPUT [Verify]: Kiểm tra tính đầy đủ...", "CHECKING")
             eval_result = evaluator_node(state)
+            
             state["is_finished"] = eval_result.get("is_finished", False)
             for eval_log in eval_result.get("node_logs", []):
-                yield await emit_log(
-                    eval_log.get("block", "EVAL"),
-                    eval_log.get("content", ""),
-                    eval_log.get("status", "INFO"),
-                )
-                await asyncio.sleep(0.1)
-            if state["is_finished"]:
-                obs_count = len(state["observations"])
-                yield await emit_log("EVAL", f"Kết quả cuối: {obs_count} bản ghi.", "DONE")
-                await asyncio.sleep(0.1)
+                yield await emit_log(eval_log.get("block"), f"OUTPUT: {eval_log.get('content')}", eval_log.get("status"))
 
         # FINAL RESULT
-        yield await emit_log(
-            "TRACE", "Kết thúc luồng Agent, trả final_result về UI.", "END"
-        )
-        await asyncio.sleep(0.1)
+        yield await emit_log("TRACE", "END: Trả kết quả về giao diện.", "COMPLETE")
         final_payload = {
             "type": "final",
             "role": detected_role,

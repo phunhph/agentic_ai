@@ -16,6 +16,7 @@ learning = AgentLearning()
 _episodic = AgentMemory()
 
 _PROMPT_TEMPLATE: str | None = None
+_PLANNING_CACHE: dict[str, dict] = {}
 
 
 def _get_prompt_template() -> str:
@@ -29,16 +30,27 @@ def _get_prompt_template() -> str:
 
 
 def agent_brain(state: dict):
+    goal = state["goal"]
     role = normalize_role(state.get("role", "BUYER"))
     domain = normalize_domain_key(state.get("domain"))
+    
+    # 1. CHECK CACHE (Tối ưu tốc độ)
+    cache_key = f"{role}:{domain}:{goal}"
+    if state.get("iteration", 1) == 1 and cache_key in _PLANNING_CACHE:
+        cached_res = _PLANNING_CACHE[cache_key]
+        # Thêm trace để biết là từ cache
+        cached_res["trace"]["cached"] = True
+        return cached_res
+
     allowed_tools = sorted(ROLE_TOOL_ALLOWLIST.get(role, set()))
 
-    relevant_schema = rag.get_relevant_schema(state["goal"])
-    past_experience = learning.recall_memory(state["goal"], role, domain)
+    relevant_schema = rag.get_relevant_schema(goal)
+    past_experience = learning.recall_memory(goal, role, domain)
     episodic_advice = _episodic.get_advice(
-        state["goal"], context_key=state.get("context_key")
+        goal, context_key=state.get("context_key")
     )
-
+    
+    # ... (rest of the prompt logic remains same)
     previous_obs = state.get("observations", [])
     obs_context = (
         json.dumps(previous_obs, ensure_ascii=False) if previous_obs else "Chưa có dữ liệu."
@@ -61,7 +73,7 @@ def agent_brain(state: dict):
         obs_context=obs_context,
         role=role,
         domain=domain,
-        goal=state["goal"],
+        goal=goal,
         iteration=state.get("iteration", 1),
         allowed_tools=allowed_tools,
     )
@@ -90,7 +102,13 @@ def agent_brain(state: dict):
                 "iteration": state.get("iteration", 1),
                 "role": role,
                 "domain": domain,
+                "cached": False
             }
+            
+            # SAVE TO CACHE (chỉ save ở iteration 1 để tránh loop cache)
+            if state.get("iteration", 1) == 1:
+                _PLANNING_CACHE[cache_key] = result
+                
             return result
         except Exception:
             if attempt < max_retries:
@@ -98,7 +116,7 @@ def agent_brain(state: dict):
             return {
                 "thought": "Lỗi xử lý. Thử tìm kiếm.",
                 "tool": "search_products",
-                "args": {"keyword": state["goal"]},
+                "args": {"keyword": goal},
                 "trace": {
                     "relevant_schema": relevant_schema,
                     "past_experience": past_experience,
@@ -109,5 +127,6 @@ def agent_brain(state: dict):
                     "role": role,
                     "domain": domain,
                     "error": "LLM reasoning failed after retries",
+                    "cached": False
                 },
             }

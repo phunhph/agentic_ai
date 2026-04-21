@@ -11,6 +11,7 @@ def action_node(state: dict):
     goal = state.get("goal")
     role = state.get("role", "BUYER")
     domain = state.get("domain", "general")
+    request_contract = state.get("request_contract", {})
 
     observation = []
 
@@ -20,6 +21,15 @@ def action_node(state: dict):
             "block": "POLICY",
             "content": deny_reason,
             "status": "DENIED",
+        }
+        return {"observations": [], "node_logs": [log]}
+
+    # Guardrail: chỉ cho execute nếu contract request hợp lệ
+    if request_contract and not request_contract.get("valid", True):
+        log = {
+            "block": "POLICY",
+            "content": f"Request contract invalid: {request_contract.get('reason', 'unknown')}",
+            "status": "BLOCKED",
         }
         return {"observations": [], "node_logs": [log]}
 

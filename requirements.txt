@@ -3,6 +3,7 @@ fastapi
 uvicorn
 jinja2
 python-multipart
+psycopg2-binary
 
 # --- Agentic AI Core (LangChain & LangGraph) ---
 langchain

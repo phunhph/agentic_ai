@@ -3,17 +3,28 @@
 
 def infer_domain(goal: str) -> str:
     g = (goal or "").lower()
-    if any(k in g for k in ("đơn", "order", "pending", "shipped", "delivered", "khách")):
+    if any(
+        k in g
+        for k in (
+            "đơn",
+            "order",
+            "contract",
+            "hợp đồng",
+            "opportunity",
+            "cơ hội",
+            "contact",
+            "liên hệ",
+        )
+    ):
         return "sales"
     if any(
         k in g
         for k in (
-            "tồn kho",
             "thống kê",
             "báo cáo",
-            "inventory",
-            "sku",
-            "danh mục",
+            "account",
+            "khách hàng",
+            "danh sách khách",
         )
     ):
         return "inventory"

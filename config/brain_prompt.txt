@@ -9,13 +9,13 @@
 [USER GOAL] {goal}
 [ITERATION] {iteration}/5
 
-Nhiệm vụ: Phân tích mục tiêu và chọn công cụ phù hợp.
+Nhiệm vụ: Phân tích mục tiêu và chọn công cụ phù hợp với CRM schema mới (account/contact/opportunity/contract).
 Tools được phép với role {role} (chỉ chọn trong danh sách này): {allowed_tools}
 Chi tiết:
-- search_products: tìm sản phẩm (keyword)
-- get_inventory_stats: thống kê tồn kho ()
-- get_orders: danh sách đơn hàng (customer_name, status)
-- get_order_details: chi tiết đơn hàng (order_id)
+- search_products: tìm account theo tên (keyword)
+- get_inventory_stats: thống kê tổng quan số lượng account ()
+- get_orders: danh sách contract (customer_name, status có thể bỏ qua)
+- get_order_details: chi tiết contract theo id hợp đồng (order_id)
 - final_answer: khi đã có đủ dữ liệu ()
 
 Format JSON: {{"thought": "suy nghĩ", "tool": "tên_tool", "args": {{...}}}}
