@@ -29,19 +29,38 @@ graph TD
         RAG[(Vector Store)]
         Mem[(Episodic Memory)]
         DB[(PostgreSQL)]
+        Learn{Learning Manager}
     end
 
     Brain ==> RAG
     Brain ==> Mem
     Act ==> DB
+    Act -.->|Ghi nhớ bài học| Learn
     Eval ==>|Hoàn tất| Final[Kết quả cuối]
+    Final -.->|Lưu trải nghiệm| Learn
+    Learn -.->|Cập nhật tri thức| Mem
     Final --> User
 
-    %% Styling for visibility
-    linkStyle default stroke:#555,stroke-width:2px
-    style agent fill:#fff,stroke:#333,stroke-width:1px
-    style storage fill:#f0f7ff,stroke:#0052cc,stroke-width:1px
+    %% Styling for Dark Mode visibility
+    linkStyle default stroke:#fff,stroke-width:2px
+    style agent fill:#0a0d14,stroke:#3b82f6,stroke-width:2px,color:#fff
+    style storage fill:#0a0d14,stroke:#ef4444,stroke-width:2px,color:#fff
+    style API fill:#1e293b,stroke:#fff,stroke-width:1px,color:#fff
+    style Orch fill:#1e293b,stroke:#fff,stroke-width:1px,color:#fff
+    style Final fill:#1e293b,stroke:#fff,stroke-width:1px,color:#fff
 ```
+
+### 🧠 Giải thích luồng vận hành (Agentic Workflow):
+
+1.  **Perception (Tiếp nhận)**: Agent nhận câu hỏi từ người dùng thông qua FastAPI, thực hiện chuẩn hóa văn bản và xác định vai trò (`BUYER` hoặc `ADMIN`).
+2.  **Reasoning (Suy luận)**:
+    *   Sử dụng **Llama 3** để phân tích mục tiêu.
+    *   **RAG (Vector Store)**: Tìm kiếm các bảng dữ liệu liên quan trong Database Schema.
+    *   **Memory**: Truy xuất các bài học thành công trong quá khứ và lời khuyên từ phiên làm việc hiện tại.
+3.  **Action (Hành động)**: Gọi các công cụ (Tools) thực tế như `search_products`, `get_orders` để truy vấn dữ liệu từ PostgreSQL.
+4.  **Evaluation (Đánh giá)**:
+    *   Kiểm tra kết quả thu được. Nếu đã đủ thông tin, Agent sẽ trả về kết quả cuối cùng.
+    *   Nếu chưa đủ (ví dụ: không thấy sản phẩm), Agent sẽ tự động quay lại bước **Reasoning** để lập kế hoạch mới (thử từ khóa khác, tìm bảng khác).
 
 ---
 
