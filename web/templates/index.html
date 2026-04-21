@@ -16,6 +16,8 @@
         .animate-fade { animation: fadeIn 0.3s ease-out forwards; }
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        .trace-view-btn-active { background: rgba(59, 130, 246, 0.2); color: #bfdbfe; border-color: rgba(59, 130, 246, 0.4); }
+        .graph-node { background: linear-gradient(135deg, rgba(15,23,42,.75), rgba(2,6,23,.8)); border: 1px solid rgba(148,163,184,.18); }
     </style>
 </head>
 <body class="h-screen flex flex-col">
@@ -66,6 +68,8 @@
                 <span class="text-[10px] font-black uppercase tracking-widest text-gray-500 shrink-0">Traces (theo context)</span>
                 <select id="traceThreadSelect" onchange="onTraceThreadChange(this.value)" class="flex-1 max-w-md text-[9px] mono bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-gray-300 outline-none"></select>
                 <div class="flex items-center gap-2 shrink-0">
+                    <button id="traceViewLogsBtn" type="button" onclick="setTraceViewMode('logs')" class="text-[9px] font-bold text-gray-400 border border-white/10 px-2 py-1 rounded-lg uppercase">Logs</button>
+                    <button id="traceViewGraphBtn" type="button" onclick="setTraceViewMode('graph')" class="text-[9px] font-bold text-gray-400 border border-white/10 px-2 py-1 rounded-lg uppercase">Graph</button>
                     <button type="button" onclick="newConversation()" class="text-[9px] font-bold text-gray-500 hover:text-amber-400 transition uppercase">New chat</button>
                     <button onclick="clearSystem()" class="text-[9px] font-bold text-gray-600 hover:text-red-400 transition uppercase">Clear</button>
                 </div>
@@ -90,8 +94,11 @@
         let conversationId = createId();
         const trace = document.getElementById('traceContent');
         const traceThreadSelect = document.getElementById('traceThreadSelect');
+        const traceViewLogsBtn = document.getElementById('traceViewLogsBtn');
+        const traceViewGraphBtn = document.getElementById('traceViewGraphBtn');
         const dbView = document.getElementById('dbView');
         const runBtn = document.getElementById('executeBtn');
+        let traceViewMode = 'logs';
 
         function localContextKey() {
             return `${FIXED_ROLE}:${sessionId}:${conversationId}`;
@@ -121,6 +128,52 @@
             trace.innerHTML = '';
             dbView.innerHTML = '';
             renderTraceThreadSelect();
+        }
+
+        function setTraceViewMode(mode) {
+            traceViewMode = mode === 'graph' ? 'graph' : 'logs';
+            traceViewLogsBtn.classList.toggle('trace-view-btn-active', traceViewMode === 'logs');
+            traceViewGraphBtn.classList.toggle('trace-view-btn-active', traceViewMode === 'graph');
+            renderTrace();
+        }
+
+        function buildTraceGraph(logs) {
+            const flowBlocks = ['PERCEIVE', 'REASON', 'LEARN', 'POLICY', 'ACT', 'EVAL'];
+            const colorByBlock = {
+                PERCEIVE: 'text-cyan-300 border-cyan-400/35',
+                REASON: 'text-amber-300 border-amber-400/35',
+                LEARN: 'text-fuchsia-300 border-fuchsia-400/35',
+                POLICY: 'text-orange-300 border-orange-400/35',
+                ACT: 'text-rose-300 border-rose-400/35',
+                EVAL: 'text-emerald-300 border-emerald-400/35'
+            };
+            const statusTone = { SUCCESS: 'text-emerald-300', DONE: 'text-emerald-300', DECIDED: 'text-blue-300', FAILED: 'text-rose-300', ERROR: 'text-rose-300', BLOCK: 'text-orange-300', BLOCKED: 'text-orange-300', RETRY: 'text-amber-300', NOT_FOUND: 'text-slate-300', CHECKING: 'text-indigo-300' };
+
+            const iterations = {};
+            const counters = {};
+            let currentIteration = 0;
+            logs.forEach((log) => {
+                const content = String(log.content || '');
+                if (log.block === 'TRACE' && content.includes('--- ITERATION')) {
+                    const m = content.match(/ITERATION\s+(\d+)/i);
+                    if (m) currentIteration = Number(m[1]);
+                    if (!iterations[currentIteration]) iterations[currentIteration] = [];
+                    return;
+                }
+                if (!flowBlocks.includes(log.block)) return;
+                if (!iterations[currentIteration || 1]) iterations[currentIteration || 1] = [];
+                counters[log.block] = (counters[log.block] || 0) + 1;
+                const bucket = iterations[currentIteration || 1];
+                const prev = bucket[bucket.length - 1];
+                if (!prev || prev.block !== log.block) {
+                    bucket.push({ block: log.block, status: (log.status || 'OK').toUpperCase(), content, count: 1 });
+                } else {
+                    prev.status = (log.status || prev.status || 'OK').toUpperCase();
+                    prev.content = content || prev.content;
+                    prev.count += 1;
+                }
+            });
+            return { iterations, counters, colorByBlock, statusTone };
         }
 
         function newConversation() {
@@ -252,6 +305,52 @@
                 `;
                 return;
             }
+            if (traceViewMode === 'graph') {
+                const { iterations, counters, colorByBlock, statusTone } = buildTraceGraph(logs);
+                const iterationKeys = Object.keys(iterations).map(Number).sort((a, b) => a - b);
+                if (!iterationKeys.length) {
+                    trace.innerHTML = '<div class="p-8 text-center text-slate-400 text-[11px] italic uppercase tracking-widest">No graphable trace events.</div>';
+                    return;
+                }
+                const chips = Object.keys(counters).map((block) =>
+                    `<div class="px-2 py-1 rounded-lg bg-slate-900/70 border border-slate-700 text-[10px] mono text-slate-300">${block}: <span class="text-white">${counters[block]}</span></div>`
+                ).join('');
+                let html = `
+                    <div class="mb-4 rounded-xl border border-white/10 bg-black/20 p-3">
+                        <div class="text-[10px] uppercase tracking-widest text-slate-400 mb-2">Execution Graph</div>
+                        <div class="flex flex-wrap gap-2">${chips}</div>
+                    </div>
+                `;
+                iterationKeys.forEach((iter) => {
+                    const nodes = iterations[iter] || [];
+                    html += `
+                        <div class="mb-4 rounded-xl border border-white/10 bg-slate-950/40 p-3">
+                            <div class="mb-3 flex items-center justify-between">
+                                <div class="text-[10px] uppercase tracking-widest text-slate-400">Iteration ${iter}</div>
+                                <div class="text-[10px] mono text-slate-500">${nodes.length} nodes</div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
+                    `;
+                    nodes.forEach((node) => {
+                        const shortContent = String(node.content || '').slice(0, 90);
+                        html += `
+                            <div class="graph-node rounded-lg px-3 py-2 ${colorByBlock[node.block] || 'text-slate-200 border-slate-500/30'}">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[10px] font-black uppercase tracking-widest">${node.block}</span>
+                                    <span class="text-[10px] mono ${statusTone[node.status] || 'text-slate-300'}">${node.status}</span>
+                                </div>
+                                <div class="text-[11px] text-slate-200 leading-relaxed">${shortContent}${String(node.content || '').length > 90 ? '…' : ''}</div>
+                            </div>
+                        `;
+                    });
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+                trace.innerHTML = html;
+                return;
+            }
             logs.forEach((log) => appendLogCard(log));
         }
 
@@ -306,9 +405,9 @@
 
                 const itemRows = detailItems.map((it) => `
                     <div class="bg-slate-800/70 rounded-lg px-3 py-2 text-slate-200 text-[11px]">
-                        <div><span class="text-slate-400">item:</span> ${it.product ?? '-'}</div>
+                        <div><span class="text-slate-400">item:</span> ${it.name ?? it.product ?? '-'}</div>
                         <div><span class="text-slate-400">quantity:</span> ${it.quantity ?? '-'}</div>
-                        <div><span class="text-slate-400">price:</span> ${it.price ?? '-'}</div>
+                        <div><span class="text-slate-400">value:</span> ${it.value ?? it.price ?? '-'}</div>
                     </div>
                 `).join('');
 
@@ -318,7 +417,7 @@
                             <div class="text-[10px] text-slate-400 mono">DETAIL</div>
                             <div class="text-sm font-semibold text-slate-100 mt-1">${detail.customer ?? '-'}</div>
                             <div class="mt-2 grid grid-cols-2 gap-2 text-[11px]">
-                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">order_id:</span> ${detail.order_id ?? '-'}</div>
+                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">contract_id:</span> ${detail.contract_id ?? '-'}</div>
                                 <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">status:</span> ${detail.status ?? '-'}</div>
                             </div>
                         </div>
@@ -347,15 +446,15 @@
             let html = '';
             const first = normalizedResults[0];
 
-            if (first.category && (first.product_count !== undefined || first.total_quantity !== undefined)) {
+            if (first.category && (first.account_count !== undefined || first.total_records !== undefined || first.product_count !== undefined)) {
                 html = '<div class="space-y-4">';
                 normalizedResults.forEach(i => {
                     html += `
                         <div class="bg-slate-900/60 border border-slate-700 p-4 rounded-xl">
                             <div class="text-[10px] font-black text-slate-300 uppercase mb-2">${i.category}</div>
                             <div class="flex justify-between items-end">
-                                <div class="text-lg font-black text-white">${i.total_quantity ?? '-'} <span class="text-[9px] text-slate-400 uppercase">Items</span></div>
-                                <div class="text-[11px] mono text-blue-300">${i.product_count ?? '-'} Skus</div>
+                                <div class="text-lg font-black text-white">${i.total_records ?? i.total_quantity ?? '-'} <span class="text-[9px] text-slate-400 uppercase">Records</span></div>
+                                <div class="text-[11px] mono text-blue-300">${i.account_count ?? i.product_count ?? '-'} Accounts</div>
                             </div>
                         </div>`;
                 });
@@ -383,14 +482,14 @@
                         </div>`;
                 });
                 html += '</div>';
-            } else if (first.order_id !== undefined) {
+            } else if (first.contract_id !== undefined) {
                 html = '<div class="space-y-3">';
                 normalizedResults.forEach(o => {
                     const statusColor = o.status === 'PENDING' ? 'text-amber-400' : 'text-green-400';
                     html += `
                         <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700 hover:border-slate-500 transition-all">
                             <div class="flex justify-between items-start mb-2">
-                                <span class="text-[10px] font-black text-blue-300 mono">ORD-#${o.order_id}</span>
+                                <span class="text-[10px] font-black text-blue-300 mono">CTR-#${o.contract_id}</span>
                                 <span class="text-[10px] font-bold ${statusColor}">${o.status ?? 'N/A'}</span>
                             </div>
                             <div class="text-sm font-semibold text-slate-100 mb-1">${o.customer ?? '-'}</div>
@@ -423,6 +522,7 @@
         }
 
         renderTraceThreadSelect();
+        setTraceViewMode('logs');
     </script>
 </body>
 </html>

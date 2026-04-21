@@ -5,7 +5,7 @@ from storage.repositories.contract_repository import (
 )
 
 
-def get_orders(customer_name: str = None, status: str = None):
+def list_contracts(customer_name: str = None, status: str = None):
     """Lấy danh sách hợp đồng theo schema CRM mới."""
     with get_db() as db:
         results = list_contracts_with_context(db, customer_name)
@@ -15,10 +15,10 @@ def get_orders(customer_name: str = None, status: str = None):
         return results
 
 
-def get_order_details(order_id: int):
+def get_contract_details(contract_id: str):
     """Lấy chi tiết hợp đồng theo schema CRM mới."""
     with get_db() as db:
-        details = get_contract_details_with_context(db, str(order_id))
+        details = get_contract_details_with_context(db, str(contract_id))
         if not details:
             return {"error": "Không tìm thấy hợp đồng"}
         return details

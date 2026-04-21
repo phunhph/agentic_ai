@@ -4,56 +4,58 @@ from __future__ import annotations
 
 from typing import Any
 
-from tools.inventory_tool import get_inventory_stats, search_products
-from tools.order_tool import get_order_details, get_orders
+from tools.inventory_tool import get_account_overview, list_accounts
+from tools.order_tool import get_contract_details, list_contracts
 
 
 def _normalize_args(tool: str, args: dict[str, Any] | None) -> dict[str, Any]:
     out = dict(args or {})
-    if tool == "search_products" and not out.get("keyword"):
+    if tool == "list_accounts" and not out.get("keyword"):
         out["keyword"] = out.get("customer_name") or out.get("name") or ""
-    if tool == "get_orders" and out.get("status") is not None:
+    if tool == "list_contracts" and out.get("status") is not None:
         s = out["status"]
         if isinstance(s, str) and s.strip():
             out["status"] = s.strip().upper()
+    if tool == "get_contract_details" and not out.get("contract_id"):
+        out["contract_id"] = out.get("order_id")
     return out
 
 
-def _args_search_products(args: dict[str, Any]) -> list[Any]:
+def _args_list_accounts(args: dict[str, Any]) -> list[Any]:
     return [args.get("keyword", "")]
 
 
-def _args_get_inventory_stats(args: dict[str, Any]) -> list[Any]:
+def _args_get_account_overview(args: dict[str, Any]) -> list[Any]:
     return []
 
 
-def _args_get_orders(args: dict[str, Any]) -> list[Any]:
+def _args_list_contracts(args: dict[str, Any]) -> list[Any]:
     return [args.get("customer_name"), args.get("status")]
 
 
-def _args_get_order_details(args: dict[str, Any]) -> list[Any]:
-    return [args.get("order_id")]
+def _args_get_contract_details(args: dict[str, Any]) -> list[Any]:
+    return [args.get("contract_id")]
 
 
 TOOL_REGISTRY: dict[str, dict[str, Any]] = {
-    "search_products": {
-        "func": search_products,
-        "extract_args": _args_search_products,
-        "description": "Tìm kiếm account theo từ khóa",
+    "list_accounts": {
+        "func": list_accounts,
+        "extract_args": _args_list_accounts,
+        "description": "Lấy danh sách account, có thể lọc theo từ khóa",
     },
-    "get_inventory_stats": {
-        "func": get_inventory_stats,
-        "extract_args": _args_get_inventory_stats,
+    "get_account_overview": {
+        "func": get_account_overview,
+        "extract_args": _args_get_account_overview,
         "description": "Thống kê tổng quan account",
     },
-    "get_orders": {
-        "func": get_orders,
-        "extract_args": _args_get_orders,
+    "list_contracts": {
+        "func": list_contracts,
+        "extract_args": _args_list_contracts,
         "description": "Lấy danh sách hợp đồng",
     },
-    "get_order_details": {
-        "func": get_order_details,
-        "extract_args": _args_get_order_details,
+    "get_contract_details": {
+        "func": get_contract_details,
+        "extract_args": _args_get_contract_details,
         "description": "Lấy chi tiết hợp đồng theo ID",
     },
 }

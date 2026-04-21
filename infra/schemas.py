@@ -41,5 +41,5 @@ class PlannerDecision(BaseModel):
     """Output JSON mong đợi từ planner / LLM."""
 
     thought: str = "..."
-    tool: str = "search_products"
+    tool: str = "list_accounts"
     args: dict[str, Any] = Field(default_factory=dict)

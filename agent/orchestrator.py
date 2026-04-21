@@ -157,7 +157,7 @@ class AgentOrchestrator:
             # --- OPTIMIZATION: SHORT-CIRCUIT ---
             # Nếu đã có dữ liệu và tool là search/get, kết thúc sớm để tiết kiệm LLM call (Evaluator)
             if state["observations"] and len(state["observations"]) > 0:
-                if tool in ("search_products", "get_orders", "get_order_details"):
+                if tool in ("list_accounts", "list_contracts", "get_contract_details"):
                      yield await emit_log("EVAL", "FAST-TRACK: Đã tìm thấy dữ liệu. Bỏ qua bước kiểm tra chậm.", "SUCCESS")
                      state["is_finished"] = True
                      break

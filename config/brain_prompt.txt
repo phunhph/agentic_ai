@@ -12,10 +12,10 @@
 Nhiệm vụ: Phân tích mục tiêu và chọn công cụ phù hợp với CRM schema mới (account/contact/opportunity/contract).
 Tools được phép với role {role} (chỉ chọn trong danh sách này): {allowed_tools}
 Chi tiết:
-- search_products: tìm account theo tên (keyword)
-- get_inventory_stats: thống kê tổng quan số lượng account ()
-- get_orders: danh sách contract (customer_name, status có thể bỏ qua)
-- get_order_details: chi tiết contract theo id hợp đồng (order_id)
+- list_accounts: lấy danh sách account (keyword có thể rỗng để lấy tất cả)
+- get_account_overview: thống kê tổng quan số lượng account ()
+- list_contracts: danh sách contract, có thể lọc theo account/opportunity/contract name (customer_name, status có thể bỏ qua)
+- get_contract_details: chi tiết contract theo id hợp đồng (contract_id)
 - final_answer: khi đã có đủ dữ liệu ()
 
 Format JSON: {{"thought": "suy nghĩ", "tool": "tên_tool", "args": {{...}}}}

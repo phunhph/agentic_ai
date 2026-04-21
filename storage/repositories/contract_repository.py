@@ -1,3 +1,4 @@
+import sqlalchemy as sa
 from sqlalchemy.orm import Session
 
 from storage.models import HblAccount, HblContract, HblOpportunities, SystemUser
@@ -6,8 +7,25 @@ from storage.models import HblAccount, HblContract, HblOpportunities, SystemUser
 def list_contracts(db: Session, customer_name: str | None = None) -> list[HblContract]:
     query = db.query(HblContract)
     if customer_name:
-        query = query.filter(HblContract.hbl_contract_name.ilike(f"%{customer_name}%"))
-    return query.all()
+        token = f"%{customer_name}%"
+        query = (
+            query.outerjoin(
+                HblOpportunities,
+                HblContract.hbl_contract_opportunityid == HblOpportunities.hbl_opportunitiesid,
+            )
+            .outerjoin(
+                HblAccount,
+                HblOpportunities.hbl_opportunities_accountid == HblAccount.hbl_accountid,
+            )
+            .filter(
+                sa.or_(
+                    HblContract.hbl_contract_name.ilike(token),
+                    HblOpportunities.hbl_opportunities_name.ilike(token),
+                    HblAccount.hbl_account_name.ilike(token),
+                )
+            )
+        )
+    return query.order_by(HblContract.createdon.desc()).all()
 
 
 def get_contract(db: Session, contract_id: str) -> HblContract | None:
@@ -45,8 +63,8 @@ def list_contracts_with_context(db: Session, customer_name: str | None = None) -
         status_label = status_opts[0].choice_label if status_opts else None
         result.append(
             {
-                "order_id": c.hbl_contractid,
                 "contract_name": c.hbl_contract_name,
+                "contract_id": c.hbl_contractid,
                 "customer": account.hbl_account_name if account else None,
                 "opportunity": opp.hbl_opportunities_name if opp else None,
                 "assignee": user_map.get(c.mc_contract_assigneeid),
@@ -84,14 +102,14 @@ def get_contract_details_with_context(db: Session, contract_id: str) -> dict | N
     contract_months = [x.choice_label for x in (c.hbl_contract_contract_month_choice_map_options or [])]
 
     return {
-        "order_id": c.hbl_contractid,
+        "contract_id": c.hbl_contractid,
         "customer": account.hbl_account_name if account else c.hbl_contract_name,
         "status": ", ".join(status_opts) if status_opts else None,
         "items": [
             {
-                "product": opp.hbl_opportunities_name if opp else None,
+                "name": opp.hbl_opportunities_name if opp else None,
                 "quantity": None,
-                "price": _sum_contract_value(c),
+                "value": _sum_contract_value(c),
             }
         ],
         "meta": {

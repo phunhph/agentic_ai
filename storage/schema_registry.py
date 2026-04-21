@@ -42,7 +42,6 @@ def _build_aliases() -> dict[str, str]:
         "opportunity": "hbl_opportunities.hbl_opportunities_name",
         "opportunity_name": "hbl_opportunities.hbl_opportunities_name",
         "status": "choice_option.choice_label",
-        "order_id": "hbl_contract.hbl_contractid",
         "contract_id": "hbl_contract.hbl_contractid",
         "id": "hbl_contract.hbl_contractid",
     }

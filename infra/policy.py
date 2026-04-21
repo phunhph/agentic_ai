@@ -3,16 +3,16 @@ from infra.context import normalize_role
 
 ROLE_TOOL_ALLOWLIST = {
     "BUYER": {
-        "search_products",
-        "get_orders",
-        "get_order_details",
+        "list_accounts",
+        "list_contracts",
+        "get_contract_details",
         "final_answer",
     },
     "ADMIN": {
-        "search_products",
-        "get_inventory_stats",
-        "get_orders",
-        "get_order_details",
+        "list_accounts",
+        "get_account_overview",
+        "list_contracts",
+        "get_contract_details",
         "final_answer",
     },
 }

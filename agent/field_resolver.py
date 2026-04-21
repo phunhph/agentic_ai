@@ -5,10 +5,10 @@ from storage.schema_registry import REGISTRY
 
 
 INTENT_TOOL_HINT = {
-    "SEARCH_PRODUCTS": "search_products",
-    "ORDER_LOOKUP": "get_orders",
-    "ORDER_DETAILS": "get_order_details",
-    "INVENTORY_STATS": "get_inventory_stats",
+    "ACCOUNT_LIST": "list_accounts",
+    "CONTRACT_LIST": "list_contracts",
+    "CONTRACT_DETAILS": "get_contract_details",
+    "ACCOUNT_OVERVIEW": "get_account_overview",
 }
 
 
@@ -18,7 +18,7 @@ def resolve_request(intent: str, entities: dict) -> NormalizedRequest:
     unresolved: list[str] = []
     normalized_entities: dict = {}
 
-    if intent == "SEARCH_PRODUCTS":
+    if intent == "ACCOUNT_LIST":
         keyword = str(entities.get("keyword", "")).strip()
         if keyword:
             normalized_entities["keyword"] = keyword
@@ -29,10 +29,9 @@ def resolve_request(intent: str, entities: dict) -> NormalizedRequest:
                     value=keyword,
                 )
             )
-        else:
-            unresolved.append("keyword")
+        # keyword có thể rỗng khi user muốn lấy toàn bộ danh sách account.
 
-    elif intent == "ORDER_LOOKUP":
+    elif intent == "CONTRACT_LIST":
         customer_name = str(entities.get("customer_name", "")).strip()
         status = str(entities.get("status", "")).strip()
         if customer_name:
@@ -56,21 +55,21 @@ def resolve_request(intent: str, entities: dict) -> NormalizedRequest:
         if not customer_name and not status:
             unresolved.append("customer_name|status")
 
-    elif intent == "ORDER_DETAILS":
-        order_id = str(entities.get("order_id", "")).strip()
-        if order_id:
-            normalized_entities["order_id"] = order_id
+    elif intent == "CONTRACT_DETAILS":
+        contract_id = str(entities.get("contract_id", entities.get("order_id", ""))).strip()
+        if contract_id:
+            normalized_entities["contract_id"] = contract_id
             filters.append(
                 RequestFilter(
                     field="hbl_contract.hbl_contractid",
                     op="eq",
-                    value=order_id,
+                    value=contract_id,
                 )
             )
         else:
-            unresolved.append("order_id")
+            unresolved.append("contract_id")
 
-    elif intent == "INVENTORY_STATS":
+    elif intent == "ACCOUNT_OVERVIEW":
         # Không cần filter, tool trả thống kê tổng quát
         pass
     else:

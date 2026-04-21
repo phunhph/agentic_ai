@@ -24,6 +24,8 @@ def _build_search_candidates(keyword: str) -> list[str]:
 
 
 def search_accounts(db: Session, keyword: str) -> list[HblAccount]:
+    if not (keyword or "").strip():
+        return db.query(HblAccount).order_by(HblAccount.createdon.desc()).limit(100).all()
     results: list[HblAccount] = []
     for candidate in _build_search_candidates(keyword):
         results = db.query(HblAccount).filter(HblAccount.hbl_account_name.ilike(f"%{candidate}%")).all()

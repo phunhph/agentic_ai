@@ -12,10 +12,10 @@ _TEXT_NORMALIZER_PATTERN = re.compile(
 )
 _ORDER_ID_PATTERN = re.compile(r"\b(?:dh|don|order)?[-_\s]?(\d{3,})\b", re.IGNORECASE)
 _ALLOWED_INTENTS = {
-    "SEARCH_PRODUCTS",
-    "ORDER_LOOKUP",
-    "ORDER_DETAILS",
-    "INVENTORY_STATS",
+    "ACCOUNT_LIST",
+    "CONTRACT_LIST",
+    "CONTRACT_DETAILS",
+    "ACCOUNT_OVERVIEW",
     "UNKNOWN",
 }
 
@@ -26,13 +26,13 @@ def _normalize_text(text: str) -> str:
 
 def _llm_parse_request(goal: str, normalized_goal: str) -> tuple[str, dict]:
     prompt = f"""
-Bạn là bộ phân tích ý định user cho hệ thống bán hàng.
+Bạn là bộ phân tích ý định user cho hệ thống CRM.
 Trả về JSON duy nhất theo schema:
 {{
-  "intent": "SEARCH_PRODUCTS|ORDER_LOOKUP|ORDER_DETAILS|INVENTORY_STATS|UNKNOWN",
+  "intent": "ACCOUNT_LIST|CONTRACT_LIST|CONTRACT_DETAILS|ACCOUNT_OVERVIEW|UNKNOWN",
   "entities": {{
     "keyword": "string",
-    "order_id": "string",
+    "contract_id": "string",
     "status": "string",
     "customer_name": "string"
   }}
@@ -40,7 +40,8 @@ Trả về JSON duy nhất theo schema:
 
 Quy tắc:
 - Chỉ chọn intent trong danh sách cho phép.
-- keyword phải ngắn gọn, bỏ từ đệm nếu user đang tìm/mua sản phẩm.
+- keyword chỉ dùng khi user muốn lọc theo tên cụ thể.
+- Nếu user chỉ hỏi danh sách account chung chung (vd: "lấy danh sách account"), để keyword rỗng.
 - Nếu không chắc thì intent=UNKNOWN.
 
 User goal gốc: {goal}
@@ -77,19 +78,30 @@ def perception_node(state: dict):
         entities = {}
 
     order_id_match = _ORDER_ID_PATTERN.search(normalized_goal)
-    if order_id_match and not entities.get("order_id"):
-        entities["order_id"] = order_id_match.group(1)
+    if order_id_match and not entities.get("contract_id"):
+        entities["contract_id"] = order_id_match.group(1)
 
     keyword = str(entities.get("keyword", "")).strip()
-    if intent == "SEARCH_PRODUCTS" and not keyword:
-        keyword = normalized_goal
+    generic_tokens = {
+        "account",
+        "accounts",
+        "danh sach account",
+        "danh sách account",
+        "liet ke account",
+        "liệt kê account",
+        "list account",
+        "lay danh sach account",
+        "lấy danh sách account",
+    }
+    if _normalize_text(keyword) in generic_tokens:
+        keyword = ""
     entities["keyword"] = keyword
     normalized_request = resolve_request(intent, entities)
 
     # Ưu tiên role do UI gửi (ADMIN / BUYER), không đoán lại từ nội dung.
     role = requested_role
 
-    planner_goal = keyword if intent == "SEARCH_PRODUCTS" and keyword else clean_goal
+    planner_goal = keyword if intent == "ACCOUNT_LIST" and keyword else clean_goal
 
     return {
         "goal": clean_goal,

@@ -88,7 +88,7 @@ def agent_brain(state: dict):
             validated = PlannerDecision.model_validate(
                 {
                     "thought": raw.get("thought", "..."),
-                    "tool": raw.get("tool", "search_products"),
+                    "tool": raw.get("tool", "list_accounts"),
                     "args": raw.get("args") if isinstance(raw.get("args"), dict) else {},
                 }
             )
@@ -115,8 +115,8 @@ def agent_brain(state: dict):
                 continue
             return {
                 "thought": "Lỗi xử lý. Thử tìm kiếm.",
-                "tool": "search_products",
-                "args": {"keyword": goal},
+                "tool": "list_accounts",
+                "args": {},
                 "trace": {
                     "relevant_schema": relevant_schema,
                     "past_experience": past_experience,

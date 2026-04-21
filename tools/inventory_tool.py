@@ -2,7 +2,7 @@ from storage.database import get_db
 from storage.repositories.account_repository import count_accounts, search_accounts_with_rollup
 
 
-def search_products(keyword: str):
+def list_accounts(keyword: str = ""):
     with get_db() as db:
         try:
             return search_accounts_with_rollup(db, keyword)
@@ -10,10 +10,10 @@ def search_products(keyword: str):
             return []
 
 
-def get_inventory_stats():
+def get_account_overview():
     with get_db() as db:
         try:
             count = count_accounts(db)
-            return [{"category": "account", "product_count": count, "total_quantity": count}]
+            return [{"category": "account", "account_count": count, "total_records": count}]
         except Exception:
             return []
