@@ -13,34 +13,34 @@
 ## 📊 Sơ đồ hoạt động (System Flow)
 
 ```mermaid
-graph LR
-    User((Người dùng)) --> API[FastAPI]
+graph TD
+    User((Người dùng)) --> API[FastAPI Entrypoint]
     API --> Orch{Orchestrator}
 
-    subgraph Core [🧠 Cognitive Cycle]
-        direction TB
-        Orch --> Perc[Perception]
+    subgraph agent [🧠 Cognitive Core]
+        Orch --> Perc[Perception Node]
         Perc --> Brain[Brain / Reasoning]
         Brain --> Act[Action Node]
-        Act --> Eval[Evaluator]
-        Eval -->|Chưa đạt| Brain
+        Act --> Eval[Evaluator Node]
+        Eval -.->|Quay lại| Brain
     end
 
-    subgraph Data [💾 Knowledge & Storage]
-        direction TB
+    subgraph storage [💾 Knowledge & Data]
         RAG[(Vector Store)]
         Mem[(Episodic Memory)]
         DB[(PostgreSQL)]
     end
 
-    Brain --- RAG
-    Brain --- Mem
-    Act --- DB
-    Eval -->|Hoàn tất| Final[Kết quả]
+    Brain ==> RAG
+    Brain ==> Mem
+    Act ==> DB
+    Eval ==>|Hoàn tất| Final[Kết quả cuối]
     Final --> User
 
-    style Core fill:#f9f9f9,stroke:#333,stroke-width:2px
-    style Data fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    %% Styling for visibility
+    linkStyle default stroke:#555,stroke-width:2px
+    style agent fill:#fff,stroke:#333,stroke-width:1px
+    style storage fill:#f0f7ff,stroke:#0052cc,stroke-width:1px
 ```
 
 ---
