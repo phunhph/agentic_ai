@@ -1,86 +1,131 @@
-import sys
-import os
-from datetime import datetime
+import random
+from storage.database import SessionLocal
+from storage.models import Category, Product, Inventory, Customer, Order, OrderItem
 
-# Thêm đường dẫn để nhận diện module tools
-sys.path.append(os.getcwd())
 
-from tools.database import engine, SessionLocal
-from tools.models import Base, Category, Product, Inventory, Customer, Order, OrderItem
+def _gen_categories(count: int) -> list[tuple[str, str]]:
+    category_pool = [
+        ("Đồ cắm trại", "Lều, túi ngủ, bếp và phụ kiện outdoor"),
+        ("Leo núi", "Giày, gậy trekking, đồ bảo hộ"),
+        ("Thời trang", "Trang phục thể thao, dã ngoại"),
+        ("Phụ kiện", "Bình nước, đèn pin, dao đa năng"),
+        ("Du lịch", "Balo, vali, phụ kiện chuyến đi"),
+        ("Sinh tồn", "Dụng cụ khẩn cấp và cứu hộ"),
+    ]
+    random.shuffle(category_pool)
+    return category_pool[:count]
 
-def seed_data():
-    print("🚀 Đang khởi tạo Database và Seeding dữ liệu...")
 
-    # 1. Reset Database
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
+def _gen_product_name(prefix: str) -> str:
+    nouns = ["Lều", "Balo", "Giày", "Áo khoác", "Gậy", "Đèn pin", "Bình nước", "Túi ngủ"]
+    suffix = ["Pro", "Ultra", "Lite", "X", "Air", "Max", "Trail", "Plus"]
+    return f"{random.choice(nouns)} {prefix}-{random.choice(suffix)}"
+
+
+def _gen_customer_name() -> str:
+    first = ["An", "Bình", "Chi", "Dũng", "Hà", "Huy", "Linh", "Minh", "Phú", "Trang", "Tuấn"]
+    last = ["Nguyễn", "Trần", "Lê", "Phạm", "Võ", "Đặng", "Hoàng", "Phan"]
+    return f"{random.choice(last)} {random.choice(first)}"
+
+
+def seed_data() -> None:
+    random.seed(42)  # deterministic random data for repeatable debug
 
     db = SessionLocal()
-
     try:
-        # 2. Tạo Categories
-        camping = Category(name="Đồ cắm trại", description="Lều, túi ngủ và phụ kiện outdoor")
-        hiking = Category(name="Leo núi", description="Giày, gậy leo núi và trang bị bảo hộ")
-        fashion = Category(name="Thời trang", description="Quần áo thể thao và dã ngoại")
-
-        db.add_all([camping, hiking, fashion])
+        # Reset data in child-first order
+        db.query(OrderItem).delete()
+        db.query(Order).delete()
+        db.query(Inventory).delete()
+        db.query(Product).delete()
+        db.query(Customer).delete()
+        db.query(Category).delete()
         db.commit()
 
-        # 3. Tạo Products & Inventory
-        products_data = [
-            {"name": "Lều cắm trại 4 người", "sku": "CAMP-001", "price": 1200000, "cat": camping, "qty": 15},
-            {"name": "Túi ngủ giữ nhiệt", "sku": "CAMP-002", "price": 450000, "cat": camping, "qty": 30},
-            {"name": "Giày leo núi chống nước", "sku": "HIKE-001", "price": 2500000, "cat": hiking, "qty": 10},
-            {"name": "Balo trợ lực 50L", "sku": "HIKE-002", "price": 1800000, "cat": hiking, "qty": 5},
-            {"name": "Áo khoác gió dã ngoại", "sku": "FASH-001", "price": 650000, "cat": fashion, "qty": 50},
-        ]
+        category_specs = _gen_categories(count=4)
+        categories = [Category(name=name, description=desc) for name, desc in category_specs]
+        db.add_all(categories)
+        db.flush()
 
-        prods = {}
-        for item in products_data:
-            new_prod = Product(
-                name=item["name"],
-                sku=item["sku"],
-                price=item["price"],
-                category_id=item["cat"].id
+        products = []
+        sku_counter = 1
+        for idx, category in enumerate(categories):
+            prefix = f"C{idx + 1}"
+            product_per_category = random.randint(3, 6)
+            for _ in range(product_per_category):
+                sku = f"{prefix}-{sku_counter:04d}"
+                sku_counter += 1
+                product = Product(
+                    sku=sku,
+                    name=_gen_product_name(prefix),
+                    price=random.randint(150_000, 2_500_000),
+                    category_id=category.id,
+                )
+                db.add(product)
+                db.flush()
+                products.append(product)
+                db.add(
+                    Inventory(
+                        product_id=product.id,
+                        quantity=random.randint(0, 80),
+                        location=f"Kho {random.choice(['A', 'B', 'C'])}",
+                    )
+                )
+
+        customers = []
+        used_emails = set()
+        for _ in range(12):
+            name = _gen_customer_name()
+            email_local = f"{name.lower().replace(' ', '.')}.{random.randint(100,999)}"
+            email = f"{email_local}@example.com"
+            while email in used_emails:
+                email = f"{email_local}.{random.randint(1,9)}@example.com"
+            used_emails.add(email)
+            customers.append(
+                Customer(
+                    name=name,
+                    email=email,
+                    address=f"Quận {random.randint(1, 12)}, TP.HCM",
+                )
             )
-            db.add(new_prod)
-            db.flush()
-            prods[item["sku"]] = new_prod
-
-            new_inv = Inventory(
-                product_id=new_prod.id,
-                quantity=item["qty"],
-                location="Kho A"
-            )
-            db.add(new_inv)
-
-        # 4. Tạo Customers
-        user_phu = Customer(name="Phú Đặng", email="phu@example.com", address="Quận 1, TP.HCM")
-        user_lan = Customer(name="Lan Nguyễn", email="lan@example.com", address="Quận 7, TP.HCM")
-        db.add_all([user_phu, user_lan])
+        db.add_all(customers)
         db.flush()
 
-        # 5. Tạo Orders
-        order1 = Order(customer_id=user_phu.id, status="SHIPPED", total_price=1650000)
-        db.add(order1)
-        db.flush()
+        statuses = ["PENDING", "SHIPPED", "DELIVERED"]
+        for customer in customers:
+            for _ in range(random.randint(1, 3)):
+                order = Order(
+                    customer_id=customer.id,
+                    status=random.choice(statuses),
+                    total_price=0.0,
+                )
+                db.add(order)
+                db.flush()
 
-        db.add(OrderItem(order_id=order1.id, product_id=prods["CAMP-001"].id, quantity=1, price_at_order=1200000))
-        db.add(OrderItem(order_id=order1.id, product_id=prods["CAMP-002"].id, quantity=1, price_at_order=450000))
-
-        order2 = Order(customer_id=user_lan.id, status="PENDING", total_price=2500000)
-        db.add(order2)
-        db.flush()
-        db.add(OrderItem(order_id=order2.id, product_id=prods["HIKE-001"].id, quantity=1, price_at_order=2500000))
+                total = 0.0
+                selected_products = random.sample(products, k=random.randint(1, min(4, len(products))))
+                for product in selected_products:
+                    qty = random.randint(1, 3)
+                    unit_price = float(product.price)
+                    total += unit_price * qty
+                    db.add(
+                        OrderItem(
+                            order_id=order.id,
+                            product_id=product.id,
+                            quantity=qty,
+                            price_at_order=unit_price,
+                        )
+                    )
+                order.total_price = total
 
         db.commit()
-        print("✅ Seeding hoàn tất! Agent đã có dữ liệu Enterprise (Products, Inventory, Orders, Customers).")
-
-    except Exception as e:
+        print("Seed completed with synthetic data.")
+    except Exception:
         db.rollback()
-        print(f"❌ Lỗi Seeding: {e}")
+        raise
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     seed_data()

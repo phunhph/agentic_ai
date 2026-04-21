@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGENTIC CORE v3.5 | Enterprise AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;900&display=swap');
+        :root { --bg: #030508; --card: #0a0d14; --admin: #ef4444; --client: #3b82f6; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: #f8fafc; overflow: hidden; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .glass { background: rgba(10, 13, 20, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+        .tab-active-client { background: var(--client); color: white; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
+        .tab-active-admin { background: var(--admin); color: white; box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.3s ease-out forwards; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+    </style>
+</head>
+<body class="h-screen flex flex-col">
+
+    <nav class="h-16 flex items-center justify-between px-8 glass border-b border-white/5 z-50">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-blue-400 rounded-xl flex items-center justify-center">
+                <i class="fas fa-brain text-white text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-black tracking-tighter uppercase italic">Agentic<span class="text-blue-500">Core</span> <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded ml-2 not-italic text-gray-400">Enterprise v3.5</span></h1>
+                <p class="text-[9px] text-gray-500 uppercase tracking-widest font-bold">Llama 3 Powered Autonomous Loop</p>
+            </div>
+        </div>
+        <div id="roleIndicator" class="px-4 py-1.5 rounded-lg text-[10px] font-black tracking-widest uppercase border border-white/10 bg-white/5">SESSION: BUYER</div>
+    </nav>
+
+    <main class="flex-grow flex p-6 gap-6 overflow-hidden">
+
+        <!-- SIDEBAR: Control & Preview -->
+        <aside class="w-[450px] flex flex-col gap-6">
+            <div class="glass rounded-2xl p-6 flex flex-col gap-4">
+                <div class="flex p-1 bg-black/40 rounded-xl border border-white/5 mb-2">
+                    <button onclick="setMode('BUYER')" id="btnBuyer" class="flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all tab-active-client">Client</button>
+                    <button onclick="setMode('ADMIN')" id="btnAdmin" class="flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all text-gray-500">Admin</button>
+                </div>
+                <div class="relative">
+                    <textarea id="goalInput" class="w-full h-32 bg-black/60 border border-white/10 rounded-xl p-5 text-sm mono outline-none focus:border-blue-500/50 transition-all resize-none" placeholder="Lệnh cho Agent..."></textarea>
+                </div>
+                <button id="executeBtn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black text-xs py-4 rounded-xl shadow-xl shadow-blue-600/20 active:scale-[0.98] transition-all uppercase tracking-widest flex items-center justify-center gap-3">
+                    <i class="fas fa-bolt"></i> <span>Execute Autonomous Loop</span>
+                </button>
+            </div>
+
+            <div class="glass rounded-2xl p-6 flex-grow flex flex-col overflow-hidden border-t-2 border-blue-500/20" id="dbContainer">
+                <h2 class="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4 flex justify-between items-center">
+                    <span>Enterprise Data View</span>
+                    <i class="fas fa-database text-blue-500"></i>
+                </h2>
+                <div id="dbView" class="flex-grow overflow-y-auto custom-scroll">
+                    <div class="h-full flex flex-col items-center justify-center opacity-10">
+                        <i class="fas fa-table text-4xl mb-4"></i>
+                        <p class="text-[10px] font-bold">Awaiting Execution Results</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- TRACE: Reasoning & Logs -->
+        <section class="flex-grow glass rounded-2xl flex flex-col overflow-hidden border-t-2 border-purple-500/20">
+            <div class="h-12 flex items-center justify-between px-8 border-b border-white/5 bg-white/[0.01] gap-4">
+                <span class="text-[10px] font-black uppercase tracking-widest text-gray-500 shrink-0">Traces (theo context)</span>
+                <select id="traceThreadSelect" onchange="onTraceThreadChange(this.value)" class="flex-1 max-w-md text-[9px] mono bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-gray-300 outline-none"></select>
+                <div class="flex items-center gap-2 shrink-0">
+                    <button type="button" onclick="newConversation()" class="text-[9px] font-bold text-gray-500 hover:text-amber-400 transition uppercase">New chat</button>
+                    <button onclick="clearSystem()" class="text-[9px] font-bold text-gray-600 hover:text-red-400 transition uppercase">Clear</button>
+                </div>
+            </div>
+            <div id="traceContent" class="flex-grow overflow-y-auto p-6 space-y-4 custom-scroll">
+                <div id="traceEmptyState" class="max-w-md mx-auto text-center py-32 opacity-10">
+                    <i class="fas fa-microchip text-6xl mb-4 text-purple-500"></i>
+                    <p class="font-bold uppercase tracking-widest">System Ready</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        let currentRole = 'BUYER';
+        const chatHistoryByRole = { BUYER: [], ADMIN: [] };
+        /** @type {Record<string, Record<string, object[]>>} role -> context_key -> logs */
+        const traceByRoleContext = { BUYER: {}, ADMIN: {} };
+        /** @type {Record<string, string|null>} */
+        const activeContextKeyByRole = { BUYER: null, ADMIN: null };
+        const resultsByRole = { BUYER: [], ADMIN: [] };
+        const sessionIdByRole = { BUYER: createId(), ADMIN: createId() };
+        const conversationIdByRole = { BUYER: createId(), ADMIN: createId() };
+        const trace = document.getElementById('traceContent');
+        const traceThreadSelect = document.getElementById('traceThreadSelect');
+        const dbView = document.getElementById('dbView');
+        const runBtn = document.getElementById('executeBtn');
+
+        function localContextKey(role) {
+            const r = (role || 'BUYER').toUpperCase();
+            return `${r}:${sessionIdByRole[r]}:${conversationIdByRole[r]}`;
+        }
+
+        function shortContextLabel(key) {
+            if (!key) return '';
+            const parts = String(key).split(':');
+            if (parts.length >= 3) {
+                const sid = (parts[1] || '').slice(0, 8);
+                const cid = (parts[2] || '').slice(0, 8);
+                return `${parts[0]} · ${sid}… · ${cid}…`;
+            }
+            return key.slice(0, 32);
+        }
+
+        function createId() {
+            if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+            return `id-${Date.now()}-${Math.floor(Math.random() * 1e9)}`;
+        }
+
+        function setMode(m) {
+            currentRole = m;
+            document.getElementById('btnBuyer').className = m === 'BUYER' ? 'flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all tab-active-client' : 'flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all text-gray-500';
+            document.getElementById('btnAdmin').className = m === 'ADMIN' ? 'flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all tab-active-admin' : 'flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all text-gray-500';
+            document.getElementById('roleIndicator').innerText = `SESSION: ${m}`;
+            document.getElementById('dbContainer').style.borderColor = m === 'BUYER' ? 'rgba(59, 130, 246, 0.2)' : 'rgba(239, 68, 68, 0.2)';
+            runBtn.className = m === 'BUYER' ? 'w-full bg-blue-600 hover:bg-blue-500 text-white font-black text-xs py-4 rounded-xl shadow-xl shadow-blue-600/20 active:scale-[0.98] transition-all uppercase tracking-widest flex items-center justify-center gap-3' : 'w-full bg-red-600 hover:bg-red-500 text-white font-black text-xs py-4 rounded-xl shadow-xl shadow-red-600/20 active:scale-[0.98] transition-all uppercase tracking-widest flex items-center justify-center gap-3';
+            renderTraceThreadSelect();
+            renderTraceForRole(m);
+            renderResults(resultsByRole[m] || []);
+        }
+
+        function clearSystem() {
+            chatHistoryByRole.BUYER = [];
+            chatHistoryByRole.ADMIN = [];
+            traceByRoleContext.BUYER = {};
+            traceByRoleContext.ADMIN = {};
+            activeContextKeyByRole.BUYER = null;
+            activeContextKeyByRole.ADMIN = null;
+            resultsByRole.BUYER = [];
+            resultsByRole.ADMIN = [];
+            trace.innerHTML = '';
+            dbView.innerHTML = '';
+            renderTraceThreadSelect();
+        }
+
+        function newConversation() {
+            const r = currentRole;
+            conversationIdByRole[r] = createId();
+            activeContextKeyByRole[r] = localContextKey(r);
+            if (!traceByRoleContext[r][activeContextKeyByRole[r]]) {
+                traceByRoleContext[r][activeContextKeyByRole[r]] = [];
+            }
+            renderTraceThreadSelect();
+            renderTraceForRole(r);
+        }
+
+        function renderTraceThreadSelect() {
+            const r = currentRole;
+            const bucket = traceByRoleContext[r] || {};
+            const keys = Object.keys(bucket);
+            traceThreadSelect.innerHTML = '';
+            keys.forEach((k) => {
+                const opt = document.createElement('option');
+                opt.value = k;
+                opt.textContent = shortContextLabel(k);
+                traceThreadSelect.appendChild(opt);
+            });
+            const active = activeContextKeyByRole[r] && keys.includes(activeContextKeyByRole[r])
+                ? activeContextKeyByRole[r]
+                : (keys.length ? keys[keys.length - 1] : '');
+            if (active) {
+                traceThreadSelect.value = active;
+                activeContextKeyByRole[r] = active;
+            }
+        }
+
+        function onTraceThreadChange(value) {
+            activeContextKeyByRole[currentRole] = value || null;
+            renderTraceForRole(currentRole);
+        }
+
+        runBtn.onclick = async () => {
+            const goal = document.getElementById('goalInput').value;
+            if (!goal) return;
+
+            runBtn.disabled = true;
+            runBtn.innerHTML = '<i class="fas fa-sync animate-spin"></i> <span>Processing...</span>';
+
+            appendLog({
+                block: 'SYSTEM',
+                content: `Kích hoạt Agent Loop - Goal: ${goal}`,
+                status: 'INIT',
+                role: currentRole,
+                session_id: sessionIdByRole[currentRole],
+                conversation_id: conversationIdByRole[currentRole],
+                context_key: localContextKey(currentRole),
+            });
+
+            const formData = new FormData();
+            formData.append('goal', goal);
+            formData.append('role', currentRole);
+            formData.append('history', JSON.stringify(chatHistoryByRole[currentRole] || []));
+            formData.append('session_id', sessionIdByRole[currentRole]);
+            formData.append('conversation_id', conversationIdByRole[currentRole]);
+
+            try {
+                const response = await fetch('/run-agent', { method: 'POST', body: formData });
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n').filter(l => l.startsWith('data: '));
+                    for (const line of lines) {
+                        const data = JSON.parse(line.replace('data: ', ''));
+                        if (data.type === 'log') appendLog(data.log);
+                        if (data.type === 'final') {
+                            const roleKey = (data.role || currentRole).toUpperCase();
+                            const ck = data.context_key || localContextKey(roleKey);
+                            activeContextKeyByRole[roleKey] = ck;
+                            resultsByRole[roleKey] = data.final_result || [];
+                            if (roleKey === currentRole) {
+                                renderResults(data.final_result);
+                            }
+                            chatHistoryByRole[roleKey].push({ goal: goal, result: JSON.stringify(data.final_result).substring(0, 200) });
+                            renderTraceThreadSelect();
+                        }
+                    }
+                }
+            } catch (e) {
+                appendLog({
+                    block: 'SYSTEM',
+                    content: 'Connection Error: ' + e.message,
+                    status: 'FATAL',
+                    role: currentRole,
+                    session_id: sessionIdByRole[currentRole],
+                    conversation_id: conversationIdByRole[currentRole],
+                    context_key: localContextKey(currentRole),
+                });
+            } finally {
+                runBtn.disabled = false;
+                runBtn.innerHTML = '<i class="fas fa-bolt"></i> <span>Execute Autonomous Loop</span>';
+            }
+        }
+
+        function appendLog(log) {
+            const logRole = (log.role || currentRole).toUpperCase();
+            const ck = log.context_key || localContextKey(logRole);
+            if (!traceByRoleContext[logRole]) traceByRoleContext[logRole] = {};
+            if (!traceByRoleContext[logRole][ck]) traceByRoleContext[logRole][ck] = [];
+            traceByRoleContext[logRole][ck].push(log);
+            activeContextKeyByRole[logRole] = ck;
+            if (logRole !== currentRole) {
+                renderTraceThreadSelect();
+                return;
+            }
+            renderTraceThreadSelect();
+            const showKey = activeContextKeyByRole[logRole] || ck;
+            if (showKey !== ck) return;
+            appendLogCard(log);
+        }
+
+        function renderTraceForRole(role) {
+            trace.innerHTML = '';
+            const bucket = traceByRoleContext[role] || {};
+            const keys = Object.keys(bucket);
+            let showKey = activeContextKeyByRole[role];
+            if (!showKey || !bucket[showKey]) {
+                showKey = keys.length ? keys[keys.length - 1] : null;
+                activeContextKeyByRole[role] = showKey;
+            }
+            renderTraceThreadSelect();
+            const logs = showKey ? (bucket[showKey] || []) : [];
+            if (!logs.length) {
+                trace.innerHTML = `
+                    <div class="max-w-md mx-auto text-center py-32 opacity-10">
+                        <i class="fas fa-microchip text-6xl mb-4 text-purple-500"></i>
+                        <p class="font-bold uppercase tracking-widest">System Ready (${role})</p>
+                    </div>
+                `;
+                return;
+            }
+            logs.forEach((log) => appendLogCard(log));
+        }
+
+        function appendLogCard(log) {
+            document.getElementById('traceEmptyState')?.remove();
+            const div = document.createElement('div');
+            const colors = { 'PERCEIVE': 'text-cyan-400', 'REASON': 'text-amber-400', 'ACT': 'text-red-400', 'EVAL': 'text-green-400', 'SYSTEM': 'text-purple-400', 'TRACE': 'text-violet-400', 'LEARN': 'text-fuchsia-400', 'POLICY': 'text-orange-400' };
+            const bgs = { 'PERCEIVE': 'bg-cyan-400', 'REASON': 'bg-amber-400', 'ACT': 'bg-red-400', 'EVAL': 'bg-green-400', 'SYSTEM': 'bg-purple-400', 'TRACE': 'bg-violet-400', 'LEARN': 'bg-fuchsia-400', 'POLICY': 'bg-orange-400' };
+            const roleTag = (log.role || currentRole).toUpperCase();
+            const roleClass = roleTag === 'ADMIN' ? 'text-red-400' : 'text-blue-400';
+
+            div.className = "glass p-4 rounded-xl animate-fade mb-3 border border-white/5";
+            div.innerHTML = `
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[9px] font-black uppercase tracking-widest ${colors[log.block] || 'text-gray-400'} flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full ${bgs[log.block] || 'bg-gray-400'}"></span> ${log.block}
+                    </span>
+                    <span class="text-[8px] mono text-white/20 uppercase font-bold">
+                        ${log.status || 'OK'} · <span class="${roleClass}">${roleTag}</span>
+                        <span class="text-white/40" title="${log.context_key || ''}"> · ${(log.session_id || '').slice(0, 8)}</span>
+                    </span>
+                </div>
+                <div class="text-[10px] mono text-white/25 mb-1 truncate" title="${log.context_key || ''}">${(log.context_key || '').slice(0, 48)}${(log.context_key || '').length > 48 ? '…' : ''}</div>
+                <div class="text-[12px] text-gray-400 font-medium leading-relaxed">${log.content}</div>
+            `;
+            trace.appendChild(div);
+            trace.scrollTop = trace.scrollHeight;
+        }
+
+        function renderResults(results) {
+            if (!results || results.length === 0) {
+                dbView.innerHTML = '<div class="p-8 text-center text-gray-600 text-[10px] italic uppercase tracking-widest">No matching records found in Postgres.</div>';
+                return;
+            }
+
+            let html = '';
+            // Kiểm tra xem là loại dữ liệu gì để render phù hợp
+            const first = results[0];
+
+            if (first.category && (first.product_count !== undefined || first.total_quantity !== undefined)) {
+                // RENDER STATS (ADMIN)
+                html = '<div class="space-y-4">';
+                results.forEach(i => {
+                    html += `
+                        <div class="bg-white/5 border-l-2 border-red-500 p-4 rounded-r-xl">
+                            <div class="text-[9px] font-black text-gray-500 uppercase mb-1">${i.category}</div>
+                            <div class="flex justify-between items-end">
+                                <div class="text-lg font-black text-white">${i.total_quantity} <span class="text-[9px] text-gray-500 uppercase">Items</span></div>
+                                <div class="text-[10px] mono text-red-400">${i.product_count} Skus</div>
+                            </div>
+                        </div>`;
+                });
+                html += '</div>';
+            } else if (first.order_id !== undefined) {
+                // RENDER ORDERS
+                html = '<div class="space-y-3">';
+                results.forEach(o => {
+                    const statusColor = o.status === 'PENDING' ? 'text-amber-400' : 'text-green-400';
+                    html += `
+                        <div class="glass p-4 rounded-xl border border-white/10 hover:border-white/20 transition-all">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-[10px] font-black text-blue-400 mono">ORD-#${o.order_id}</span>
+                                <span class="text-[9px] font-bold ${statusColor}">${o.status}</span>
+                            </div>
+                            <div class="text-xs font-bold text-gray-300 mb-1">${o.customer}</div>
+                            <div class="flex justify-between items-center mt-3">
+                                <span class="text-[9px] text-gray-500 mono">${o.date.split(' ')[0]}</span>
+                                <span class="text-sm font-black text-white">${o.total.toLocaleString()}đ</span>
+                            </div>
+                        </div>`;
+                });
+                html += '</div>';
+            } else {
+                // RENDER PRODUCTS
+                html = '<div class="grid grid-cols-1 gap-3">';
+                results.forEach(p => {
+                    html += `
+                        <div class="bg-white/[0.03] border border-white/5 p-4 rounded-xl hover:bg-white/[0.05] transition-all group">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="text-[9px] font-black text-gray-500 mono">${p.sku}</span>
+                                <span class="text-xs font-black text-green-400">${p.price.toLocaleString()}đ</span>
+                            </div>
+                            <h4 class="text-xs font-bold text-gray-300 group-hover:text-white">${p.name}</h4>
+                            <div class="mt-3 flex justify-between items-center text-[9px] mono">
+                                <span class="text-gray-500">Stock: ${p.stock || 0}</span>
+                                <span class="text-gray-600">${p.category}</span>
+                            </div>
+                        </div>`;
+                });
+                html += '</div>';
+            }
+            dbView.innerHTML = html;
+        }
+
+        renderTraceThreadSelect();
+    </script>
+</body>
+</html>

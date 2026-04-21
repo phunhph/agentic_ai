@@ -49,6 +49,11 @@ jobs:
           set -x
           python -m compileall .
 
+      - name: Unit tests
+        run: |
+          set -x
+          python -m pytest tests/ -q
+
       - name: Smoke import app
         run: |
           set -x

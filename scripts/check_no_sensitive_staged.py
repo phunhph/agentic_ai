@@ -8,6 +8,9 @@ BLOCKED_FILE_PATTERNS = [
     re.compile(r"(^|/)id_rsa(\.pub)?$"),
     re.compile(r"(^|/)credentials\.json$"),
     re.compile(r"(^|/)secrets?(\.|/|$)"),
+    re.compile(r"(^|/)__pycache__/"),
+    re.compile(r"\.pyc$"),
+    re.compile(r"\.pyo$"),
 ]
 
 ALLOWED_FILES = {
