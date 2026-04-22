@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
-from infra.settings import LEARNING_SCORE_WEIGHT, LEARNING_TEXT_MATCH_MIN, LEARNING_TEXT_WEIGHT
+from infra.settings import LEARNING_FINAL_MATCH_MIN, LEARNING_SCORE_WEIGHT, LEARNING_TEXT_MATCH_MIN, LEARNING_TEXT_WEIGHT
 from storage.models.agent_knowledge_base import AgentKnowledgeBase
 
 _NON_WORD = re.compile(
@@ -98,6 +98,8 @@ def find_similar_lessons(
             continue
         db_score = float(row.score or 0.0)
         final_score = (LEARNING_SCORE_WEIGHT * db_score) + (LEARNING_TEXT_WEIGHT * text_score)
+        if final_score < LEARNING_FINAL_MATCH_MIN:
+            continue
         scored.append((final_score, row, text_score))
 
     scored.sort(key=lambda x: x[0], reverse=True)

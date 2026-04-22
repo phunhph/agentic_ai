@@ -172,14 +172,18 @@ def _select_tool_autonomously(
 def plan_with_metadata(state: dict, knowledge_hits: list[dict] | None = None) -> dict:
     provider = get_metadata_provider()
     goal = state.get("goal", "")
-    extracted = extract_entities(goal)
+    extracted = state.get("entity_extract") if isinstance(state.get("entity_extract"), dict) else extract_entities(goal)
     
     # Lấy tri thức từ Metadata và Kinh nghiệm quá khứ
     mentioned_tables = extracted["mentioned_tables"]
     choices = extracted["choices"]
-    keyword = extracted["keyword"]
     entities = state.get("entities", {}) if isinstance(state.get("entities"), dict) else {}
     current_intent = str(state.get("intent", "")).strip().upper()
+    keyword_entity = str(entities.get("keyword", "")).strip()
+    keyword = keyword_entity or extracted["keyword"]
+    if current_intent.endswith("_LIST"):
+        # Với list intent, ưu tiên keyword đã chuẩn hóa ở perception để tránh lọc nhiễu.
+        keyword = keyword_entity
     normalized_keyword = " ".join(str(keyword or "").strip().lower().split())
     if current_intent.endswith("_LIST") and normalized_keyword in PLANNER_GENERIC_LIST_KEYWORDS:
         keyword = ""
@@ -256,6 +260,10 @@ def plan_with_metadata(state: dict, knowledge_hits: list[dict] | None = None) ->
         mentioned_tables=mentioned_tables,
         entities=entities,
     )
+    intent_tool = INTENT_TOOL_HINT.get(current_intent, "")
+    if intent_tool and intent_tool in MATRIX_ALLOWED_TOOLS:
+        # Khi intent đã rõ ràng, ưu tiên tool theo intent để tránh drift sang bảng khác.
+        tool = intent_tool
     if tool not in MATRIX_ALLOWED_TOOLS:
         tool = inferred_default
     args = _build_tool_args(tool, keyword, entities)

@@ -99,8 +99,7 @@ def resolve_request(intent: str, entities: dict) -> NormalizedRequest:
                     value=customer_name,
                 )
             )
-        if not keyword and not customer_name:
-            unresolved.append("keyword|customer_name")
+        # keyword/customer_name có thể rỗng khi user muốn lấy toàn bộ danh sách contact.
 
     elif intent == "CONTACT_CREATE":
         contact_name = str(entities.get("contact_name", entities.get("name", entities.get("keyword", "")))).strip()
@@ -137,8 +136,7 @@ def resolve_request(intent: str, entities: dict) -> NormalizedRequest:
                     value=status,
                 )
             )
-        if not customer_name and not status:
-            unresolved.append("customer_name|status")
+        # customer_name/status có thể rỗng khi user muốn lấy toàn bộ danh sách contract.
 
     elif intent == "CONTRACT_CREATE":
         contract_name = str(entities.get("contract_name", entities.get("name", entities.get("keyword", "")))).strip()

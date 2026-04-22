@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 import re
+from functools import lru_cache
 from typing import Any
 from core.metadata_provider import get_metadata_provider
 from dynamic_metadata.text_normalize import normalize_goal_text
@@ -18,11 +19,7 @@ def _find_system_user_id(display_name: str) -> tuple[str | None, str | None, flo
     name_norm = normalize_goal_text(display_name)
     if not name_norm:
         return None, None, 0.0
-    db = SessionLocal()
-    try:
-        users = db.query(SystemUser.systemuserid, SystemUser.fullname).all()
-    finally:
-        db.close()
+    users = _load_system_users()
     best_id = None
     best_name = None
     best_score = 0.0
@@ -45,6 +42,16 @@ def _find_system_user_id(display_name: str) -> tuple[str | None, str | None, flo
     if best_score >= 0.55:
         return best_id, best_name, best_score
     return None, None, 0.0
+
+
+@lru_cache(maxsize=1)
+def _load_system_users() -> tuple[tuple[str, str], ...]:
+    db = SessionLocal()
+    try:
+        rows = db.query(SystemUser.systemuserid, SystemUser.fullname).all()
+    finally:
+        db.close()
+    return tuple((str(uid), str(fullname or "")) for uid, fullname in rows)
 
 def extract_entities(goal: str) -> dict[str, Any]:
     # 1. Chuẩn hóa text (Chỉ xử lý format, không lọc từ lóng ở đây)

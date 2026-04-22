@@ -288,5 +288,54 @@
     "usage_count": 1,
     "success_count": 1,
     "last_success": true
+  },
+  {
+    "query": "thống kê doanh thu hiện đã đạt được bao nhiêu",
+    "expected_tool": "get_account_overview",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "lấy cho tôi contact được tọa gần đây nhất",
+    "expected_tool": "list_accounts",
+    "usage_count": 3,
+    "success_count": 0,
+    "last_success": false
+  },
+  {
+    "query": "lấy cho tôi contact",
+    "expected_tool": "list_accounts",
+    "usage_count": 3,
+    "success_count": 0,
+    "last_success": false
+  },
+  {
+    "query": "kiểm tra lại giúp tôi contacts có mà sao không lấy được danh sách ra",
+    "expected_tool": "list_contacts",
+    "usage_count": 3,
+    "success_count": 0,
+    "last_success": false
+  },
+  {
+    "query": "danh sách contacts",
+    "expected_tool": "list_contacts",
+    "usage_count": 4,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "danh sách contacts chỉ lấy contacts có customer là demo account 1",
+    "expected_tool": "list_contacts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "sao danh sách vẫn k lọc theo mong muốn cảu tôi vậy kiểm tra lại giúp tôi",
+    "expected_tool": "list_contacts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
   }
 ]

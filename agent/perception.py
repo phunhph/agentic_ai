@@ -223,6 +223,7 @@ def perception_node(state: dict):
         "goal": clean_goal,
         "normalized_goal": normalized_goal,
         "planner_goal": planner_goal,
+        "entity_extract": extracted,
         "intent": intent,
         "entities": normalized_request.entities,
         "request_contract": normalized_request.model_dump(),

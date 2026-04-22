@@ -1,5 +1,6 @@
 import json
 import asyncio
+import re
 from typing import AsyncGenerator
 from agent.brain import agent_brain
 from agent.dynamic_planner import plan_with_metadata
@@ -139,25 +140,59 @@ class AgentOrchestrator:
                 db.close()
 
         def check_entity_match(entities: dict, observations: list[dict]) -> tuple[bool, str]:
-            if not isinstance(entities, dict):
-                return True, ""
             if not isinstance(observations, list) or not observations:
                 return True, ""
-            bd_owner_name = str(entities.get("bd_owner_name", "")).strip().lower()
-            am_sales_name = str(entities.get("am_sales_name", "")).strip().lower()
-            customer_name = str(entities.get("customer_name", "")).strip().lower()
-            if bd_owner_name:
+            if not isinstance(request_contract, dict):
+                return True, ""
+            filters = request_contract.get("filters", [])
+            if not isinstance(filters, list) or not filters:
+                return True, ""
+
+            def _norm_tokens(text: str) -> set[str]:
+                raw = re.sub(r"[^a-zA-Z0-9_]+", " ", str(text or "").lower()).strip()
+                toks = [t for t in raw.split() if t]
+                cleaned: list[str] = []
+                for t in toks:
+                    t = re.sub(r"^(hbl|mc|cr\d+)_", "", t)
+                    if t in {"account", "contact", "contract", "opportunities", "opportunity"}:
+                        continue
+                    cleaned.append(t)
+                return set(cleaned)
+
+            def _resolve_output_key(filter_field: str, row: dict) -> str | None:
+                if not isinstance(row, dict) or not row:
+                    return None
+                col = str(filter_field).split(".", 1)[-1]
+                col_tokens = _norm_tokens(col)
+                best_key = None
+                best_score = -1
+                for key in row.keys():
+                    key_tokens = _norm_tokens(str(key))
+                    score = len(col_tokens.intersection(key_tokens))
+                    if score > best_score:
+                        best_score = score
+                        best_key = str(key)
+                return best_key if best_score > 0 else None
+
+            for f in filters:
+                if not isinstance(f, dict):
+                    continue
+                field = str(f.get("field", "")).strip()
+                op = str(f.get("op", "contains")).strip().lower()
+                expected = str(f.get("value", "")).strip().lower()
+                if not field or not expected:
+                    continue
                 for row in observations:
-                    if isinstance(row, dict) and str(row.get("bd_owner", "")).strip().lower() != bd_owner_name:
-                        return False, "bd_owner_name_mismatch"
-            if am_sales_name:
-                for row in observations:
-                    if isinstance(row, dict) and str(row.get("am_sales", "")).strip().lower() != am_sales_name:
-                        return False, "am_sales_name_mismatch"
-            if customer_name and state.get("intent") == "CONTACT_LIST":
-                for row in observations:
-                    if isinstance(row, dict) and customer_name not in str(row.get("customer", "")).strip().lower():
-                        return False, "customer_name_mismatch"
+                    if not isinstance(row, dict):
+                        continue
+                    out_key = _resolve_output_key(field, row)
+                    if not out_key:
+                        continue
+                    actual = str(row.get(out_key, "")).strip().lower()
+                    if op == "eq" and actual != expected:
+                        return False, f"filter_mismatch:{field}:eq"
+                    if op == "contains" and expected not in actual:
+                        return False, f"filter_mismatch:{field}:contains"
             return True, ""
 
         # 1. PERCEPTION
@@ -220,6 +255,7 @@ class AgentOrchestrator:
             "db_call_executed": False,
             "entity_match_ok": True,
             "entity_match_reason": "",
+            "entity_extract": perception_result.get("entity_extract", {}),
         }
         state["bootstrap_learning"] = self.learning.lesson_count(detected_role, domain) == 0
 
@@ -451,7 +487,7 @@ class AgentOrchestrator:
             # --- OPTIMIZATION: SHORT-CIRCUIT ---
             # Nếu đã có dữ liệu và tool là search/get, kết thúc sớm để tiết kiệm LLM call (Evaluator)
             if state["observations"] and len(state["observations"]) > 0:
-                if tool in ("list_accounts", "list_contacts", "list_contracts", "get_contract_details"):
+                if tool in ("list_accounts", "list_contacts", "list_contracts", "list_opportunities", "get_contract_details"):
                      yield await emit_log("EVAL", "FAST-TRACK: Đã tìm thấy dữ liệu. Bỏ qua bước kiểm tra chậm.", "SUCCESS")
                      state["is_finished"] = True
                      break

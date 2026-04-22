@@ -28,25 +28,19 @@ def create_contract_tool(contract_name: str, customer_name: str = None, assignee
     if not str(contract_name or "").strip():
         return [{"error": "contract_name is required"}]
     with get_db() as db:
-        try:
-            return [
-                create_contract(
-                    db,
-                    contract_name=contract_name,
-                    customer_name=customer_name,
-                    assignee_id=assignee_id,
-                )
-            ]
-        except Exception:
-            return []
+        return [
+            create_contract(
+                db,
+                contract_name=contract_name,
+                customer_name=customer_name,
+                assignee_id=assignee_id,
+            )
+        ]
 
 
 def compare_contract_stats_tool():
     with get_db() as db:
-        try:
-            return compare_contract_stats(db)
-        except Exception:
-            return []
+        return compare_contract_stats(db)
 
 
 __all__ = ["list_contracts", "get_contract_details", "create_contract_tool", "compare_contract_stats_tool"]

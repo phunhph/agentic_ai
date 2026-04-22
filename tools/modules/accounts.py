@@ -9,24 +9,18 @@ from storage.repositories.modules.accounts import (
 
 def list_accounts(keyword: str = "", bd_owner_id: str | None = None, am_sales_id: str | None = None):
     with get_db() as db:
-        try:
-            return search_accounts_with_rollup(
-                db,
-                keyword,
-                bd_owner_id=bd_owner_id,
-                am_sales_id=am_sales_id,
-            )
-        except Exception:
-            return []
+        return search_accounts_with_rollup(
+            db,
+            keyword,
+            bd_owner_id=bd_owner_id,
+            am_sales_id=am_sales_id,
+        )
 
 
 def get_account_overview():
     with get_db() as db:
-        try:
-            count = count_accounts(db)
-            return [{"category": "account", "account_count": count, "total_records": count}]
-        except Exception:
-            return []
+        count = count_accounts(db)
+        return [{"category": "account", "account_count": count, "total_records": count}]
 
 
 def create_account(
@@ -39,27 +33,21 @@ def create_account(
     if not str(name or "").strip():
         return [{"error": "name is required"}]
     with get_db() as db:
-        try:
-            return [
-                repo_create_account(
-                    db,
-                    name=name,
-                    website=website,
-                    domain=domain,
-                    bd_owner_id=bd_owner_id,
-                    am_sales_id=am_sales_id,
-                )
-            ]
-        except Exception:
-            return []
+        return [
+            repo_create_account(
+                db,
+                name=name,
+                website=website,
+                domain=domain,
+                bd_owner_id=bd_owner_id,
+                am_sales_id=am_sales_id,
+            )
+        ]
 
 
 def compare_account_stats():
     with get_db() as db:
-        try:
-            return compare_account_owner_stats(db)
-        except Exception:
-            return []
+        return compare_account_owner_stats(db)
 
 
 __all__ = ["list_accounts", "get_account_overview", "create_account", "compare_account_stats"]
