@@ -1,271 +1,292 @@
 [
   {
-    "query": "Lấy danh sách account tuần này cần xử lý",
+    "query": "Cho tôi xem danh sách systemuser",
+    "expected_tool": "list_accounts",
+    "expected_entities": [
+      "systemuser"
+    ]
+  },
+  {
+    "query": "Cho tôi xem danh sách hbl_account",
     "expected_tool": "list_accounts",
     "expected_entities": [
       "hbl_account"
     ]
   },
   {
-    "query": "Cho tôi các hợp đồng của khách hàng MIMS",
-    "expected_tool": "list_contracts",
+    "query": "Cho tôi xem danh sách hbl_contact",
+    "expected_tool": "list_contacts",
+    "expected_entities": [
+      "hbl_contact"
+    ]
+  },
+  {
+    "query": "Cho tôi xem danh sách hbl_opportunities",
+    "expected_tool": "list_accounts",
+    "expected_entities": [
+      "hbl_opportunities"
+    ]
+  },
+  {
+    "query": "Cho tôi xem danh sách hbl_contract",
+    "expected_tool": "get_contract_details",
+    "expected_entities": [
+      "hbl_contract"
+    ]
+  },
+  {
+    "query": "Cho tôi xem danh sách choice_option",
+    "expected_tool": "list_accounts",
+    "expected_entities": [
+      "choice_option"
+    ]
+  },
+  {
+    "query": "Tìm hbl_contract liên quan đến hbl_account",
+    "expected_tool": "list_accounts",
     "expected_entities": [
       "hbl_contract",
       "hbl_account"
-    ],
-    "expected_path": [
-      [
-        {
-          "from_table": "hbl_contract",
-          "to_table": "hbl_opportunities",
-          "relation_type": "lookup",
-          "join_table": null
-        },
-        {
-          "from_table": "hbl_opportunities",
-          "to_table": "hbl_account",
-          "relation_type": "lookup",
-          "join_table": null
-        }
-      ],
-      [
-        {
-          "from_table": "hbl_contract",
-          "to_table": "systemuser",
-          "relation_type": "lookup",
-          "join_table": null
-        },
-        {
-          "from_table": "systemuser",
-          "to_table": "hbl_account",
-          "relation_type": "lookup",
-          "join_table": null
-        }
-      ],
-      [
-        {
-          "from_table": "hbl_contract",
-          "to_table": "systemuser",
-          "relation_type": "lookup",
-          "join_table": null
-        },
-        {
-          "from_table": "systemuser",
-          "to_table": "hbl_account",
-          "relation_type": "lookup",
-          "join_table": null
-        }
-      ],
-      [
-        {
-          "from_table": "hbl_contract",
-          "to_table": "choice_option",
-          "relation_type": "choice",
-          "join_table": "hbl_contract_status_choice_map"
-        },
-        {
-          "from_table": "choice_option",
-          "to_table": "hbl_account",
-          "relation_type": "choice",
-          "join_table": "hbl_account_industry_choice"
-        }
-      ],
-      [
-        {
-          "from_table": "hbl_contract",
-          "to_table": "choice_option",
-          "relation_type": "choice",
-          "join_table": "hbl_contract_status_choice_map"
-        },
-        {
-          "from_table": "choice_option",
-          "to_table": "hbl_account",
-          "relation_type": "choice",
-          "join_table": "hbl_account_country_choice"
-        }
-      ],
-      [
-        {
-          "from_table": "hbl_contract",
-          "to_table": "choice_option",
-          "relation_type": "choice",
-          "join_table": "hbl_contract_status_choice_map"
-        },
-        {
-          "from_table": "choice_option",
-          "to_table": "hbl_account",
-          "relation_type": "choice",
-          "join_table": "hbl_account_revenue_choice"
-        }
-      ],
-      [
-        {
-          "from_table": "hbl_contract",
-          "to_table": "choice_option",
-          "relation_type": "choice",
-          "join_table": "hbl_contract_invoiced_month_choice_map"
-        },
-        {
-          "from_table": "choice_option",
-          "to_table": "hbl_account",
-          "relation_type": "choice",
-          "join_table": "hbl_account_industry_choice"
-        }
-      ],
-      [
-        {
-          "from_table": "hbl_contract",
-          "to_table": "choice_option",
-          "relation_type": "choice",
-          "join_table": "hbl_contract_invoiced_month_choice_map"
-        },
-        {
-          "from_table": "choice_option",
-          "to_table": "hbl_account",
-          "relation_type": "choice",
-          "join_table": "hbl_account_country_choice"
-        }
-      ],
-      [
-        {
-          "from_table": "hbl_contract",
-          "to_table": "choice_option",
-          "relation_type": "choice",
-          "join_table": "hbl_contract_invoiced_month_choice_map"
-        },
-        {
-          "from_table": "choice_option",
-          "to_table": "hbl_account",
-          "relation_type": "choice",
-          "join_table": "hbl_account_revenue_choice"
-        }
-      ],
-      [
-        {
-          "from_table": "hbl_contract",
-          "to_table": "choice_option",
-          "relation_type": "choice",
-          "join_table": "hbl_contract_paid_month_choice_map"
-        },
-        {
-          "from_table": "choice_option",
-          "to_table": "hbl_account",
-          "relation_type": "choice",
-          "join_table": "hbl_account_industry_choice"
-        }
-      ],
-      [
-        {
-          "from_table": "hbl_contract",
-          "to_table": "choice_option",
-          "relation_type": "choice",
-          "join_table": "hbl_contract_paid_month_choice_map"
-        },
-        {
-          "from_table": "choice_option",
-          "to_table": "hbl_account",
-          "relation_type": "choice",
-          "join_table": "hbl_account_country_choice"
-        }
-      ],
-      [
-        {
-          "from_table": "hbl_contract",
-          "to_table": "choice_option",
-          "relation_type": "choice",
-          "join_table": "hbl_contract_paid_month_choice_map"
-        },
-        {
-          "from_table": "choice_option",
-          "to_table": "hbl_account",
-          "relation_type": "choice",
-          "join_table": "hbl_account_revenue_choice"
-        }
-      ],
-      [
-        {
-          "from_table": "hbl_contract",
-          "to_table": "choice_option",
-          "relation_type": "choice",
-          "join_table": "hbl_contract_contract_month_choice_map"
-        },
-        {
-          "from_table": "choice_option",
-          "to_table": "hbl_account",
-          "relation_type": "choice",
-          "join_table": "hbl_account_industry_choice"
-        }
-      ],
-      [
-        {
-          "from_table": "hbl_contract",
-          "to_table": "choice_option",
-          "relation_type": "choice",
-          "join_table": "hbl_contract_contract_month_choice_map"
-        },
-        {
-          "from_table": "choice_option",
-          "to_table": "hbl_account",
-          "relation_type": "choice",
-          "join_table": "hbl_account_country_choice"
-        }
-      ],
-      [
-        {
-          "from_table": "hbl_contract",
-          "to_table": "choice_option",
-          "relation_type": "choice",
-          "join_table": "hbl_contract_contract_month_choice_map"
-        },
-        {
-          "from_table": "choice_option",
-          "to_table": "hbl_account",
-          "relation_type": "choice",
-          "join_table": "hbl_account_revenue_choice"
-        }
-      ]
     ]
   },
   {
-    "query": "khách hàng thuộc nhóm SI",
+    "query": "Tìm hbl_opportunities liên quan đến hbl_account",
+    "expected_tool": "list_accounts",
+    "expected_entities": [
+      "hbl_opportunities",
+      "hbl_account"
+    ]
+  },
+  {
+    "query": "Tìm hbl_contact liên quan đến hbl_account",
+    "expected_tool": "list_contacts",
+    "expected_entities": [
+      "hbl_contact",
+      "hbl_account"
+    ]
+  },
+  {
+    "query": "Khách hàng thuộc nhóm SI",
     "expected_tool": "list_accounts",
     "choice_group": "hbl_cust_choice_industry",
-    "choice_label": "SI"
+    "choice_label": "SI",
+    "expected_choice_code": "135150001"
   },
   {
-    "query": "khách hàng thuộc nhóm Singapore",
+    "query": "Khách hàng thuộc nhóm Singapore",
     "expected_tool": "list_accounts",
     "choice_group": "hbl_cust_choice_country",
-    "choice_label": "Singapore"
+    "choice_label": "Singapore",
+    "expected_choice_code": "135150000"
   },
   {
-    "query": "khách hàng thuộc nhóm <10M",
+    "query": "Khách hàng thuộc nhóm <10M",
     "expected_tool": "list_accounts",
     "choice_group": "hbl_cust_choice_revenue",
-    "choice_label": "<10M"
+    "choice_label": "<10M",
+    "expected_choice_code": "135150000"
   },
   {
-    "query": "khách hàng thuộc nhóm Linkedin",
+    "query": "Khách hàng thuộc nhóm Linkedin",
     "expected_tool": "list_accounts",
     "choice_group": "mc_contact_source_choice",
-    "choice_label": "Linkedin"
+    "choice_label": "Linkedin",
+    "expected_choice_code": "758130000"
   },
   {
-    "query": "khách hàng thuộc nhóm Following",
+    "query": "Khách hàng thuộc nhóm Following",
     "expected_tool": "list_accounts",
     "choice_group": "hbl_opportunities_status_choice",
-    "choice_label": "Following"
+    "choice_label": "Following",
+    "expected_choice_code": "135150000"
   },
   {
-    "query": "khách hàng thuộc nhóm Adapting",
+    "query": "Khách hàng thuộc nhóm Adapting",
     "expected_tool": "list_accounts",
     "choice_group": "hbl_contract_status_choice",
-    "choice_label": "Adapting"
+    "choice_label": "Adapting",
+    "expected_choice_code": "135150000"
   },
   {
-    "query": "khách hàng thuộc nhóm 1",
+    "query": "Khách hàng thuộc nhóm 1",
     "expected_tool": "list_accounts",
     "choice_group": "mc_monthchoice",
-    "choice_label": "1"
+    "choice_label": "1",
+    "expected_choice_code": "1"
+  },
+  {
+    "query": "list contacts",
+    "expected_tool": "list_contacts",
+    "expected_entities": [
+      "hbl_contact"
+    ]
+  },
+  {
+    "query": "lấy danh sách account cho tôi",
+    "expected_tool": "list_accounts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "chi tiến của account Demo Account 1",
+    "expected_tool": "list_accounts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "lấy danh sách contacts có account là Demo Account 1",
+    "expected_tool": "list_contacts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "sao danh sách vẫn có cải k phải của account Demo Account 1 vậy xem lại đi",
+    "expected_tool": "list_contacts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "vẫn chưa đứng vẫn chưa lọc được data như tôi muốn xem lại đi",
+    "expected_tool": "list_contacts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "vẫn chưa đúng",
+    "expected_tool": "list_accounts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "ơ kaif đnag lấy contact mà sao lại thành account r tôi bảo là lấy contact có account là Demo Account 1",
+    "expected_tool": "list_contacts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "lấy data sai rồi đây lấy cả data mà customer không phải là Demo Account 1",
+    "expected_tool": "list_contacts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "lấy cho tôi contact có customer là Demo Account 2",
+    "expected_tool": "list_contacts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "lấy contact có assigne là System User 5",
+    "expected_tool": "list_contacts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "lấy contract có account customer là Demo Account 1",
+    "expected_tool": "list_contracts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "cho tôi danh sách contract của account Demo Account 1",
+    "expected_tool": "list_contracts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "chỉ lấy contract có account customer là Demo Account 1 thôi mà sao lấy cả data k phải của Demo Account 1 vậy",
+    "expected_tool": "list_contracts",
+    "usage_count": 2,
+    "success_count": 2,
+    "last_success": true
+  },
+  {
+    "query": "lấy danh sách contact có account là Demo Account 5",
+    "expected_tool": "list_contracts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "tôi lất contacts mà có phải contracts đâu",
+    "expected_tool": "list_contacts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "lấy cho tôi danh sách opp",
+    "expected_tool": "list_accounts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "sao lại là danh sách account tôi muốn opp tức là opportunities",
+    "expected_tool": "list_accounts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "vẫn là list account alf sao là opportunities cơ mà",
+    "expected_tool": "list_accounts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "danh sách opp",
+    "expected_tool": "list_accounts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "không phải bảng account mà là bảng opportunities",
+    "expected_tool": "list_opportunities",
+    "usage_count": 3,
+    "success_count": 0,
+    "last_success": false
+  },
+  {
+    "query": "danh sách opportunity",
+    "expected_tool": "list_opportunities",
+    "usage_count": 5,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "danh sách account",
+    "expected_tool": "list_opportunities",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "lất danh sách account mà sao vẫn là oppor vậy",
+    "expected_tool": "list_accounts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "giờ lấy tôi danh sách op có customer account là Demo Account 2",
+    "expected_tool": "list_opportunities",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
   }
 ]

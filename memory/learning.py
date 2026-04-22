@@ -2,13 +2,14 @@ import json
 import os
 import ollama
 import math
-from infra.settings import OLLAMA_EMBEDDING_MODEL
+from infra.settings import LEARNING_STORE_DIR, OLLAMA_EMBEDDING_MODEL
 from infra.domain import normalize_domain_key
 
 
 class AgentLearning:
     def __init__(self):
-        self.base_dir = "logs"
+        self.base_dir = LEARNING_STORE_DIR
+        self.legacy_base_dir = "logs"
         self.default_path = os.path.join(self.base_dir, "learning_data.json")
         self.model = OLLAMA_EMBEDDING_MODEL
         os.makedirs(self.base_dir, exist_ok=True)
@@ -17,8 +18,7 @@ class AgentLearning:
                 json.dump([], f)
 
     def _normalize_role(self, role: str | None) -> str:
-        normalized = (role or "BUYER").strip().upper()
-        return normalized if normalized in {"ADMIN", "BUYER"} else "BUYER"
+        return "DEFAULT"
 
     def _get_store_path(self, role: str | None, domain: str | None) -> str:
         normalized_role = self._normalize_role(role)
@@ -31,6 +31,14 @@ class AgentLearning:
             with open(role_path, "w", encoding="utf-8") as f:
                 json.dump([], f)
         return role_path
+
+    def _get_legacy_store_path(self, role: str | None, domain: str | None) -> str:
+        normalized_role = self._normalize_role(role)
+        d = normalize_domain_key(domain)
+        return os.path.join(
+            self.legacy_base_dir,
+            f"learning_data_{normalized_role.lower()}_{d}.json",
+        )
 
     def _get_embedding(self, text):
         """Lấy vector embedding từ Ollama"""
@@ -79,8 +87,19 @@ class AgentLearning:
         try:
             d = normalize_domain_key(domain)
             role_path = self._get_store_path(role, d)
-            with open(role_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
+            data: list = []
+            if os.path.exists(role_path):
+                with open(role_path, "r", encoding="utf-8") as f:
+                    loaded = json.load(f)
+                    if isinstance(loaded, list):
+                        data = loaded
+            if not data:
+                legacy_path = self._get_legacy_store_path(role, d)
+                if os.path.exists(legacy_path):
+                    with open(legacy_path, "r", encoding="utf-8") as f:
+                        loaded = json.load(f)
+                        if isinstance(loaded, list):
+                            data = loaded
 
             if not data:
                 return f"Hệ thống chưa có kinh nghiệm thực tế cho role {self._normalize_role(role)} / domain {d}."
@@ -115,3 +134,21 @@ class AgentLearning:
 
     def get_lesson(self, goal, role="BUYER", domain="general"):
         return self.recall_memory(goal, role, domain)
+
+    def lesson_count(self, role="BUYER", domain="general") -> int:
+        """Số lượng bài học hiện có theo role/domain."""
+        try:
+            d = normalize_domain_key(domain)
+            role_path = self._get_store_path(role, d)
+            data = []
+            if os.path.exists(role_path):
+                with open(role_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+            if not data:
+                legacy_path = self._get_legacy_store_path(role, d)
+                if os.path.exists(legacy_path):
+                    with open(legacy_path, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+            return len(data) if isinstance(data, list) else 0
+        except Exception:
+            return 0

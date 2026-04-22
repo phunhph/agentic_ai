@@ -1,7 +1,12 @@
 import json
 import ollama
 import math
-from infra.settings import OLLAMA_EMBEDDING_MODEL
+from pathlib import Path
+from infra.settings import (
+    OLLAMA_EMBEDDING_MODEL,
+    RAG_EMBEDDING_CACHE_PATH,
+    RAG_FORCE_REBUILD,
+)
 
 
 class MetadataRAG:
@@ -18,7 +23,8 @@ class MetadataRAG:
         }
         self.model = OLLAMA_EMBEDDING_MODEL
         self.embeddings = {}
-        self._initialize_embeddings()
+        self._cache_path = Path(RAG_EMBEDDING_CACHE_PATH)
+        self._load_or_initialize_embeddings()
 
     def _get_embedding(self, text):
         """Gọi Ollama để lấy vector embedding"""
@@ -29,13 +35,57 @@ class MetadataRAG:
             print(f"Lỗi lấy embedding: {e}")
             return None
 
+    def _schema_signature(self) -> str:
+        items = [self.model, *[f"{k}:{v}" for k, v in sorted(self.schema_kb.items())]]
+        return str(hash("|".join(items)))
+
+    def _load_cached_embeddings(self) -> bool:
+        if RAG_FORCE_REBUILD or not self._cache_path.exists():
+            return False
+        try:
+            payload = json.loads(self._cache_path.read_text(encoding="utf-8"))
+            if payload.get("model") != self.model:
+                return False
+            if payload.get("schema_signature") != self._schema_signature():
+                return False
+            vectors = payload.get("embeddings")
+            if not isinstance(vectors, dict) or not vectors:
+                return False
+            self.embeddings = vectors
+            return True
+        except Exception:
+            return False
+
+    def _save_cached_embeddings(self) -> None:
+        try:
+            self._cache_path.parent.mkdir(parents=True, exist_ok=True)
+            payload = {
+                "model": self.model,
+                "schema_signature": self._schema_signature(),
+                "embeddings": self.embeddings,
+            }
+            self._cache_path.write_text(
+                json.dumps(payload, ensure_ascii=False),
+                encoding="utf-8",
+            )
+        except Exception:
+            # Cache lỗi không chặn runtime.
+            pass
+
     def _initialize_embeddings(self):
-        """Khởi tạo vector cho các Schema (Trong thực tế nên cache vào file/DB)"""
+        """Khởi tạo vector cho các Schema."""
         print("Dang khoi tao tri thuc Schema (Vectorizing)...")
         for key, text in self.schema_kb.items():
             vector = self._get_embedding(text)
             if vector:
                 self.embeddings[key] = vector
+        self._save_cached_embeddings()
+
+    def _load_or_initialize_embeddings(self):
+        if self._load_cached_embeddings():
+            print("Da nap tri thuc Schema tu cache.")
+            return
+        self._initialize_embeddings()
 
     def _cosine_similarity(self, v1, v2):
         """Tính độ tương đồng Cosine giữa 2 vector"""

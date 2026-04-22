@@ -122,6 +122,15 @@
             return `id-${Date.now()}-${Math.floor(Math.random() * 1e9)}`;
         }
 
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+
         function clearSystem() {
             chatHistory.length = 0;
             Object.keys(traceByContext).forEach((k) => delete traceByContext[k]);
@@ -253,9 +262,9 @@
                         if (data.type === 'final') {
                             const ck = data.context_key || localContextKey();
                             activeContextKey = ck;
-                            lastResults = data.final_result || [];
+                            lastResults = data;
                             renderResults(lastResults);
-                            chatHistory.push({ goal: goal, result: JSON.stringify(lastResults).substring(0, 200) });
+                            chatHistory.push({ goal: goal, result: JSON.stringify(data.final_result || []).substring(0, 200) });
                             renderTraceThreadSelect();
                         }
                     }
@@ -382,145 +391,15 @@
         }
 
         function renderResults(results) {
-            const isDetailObject = (
-                results &&
-                !Array.isArray(results) &&
-                typeof results === 'object' &&
-                (
-                    Array.isArray(results.items) ||
-                    results.meta !== undefined
-                )
-            );
-
-            if (isDetailObject) {
-                const detail = results;
-                const detailItems = Array.isArray(detail.items) ? detail.items : [];
-                const meta = detail.meta && typeof detail.meta === 'object' ? detail.meta : {};
-                const metaRows = Object.entries(meta).map(([k, v]) => {
-                    const value = Array.isArray(v) ? v.join(', ') : (v ?? '-');
-                    return `
-                        <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300">
-                            <span class="text-slate-400">${k}:</span> ${value || '-'}
-                        </div>
-                    `;
-                }).join('');
-
-                const itemRows = detailItems.map((it) => `
-                    <div class="bg-slate-800/70 rounded-lg px-3 py-2 text-slate-200 text-[11px]">
-                        <div><span class="text-slate-400">item:</span> ${it.name ?? it.product ?? '-'}</div>
-                        <div><span class="text-slate-400">quantity:</span> ${it.quantity ?? '-'}</div>
-                        <div><span class="text-slate-400">value:</span> ${it.value ?? it.price ?? '-'}</div>
-                    </div>
-                `).join('');
-
-                dbView.innerHTML = `
-                    <div class="space-y-3">
-                        <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700">
-                            <div class="text-[10px] text-slate-400 mono">DETAIL</div>
-                            <div class="text-sm font-semibold text-slate-100 mt-1">${detail.customer ?? '-'}</div>
-                            <div class="mt-2 grid grid-cols-2 gap-2 text-[11px]">
-                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">contract_id:</span> ${detail.contract_id ?? '-'}</div>
-                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">status:</span> ${detail.status ?? '-'}</div>
-                            </div>
-                        </div>
-                        <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700">
-                            <div class="text-[10px] text-slate-400 uppercase mb-2">Items</div>
-                            <div class="space-y-2">${itemRows || '<div class="text-slate-400 text-[11px]">No items</div>'}</div>
-                        </div>
-                        <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700">
-                            <div class="text-[10px] text-slate-400 uppercase mb-2">Meta</div>
-                            <div class="grid grid-cols-1 gap-2 text-[11px]">${metaRows || '<div class="text-slate-400">No meta</div>'}</div>
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-
-            const normalizedResults = Array.isArray(results)
+            const payload = (results && typeof results === 'object')
                 ? results
-                : (results && typeof results === 'object' ? [results] : []);
-
-            if (!normalizedResults.length) {
-                dbView.innerHTML = '<div class="p-8 text-center text-slate-400 text-[11px] italic uppercase tracking-widest">No matching records found.</div>';
-                return;
-            }
-
-            let html = '';
-            const first = normalizedResults[0];
-
-            if (first.category && (first.account_count !== undefined || first.total_records !== undefined || first.product_count !== undefined)) {
-                html = '<div class="space-y-4">';
-                normalizedResults.forEach(i => {
-                    html += `
-                        <div class="bg-slate-900/60 border border-slate-700 p-4 rounded-xl">
-                            <div class="text-[10px] font-black text-slate-300 uppercase mb-2">${i.category}</div>
-                            <div class="flex justify-between items-end">
-                                <div class="text-lg font-black text-white">${i.total_records ?? i.total_quantity ?? '-'} <span class="text-[9px] text-slate-400 uppercase">Records</span></div>
-                                <div class="text-[11px] mono text-blue-300">${i.account_count ?? i.product_count ?? '-'} Accounts</div>
-                            </div>
-                        </div>`;
-                });
-                html += '</div>';
-            } else if (first.contact_count !== undefined || first.opportunity_count !== undefined || first.contract_count !== undefined) {
-                html = '<div class="grid grid-cols-1 gap-3">';
-                normalizedResults.forEach(a => {
-                    html += `
-                        <div class="bg-slate-900/60 border border-slate-700 p-4 rounded-xl hover:bg-slate-900/90 transition-all group">
-                            <div class="flex justify-between items-start gap-2 mb-2">
-                                <div>
-                                    <h4 class="text-sm font-semibold text-slate-100 group-hover:text-white">${a.name || '-'}</h4>
-                                    <div class="text-[10px] text-slate-400 mono mt-0.5">${a.id || '-'}</div>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2 text-[11px]">
-                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">AM:</span> ${a.am_sales || '-'}</div>
-                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">BD:</span> ${a.bd_owner || '-'}</div>
-                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">Contacts:</span> ${a.contact_count ?? 0}</div>
-                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">Opportunities:</span> ${a.opportunity_count ?? 0}</div>
-                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">Contracts:</span> ${a.contract_count ?? 0}</div>
-                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">Website:</span> ${a.website || '-'}</div>
-                            </div>
-                            <div class="mt-2 text-[11px] text-slate-400"><span class="text-slate-500">Domain:</span> ${a.domain || '-'}</div>
-                        </div>`;
-                });
-                html += '</div>';
-            } else if (first.contract_id !== undefined) {
-                html = '<div class="space-y-3">';
-                normalizedResults.forEach(o => {
-                    const statusColor = o.status === 'PENDING' ? 'text-amber-400' : 'text-green-400';
-                    html += `
-                        <div class="bg-slate-900/70 p-4 rounded-xl border border-slate-700 hover:border-slate-500 transition-all">
-                            <div class="flex justify-between items-start mb-2">
-                                <span class="text-[10px] font-black text-blue-300 mono">CTR-#${o.contract_id}</span>
-                                <span class="text-[10px] font-bold ${statusColor}">${o.status ?? 'N/A'}</span>
-                            </div>
-                            <div class="text-sm font-semibold text-slate-100 mb-1">${o.customer ?? '-'}</div>
-                            <div class="flex justify-between items-center mt-3">
-                                <span class="text-[10px] text-slate-400 mono">${String(o.date || '').split(' ')[0] || '-'}</span>
-                                <span class="text-sm font-black text-white">${o.total != null ? o.total.toLocaleString() + 'đ' : '-'}</span>
-                            </div>
-                        </div>`;
-                });
-                html += '</div>';
-            } else {
-                html = '<div class="grid grid-cols-1 gap-3">';
-                normalizedResults.forEach(p => {
-                    html += `
-                        <div class="bg-slate-900/60 border border-slate-700 p-4 rounded-xl hover:bg-slate-900/90 transition-all group">
-                            <div class="flex justify-between items-start mb-1">
-                                <span class="text-[10px] font-black text-slate-400 mono">${p.sku || '-'}</span>
-                                <span class="text-sm font-black text-emerald-300">${p.price != null ? p.price.toLocaleString() + 'đ' : '-'}</span>
-                            </div>
-                            <h4 class="text-sm font-semibold text-slate-100 group-hover:text-white">${p.name || '-'}</h4>
-                            <div class="mt-3 grid grid-cols-2 gap-2 text-[11px]">
-                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">Stock:</span> ${p.stock ?? 0}</div>
-                                <div class="bg-slate-800/70 rounded-lg px-2 py-1 text-slate-300"><span class="text-slate-400">Category:</span> ${p.category || '-'}</div>
-                            </div>
-                        </div>`;
-                });
-                html += '</div>';
-            }
-            dbView.innerHTML = html;
+                : { final_result: Array.isArray(results) ? results : [] };
+            dbView.innerHTML = `
+                <div class="bg-slate-950/70 border border-slate-700 rounded-xl p-3">
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">JSON Result</div>
+                    <pre class="mono text-[11px] text-slate-200 whitespace-pre-wrap break-all">${escapeHtml(JSON.stringify(payload, null, 2))}</pre>
+                </div>
+            `;
         }
 
         renderTraceThreadSelect();

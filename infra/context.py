@@ -2,8 +2,7 @@ import uuid
 
 
 def normalize_role(role: str | None) -> str:
-    normalized = str(role or "BUYER").strip().upper()
-    return normalized if normalized in {"ADMIN", "BUYER"} else "BUYER"
+    return "DEFAULT"
 
 
 def ensure_context_id(value: str | None) -> str:

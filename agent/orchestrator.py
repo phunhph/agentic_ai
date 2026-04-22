@@ -1,27 +1,35 @@
 import json
 import asyncio
-from pathlib import Path
 from typing import AsyncGenerator
 from agent.brain import agent_brain
 from agent.dynamic_planner import plan_with_metadata
 from agent.perception import perception_node
+from agent.field_resolver import INTENT_TOOL_HINT
+from dynamic_metadata.matrix_gate import evaluate_matrix_gate
 from agent.action import action_node
 from agent.evaluator import evaluator_node
+from memory.learning import AgentLearning
 from memory.manager import AgentMemory
 from infra.context import normalize_role, ensure_context_id, build_context_key
 from infra.domain import infer_domain, normalize_domain_key
 from infra.policy import is_tool_allowed
-from infra.settings import ENABLE_DYNAMIC_METADATA_PLANNER
 from infra.settings import (
-    ENABLE_MATRIX_GATE,
-    MATRIX_MIN_CHOICE_SUCCESS,
-    MATRIX_MIN_PATH_SUCCESS,
-    MATRIX_MIN_TOOL_ACCURACY,
+    ENABLE_DYNAMIC_METADATA_PLANNER,
+    ENABLE_MATRIX_IO_TRACE,
+    ENABLE_TRACE_TOKEN_STATS,
+    AUTO_MATRIX_EVAL_REFRESH,
+    AUTO_MATRIX_LEARNING,
+    MATRIX_ALLOWED_TOOLS,
+    MATRIX_KNOWLEDGE_HITS_LIMIT,
 )
+from dynamic_metadata.matrix_learning import penalize_case, refresh_matrix_eval_report, upsert_case_from_run
+from dynamic_metadata.trace_metrics import estimate_tokens
 from storage.database import SessionLocal
 from storage.repositories.knowledge_repository import (
     find_similar_lessons,
     mark_lessons_outcome,
+    penalize_lessons,
+    prune_low_confidence_lessons,
     record_correction,
 )
 
@@ -29,6 +37,7 @@ from storage.repositories.knowledge_repository import (
 class AgentOrchestrator:
     def __init__(self):
         self.memory = AgentMemory()
+        self.learning = AgentLearning()
 
     def ingest_feedback(self, feedback: dict) -> str | None:
         if not isinstance(feedback, dict):
@@ -42,7 +51,7 @@ class AgentOrchestrator:
             row = record_correction(
                 db,
                 context_key=str(feedback.get("context_key", "")).strip() or None,
-                user_role=str(feedback.get("role", "BUYER")).strip() or "BUYER",
+                user_role=str(feedback.get("role", "DEFAULT")).strip() or "DEFAULT",
                 domain=str(feedback.get("domain", "general")).strip() or "general",
                 original_query=original_query,
                 wrong_answer_excerpt=str(feedback.get("wrong_answer_excerpt", "")).strip() or None,
@@ -58,7 +67,7 @@ class AgentOrchestrator:
     async def run(
         self,
         goal: str,
-        role: str = "BUYER",
+        role: str = "DEFAULT",
         history: str = "[]",
         session_id: str = "",
         conversation_id: str = "",
@@ -85,42 +94,13 @@ class AgentOrchestrator:
             }
             return f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
 
-        def evaluate_matrix_gate() -> tuple[bool, dict]:
-            if not ENABLE_MATRIX_GATE:
-                return True, {"enabled": False, "reason": "matrix gate disabled"}
-            report_path = Path(__file__).resolve().parent.parent / "storage" / "dynamic_eval_report.json"
-            if not report_path.exists():
-                return False, {"enabled": True, "reason": "dynamic_eval_report.json missing"}
-            try:
-                report = json.loads(report_path.read_text(encoding="utf-8"))
-            except Exception:
-                return False, {"enabled": True, "reason": "dynamic_eval_report.json unreadable"}
-            tool_acc = float(report.get("tool_accuracy", 0.0))
-            path_ok = float(report.get("path_resolution_success", 0.0))
-            choice_ok = float(report.get("choice_constraint_success", 0.0))
-            passed = (
-                tool_acc >= MATRIX_MIN_TOOL_ACCURACY
-                and path_ok >= MATRIX_MIN_PATH_SUCCESS
-                and choice_ok >= MATRIX_MIN_CHOICE_SUCCESS
-            )
-            return passed, {
-                "enabled": True,
-                "tool_accuracy": tool_acc,
-                "path_resolution_success": path_ok,
-                "choice_constraint_success": choice_ok,
-                "thresholds": {
-                    "tool_accuracy": MATRIX_MIN_TOOL_ACCURACY,
-                    "path_resolution_success": MATRIX_MIN_PATH_SUCCESS,
-                    "choice_constraint_success": MATRIX_MIN_CHOICE_SUCCESS,
-                },
-            }
-
         # Parse history
         try:
             chat_history = json.loads(history)
         except Exception:
             chat_history = []
         matrix_gate_passed, matrix_gate_info = evaluate_matrix_gate()
+        stage_token_stats: dict[str, dict] = {}
 
         def maybe_record_correction(query_text: str, role: str, domain: str) -> None:
             normalized = (query_text or "").strip().lower()
@@ -158,6 +138,28 @@ class AgentOrchestrator:
             finally:
                 db.close()
 
+        def check_entity_match(entities: dict, observations: list[dict]) -> tuple[bool, str]:
+            if not isinstance(entities, dict):
+                return True, ""
+            if not isinstance(observations, list) or not observations:
+                return True, ""
+            bd_owner_name = str(entities.get("bd_owner_name", "")).strip().lower()
+            am_sales_name = str(entities.get("am_sales_name", "")).strip().lower()
+            customer_name = str(entities.get("customer_name", "")).strip().lower()
+            if bd_owner_name:
+                for row in observations:
+                    if isinstance(row, dict) and str(row.get("bd_owner", "")).strip().lower() != bd_owner_name:
+                        return False, "bd_owner_name_mismatch"
+            if am_sales_name:
+                for row in observations:
+                    if isinstance(row, dict) and str(row.get("am_sales", "")).strip().lower() != am_sales_name:
+                        return False, "am_sales_name_mismatch"
+            if customer_name and state.get("intent") == "CONTACT_LIST":
+                for row in observations:
+                    if isinstance(row, dict) and customer_name not in str(row.get("customer", "")).strip().lower():
+                        return False, "customer_name_mismatch"
+            return True, ""
+
         # 1. PERCEPTION
         yield await emit_log("TRACE", f"INPUT [Goal]: {goal}", "RECEIVING")
         perception_result = perception_node({"goal": goal, "role": session_role})
@@ -168,8 +170,21 @@ class AgentOrchestrator:
         intent = perception_result.get("intent", "UNKNOWN")
         entities = perception_result.get("entities", {})
         request_contract = perception_result.get("request_contract", {})
+        perception_trace = perception_result.get("trace", {})
         domain = normalize_domain_key(infer_domain(clean_goal))
         maybe_record_correction(clean_goal, detected_role, domain)
+        if ENABLE_TRACE_TOKEN_STATS:
+            stage_token_stats["perceive"] = {
+                "input_tokens_est": estimate_tokens(goal),
+                "output_tokens_est": estimate_tokens(
+                    {
+                        "goal": clean_goal,
+                        "planner_goal": planner_goal,
+                        "intent": intent,
+                        "entities": entities,
+                    }
+                ),
+            }
 
         yield await emit_log(
             "PERCEIVE",
@@ -181,7 +196,7 @@ class AgentOrchestrator:
             ),
             "DONE",
         )
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0)
 
         # STATE
         state = {
@@ -200,7 +215,13 @@ class AgentOrchestrator:
             "iteration": 0,
             "steps": [],
             "observations": [],
+            "selected_tool": "",
+            "selected_args": {},
+            "db_call_executed": False,
+            "entity_match_ok": True,
+            "entity_match_reason": "",
         }
+        state["bootstrap_learning"] = self.learning.lesson_count(detected_role, domain) == 0
 
         while not state["is_finished"] and state["iteration"] < 5:
             state["iteration"] += 1
@@ -208,6 +229,7 @@ class AgentOrchestrator:
 
             # 2. PLANNING (BRAIN)
             yield await emit_log("REASON", f"INPUT [Context]: Goal + Memory + RAG", "PROCESSING")
+            matrix_trace_io = {}
             if ENABLE_DYNAMIC_METADATA_PLANNER and matrix_gate_passed:
                 db = SessionLocal()
                 try:
@@ -216,18 +238,50 @@ class AgentOrchestrator:
                         query=state.get("goal", ""),
                         role=detected_role,
                         domain=domain,
-                        limit=3,
+                        limit=MATRIX_KNOWLEDGE_HITS_LIMIT,
                     )
                 finally:
                     db.close()
+                matrix_input = {
+                    "goal": state.get("goal", ""),
+                    "role": detected_role,
+                    "domain": domain,
+                    "knowledge_hits_count": len(lessons),
+                    "knowledge_hits_preview": lessons[:2],
+                }
                 decision = plan_with_metadata(state, knowledge_hits=lessons)
+                matrix_output = {
+                    "thought": decision.get("thought"),
+                    "tool": decision.get("tool"),
+                    "args": decision.get("args", {}),
+                    "trace": decision.get("trace", {}),
+                }
+                if ENABLE_MATRIX_IO_TRACE:
+                    matrix_trace_io = {
+                        "matrix_input": matrix_input,
+                        "matrix_output": matrix_output,
+                    }
+                if ENABLE_TRACE_TOKEN_STATS:
+                    stage_token_stats["matrix"] = {
+                        "input_tokens_est": estimate_tokens(matrix_input),
+                        "output_tokens_est": estimate_tokens(matrix_output),
+                    }
                 state["knowledge_hit_ids"] = [str(x.get("id")) for x in lessons if x.get("id")]
                 decision.setdefault("trace", {})
                 decision["trace"]["matrix_gate"] = matrix_gate_info
-                if decision.get("tool") not in ("list_accounts", "list_contracts", "get_contract_details", "get_account_overview", "final_answer"):
-                    decision = agent_brain(state)
-                    decision.setdefault("trace", {})
-                    decision["trace"]["fallback_reason"] = "dynamic planner tool mismatch; fallback legacy"
+                if decision.get("tool") not in MATRIX_ALLOWED_TOOLS:
+                    fallback_tool = INTENT_TOOL_HINT.get(str(state.get("intent", "")).upper(), "final_answer")
+                    if fallback_tool not in MATRIX_ALLOWED_TOOLS:
+                        fallback_tool = "final_answer"
+                    decision = {
+                        "thought": "Matrix trả tool không hợp lệ; fallback theo intent mapping để tránh drift từ legacy brain.",
+                        "tool": fallback_tool,
+                        "args": {},
+                        "trace": {
+                            "fallback_reason": "dynamic planner tool mismatch; fallback intent-mapped",
+                            "matrix_gate": matrix_gate_info,
+                        },
+                    }
             else:
                 decision = agent_brain(state)
                 decision.setdefault("trace", {})
@@ -239,14 +293,38 @@ class AgentOrchestrator:
             tool = decision.get("tool", "error")
             args = decision.get("args", {})
             trace = decision.get("trace", {})
+            if not isinstance(trace, dict):
+                trace = {}
+            if matrix_trace_io:
+                trace.update(matrix_trace_io)
+            if ENABLE_TRACE_TOKEN_STATS:
+                stage_token_stats["reason"] = {
+                    "input_tokens_est": estimate_tokens(
+                        {
+                            "goal": state.get("goal"),
+                            "history_tail": state.get("history", [])[-3:],
+                            "observations": state.get("observations", []),
+                        }
+                    ),
+                    "output_tokens_est": estimate_tokens(
+                        {
+                            "thought": thought,
+                            "tool": tool,
+                            "args": args,
+                            "trace_keys": sorted(list(trace.keys())),
+                        }
+                    ),
+                }
             state["planner_trace"] = trace
+            state["selected_tool"] = tool
+            state["selected_args"] = args
 
             yield await emit_log(
                 "REASON", 
                 f"OUTPUT [Decision]: Thought='{thought}' | Tool='{tool}' | Args={json.dumps(args, ensure_ascii=False)}", 
                 "DECIDED"
             )
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0)
             
             yield await emit_log(
                 "LEARN",
@@ -261,6 +339,8 @@ class AgentOrchestrator:
                 ),
                 "MEMORY"
             )
+            if trace.get("strict_blocked"):
+                yield await emit_log("POLICY", f"STRICT_LEARNED_ONLY: {trace.get('strict_reason', 'blocked')}", "BLOCKED")
 
             if tool not in ("final_answer", "error"):
                 allowed, deny_reason = is_tool_allowed(detected_role, tool)
@@ -286,9 +366,15 @@ class AgentOrchestrator:
             yield await emit_log("ACT", f"INPUT [Action]: Tool='{tool}' | Args={json.dumps(args, ensure_ascii=False)}", "EXECUTING")
             state["next_action"] = tool
             state["next_args"] = args
+            state["db_call_executed"] = True
             act_res = action_node(state)
             
             state["observations"] = act_res["observations"]
+            if ENABLE_TRACE_TOKEN_STATS:
+                stage_token_stats["act"] = {
+                    "input_tokens_est": estimate_tokens({"tool": tool, "args": args}),
+                    "output_tokens_est": estimate_tokens(state["observations"]),
+                }
             
             yield await emit_log(
                 "ACT", 
@@ -306,10 +392,66 @@ class AgentOrchestrator:
                 finally:
                     db.close()
 
+            entity_match_ok, entity_mismatch_reason = check_entity_match(entities, state["observations"])
+            state["entity_match_ok"] = entity_match_ok
+            state["entity_match_reason"] = entity_mismatch_reason
+            if not entity_match_ok and state.get("knowledge_hit_ids"):
+                db = SessionLocal()
+                try:
+                    penalize_lessons(
+                        db,
+                        state.get("knowledge_hit_ids", []),
+                        penalty=0.3,
+                    )
+                    pruned = prune_low_confidence_lessons(
+                        db,
+                        role=detected_role,
+                        domain=domain,
+                        keep_top=30,
+                    )
+                finally:
+                    db.close()
+                yield await emit_log(
+                    "LEARN",
+                    f"NEGATIVE REINFORCEMENT: {entity_mismatch_reason}, penalized={len(state.get('knowledge_hit_ids', []))}, pruned={pruned}",
+                    "DOWNGRADED",
+                )
+
+            if AUTO_MATRIX_LEARNING and tool in MATRIX_ALLOWED_TOOLS and tool not in {"final_answer", "error"}:
+                try:
+                    if not entity_match_ok:
+                        penalize_case(clean_goal, amount=1)
+                    matrix_update = upsert_case_from_run(
+                        query=clean_goal,
+                        expected_tool=tool,
+                        trace=trace,
+                        success=bool(state["observations"]),
+                    )
+                    if AUTO_MATRIX_EVAL_REFRESH:
+                        report = refresh_matrix_eval_report()
+                        yield await emit_log(
+                            "LEARN",
+                            (
+                                f"MATRIX AUTO-UPDATE: {json.dumps(matrix_update, ensure_ascii=False)} | "
+                                f"tool_accuracy={report.get('tool_accuracy', 0):.2f} "
+                                f"path_resolution_success={report.get('path_resolution_success', 0):.2f} "
+                                f"choice_constraint_success={report.get('choice_constraint_success', 0):.2f}"
+                            ),
+                            "UPDATED",
+                        )
+                    else:
+                        yield await emit_log(
+                            "LEARN",
+                            f"MATRIX AUTO-UPDATE: {json.dumps(matrix_update, ensure_ascii=False)}",
+                            "UPDATED",
+                        )
+                except Exception as e:
+                    yield await emit_log("LEARN", f"MATRIX AUTO-UPDATE ERROR: {str(e)}", "ERROR")
+
             # --- OPTIMIZATION: SHORT-CIRCUIT ---
             # Nếu đã có dữ liệu và tool là search/get, kết thúc sớm để tiết kiệm LLM call (Evaluator)
             if state["observations"] and len(state["observations"]) > 0:
-                if tool in ("list_accounts", "list_contracts", "get_contract_details"):
+                if tool in ("list_accounts", "list_contacts", "list_contracts", "get_contract_details"):
                      yield await emit_log("EVAL", "FAST-TRACK: Đã tìm thấy dữ liệu. Bỏ qua bước kiểm tra chậm.", "SUCCESS")
                      state["is_finished"] = True
                      break
@@ -333,5 +475,18 @@ class AgentOrchestrator:
             "context_key": context_key,
             "final_result": state["observations"],
             "planner_trace": state.get("planner_trace", {}),
+            "selected_tool": state.get("selected_tool"),
+            "selected_args": state.get("selected_args", {}),
+            "db_call_executed": bool(state.get("db_call_executed")),
+            "entity_match_result": {
+                "ok": bool(state.get("entity_match_ok", True)),
+                "reason": state.get("entity_match_reason", ""),
+                "target_identities": state.get("planner_trace", {}).get("target_identities", []),
+            },
         }
+        if ENABLE_TRACE_TOKEN_STATS:
+            final_payload["token_trace"] = stage_token_stats
+            final_payload["planner_trace"]["token_trace"] = stage_token_stats
+        if perception_trace:
+            final_payload["planner_trace"]["perception_trace"] = perception_trace
         yield f"data: {json.dumps(final_payload, ensure_ascii=False)}\n\n"

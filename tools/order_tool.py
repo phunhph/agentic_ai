@@ -1,24 +1,3 @@
-from storage.database import get_db
-from storage.repositories.contract_repository import (
-    get_contract_details_with_context,
-    list_contracts_with_context,
-)
+from tools.modules.contracts import compare_contract_stats_tool, create_contract_tool, get_contract_details, list_contracts
 
-
-def list_contracts(customer_name: str = None, status: str = None):
-    """Lấy danh sách hợp đồng theo schema CRM mới."""
-    with get_db() as db:
-        results = list_contracts_with_context(db, customer_name)
-        if status:
-            status_upper = status.strip().upper()
-            results = [row for row in results if (row.get("status") or "").upper() == status_upper]
-        return results
-
-
-def get_contract_details(contract_id: str):
-    """Lấy chi tiết hợp đồng theo schema CRM mới."""
-    with get_db() as db:
-        details = get_contract_details_with_context(db, str(contract_id))
-        if not details:
-            return {"error": "Không tìm thấy hợp đồng"}
-        return details
+__all__ = ["list_contracts", "get_contract_details", "create_contract_tool", "compare_contract_stats_tool"]

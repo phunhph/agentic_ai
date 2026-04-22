@@ -2,19 +2,23 @@ from infra.context import normalize_role
 
 
 ROLE_TOOL_ALLOWLIST = {
-    "BUYER": {
+    "DEFAULT": {
         "list_accounts",
-        "list_contracts",
-        "get_contract_details",
-        "final_answer",
-    },
-    "ADMIN": {
-        "list_accounts",
+        "create_account",
+        "compare_account_stats",
+        "list_contacts",
+        "create_contact",
+        "compare_contact_stats",
         "get_account_overview",
         "list_contracts",
+        "create_contract",
+        "compare_contract_stats",
         "get_contract_details",
+        "list_opportunities",
+        "create_opportunity",
+        "compare_opportunity_stats",
         "final_answer",
-    },
+    }
 }
 
 

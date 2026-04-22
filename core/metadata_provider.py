@@ -145,6 +145,7 @@ class MetadataProvider:
                 "khách hàng": "hbl_account",
                 "account": "hbl_account",
                 "contact": "hbl_contact",
+                "contacts": "hbl_contact",
                 "lien he": "hbl_contact",
                 "liên hệ": "hbl_contact",
                 "opportunity": "hbl_opportunities",
@@ -170,6 +171,16 @@ class MetadataProvider:
 
     def resolve_choice_code(self, group: str, label: str) -> str | None:
         return self._choice_label_to_code.get(group, {}).get((label or "").strip().lower())
+
+    def get_alias_terms_for_table(self, table_name: str) -> set[str]:
+        table = (table_name or "").strip()
+        if not table:
+            return set()
+        terms = {table.lower(), table.replace("hbl_", "").lower(), self.get_table_display(table).lower()}
+        for alias, mapped in self._aliases.items():
+            if mapped == table:
+                terms.add(alias.lower())
+        return {t for t in terms if t}
 
     def expand_choice_filter(self, left_table: str, group: str, label: str) -> dict | None:
         code = self.resolve_choice_code(group, label)
