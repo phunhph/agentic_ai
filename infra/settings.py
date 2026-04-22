@@ -25,7 +25,7 @@ APP_HOST = os.getenv("APP_HOST", "127.0.0.1")
 APP_PORT = get_env_int("APP_PORT", 8000)
 
 DATABASE_URL = os.getenv(
-    "DATABASE_URL", "postgresql://postgres:123456@localhost:5432/agentic_store"
+    "DATABASE_URL", "postgresql://postgres:123456@localhost:5432/agent_db"
 )
 
 OLLAMA_CHAT_MODEL = os.getenv("OLLAMA_CHAT_MODEL", "llama3:latest")

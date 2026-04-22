@@ -22,14 +22,14 @@
   },
   {
     "query": "Cho tôi xem danh sách hbl_opportunities",
-    "expected_tool": "list_accounts",
+    "expected_tool": "list_opportunities",
     "expected_entities": [
       "hbl_opportunities"
     ]
   },
   {
     "query": "Cho tôi xem danh sách hbl_contract",
-    "expected_tool": "get_contract_details",
+    "expected_tool": "create_contract",
     "expected_entities": [
       "hbl_contract"
     ]
@@ -122,218 +122,29 @@
     ]
   },
   {
-    "query": "lấy danh sách account cho tôi",
-    "expected_tool": "list_accounts",
-    "usage_count": 1,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "chi tiến của account Demo Account 1",
-    "expected_tool": "list_accounts",
-    "usage_count": 1,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "lấy danh sách contacts có account là Demo Account 1",
-    "expected_tool": "list_contacts",
-    "usage_count": 1,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "sao danh sách vẫn có cải k phải của account Demo Account 1 vậy xem lại đi",
-    "expected_tool": "list_contacts",
-    "usage_count": 1,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "vẫn chưa đứng vẫn chưa lọc được data như tôi muốn xem lại đi",
-    "expected_tool": "list_contacts",
-    "usage_count": 1,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "vẫn chưa đúng",
-    "expected_tool": "list_accounts",
-    "usage_count": 1,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "ơ kaif đnag lấy contact mà sao lại thành account r tôi bảo là lấy contact có account là Demo Account 1",
-    "expected_tool": "list_contacts",
-    "usage_count": 1,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "lấy data sai rồi đây lấy cả data mà customer không phải là Demo Account 1",
-    "expected_tool": "list_contacts",
-    "usage_count": 1,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "lấy cho tôi contact có customer là Demo Account 2",
-    "expected_tool": "list_contacts",
-    "usage_count": 1,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "lấy contact có assigne là System User 5",
-    "expected_tool": "list_contacts",
-    "usage_count": 1,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "lấy contract có account customer là Demo Account 1",
+    "query": "danh sách contracts",
     "expected_tool": "list_contracts",
     "usage_count": 1,
     "success_count": 1,
     "last_success": true
   },
   {
-    "query": "cho tôi danh sách contract của account Demo Account 1",
+    "query": "hôm nay tôi nên làm gì",
     "expected_tool": "list_contracts",
     "usage_count": 1,
     "success_count": 1,
     "last_success": true
   },
   {
-    "query": "chỉ lấy contract có account customer là Demo Account 1 thôi mà sao lấy cả data k phải của Demo Account 1 vậy",
-    "expected_tool": "list_contracts",
-    "usage_count": 2,
-    "success_count": 2,
-    "last_success": true
-  },
-  {
-    "query": "lấy danh sách contact có account là Demo Account 5",
+    "query": "chỉ lấy contract có assignee là System User 2",
     "expected_tool": "list_contracts",
     "usage_count": 1,
     "success_count": 1,
     "last_success": true
   },
   {
-    "query": "tôi lất contacts mà có phải contracts đâu",
-    "expected_tool": "list_contacts",
-    "usage_count": 1,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "lấy cho tôi danh sách opp",
-    "expected_tool": "list_accounts",
-    "usage_count": 1,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "sao lại là danh sách account tôi muốn opp tức là opportunities",
-    "expected_tool": "list_accounts",
-    "usage_count": 1,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "vẫn là list account alf sao là opportunities cơ mà",
-    "expected_tool": "list_accounts",
-    "usage_count": 1,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "danh sách opp",
-    "expected_tool": "list_accounts",
-    "usage_count": 1,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "không phải bảng account mà là bảng opportunities",
-    "expected_tool": "list_opportunities",
-    "usage_count": 3,
-    "success_count": 0,
-    "last_success": false
-  },
-  {
-    "query": "danh sách opportunity",
-    "expected_tool": "list_opportunities",
-    "usage_count": 5,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "danh sách account",
-    "expected_tool": "list_opportunities",
-    "usage_count": 1,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "lất danh sách account mà sao vẫn là oppor vậy",
-    "expected_tool": "list_accounts",
-    "usage_count": 1,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "giờ lấy tôi danh sách op có customer account là Demo Account 2",
-    "expected_tool": "list_opportunities",
-    "usage_count": 1,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "thống kê doanh thu hiện đã đạt được bao nhiêu",
-    "expected_tool": "get_account_overview",
-    "usage_count": 1,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "lấy cho tôi contact được tọa gần đây nhất",
-    "expected_tool": "list_accounts",
-    "usage_count": 3,
-    "success_count": 0,
-    "last_success": false
-  },
-  {
-    "query": "lấy cho tôi contact",
-    "expected_tool": "list_accounts",
-    "usage_count": 3,
-    "success_count": 0,
-    "last_success": false
-  },
-  {
-    "query": "kiểm tra lại giúp tôi contacts có mà sao không lấy được danh sách ra",
-    "expected_tool": "list_contacts",
-    "usage_count": 3,
-    "success_count": 0,
-    "last_success": false
-  },
-  {
-    "query": "danh sách contacts",
-    "expected_tool": "list_contacts",
-    "usage_count": 4,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "danh sách contacts chỉ lấy contacts có customer là demo account 1",
-    "expected_tool": "list_contacts",
-    "usage_count": 1,
-    "success_count": 1,
-    "last_success": true
-  },
-  {
-    "query": "sao danh sách vẫn k lọc theo mong muốn cảu tôi vậy kiểm tra lại giúp tôi",
-    "expected_tool": "list_contacts",
+    "query": "chỉ lấy contract có assignee là System User 2 thôi mà",
+    "expected_tool": "list_contracts",
     "usage_count": 1,
     "success_count": 1,
     "last_success": true

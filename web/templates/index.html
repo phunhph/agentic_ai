@@ -101,6 +101,12 @@
         const dbView = document.getElementById('dbView');
         const runBtn = document.getElementById('executeBtn');
         let traceViewMode = 'logs';
+        const MAX_TRACE_LOGS_PER_CONTEXT = 250;
+        const MAX_CARD_CONTENT_CHARS = 1200;
+        const MAX_CONTEXTS = 20;
+        const MAX_CHAT_HISTORY = 20;
+        const pendingLogsByContext = {};
+        let flushScheduled = false;
 
         function localContextKey() {
             return `${FIXED_ROLE}:${sessionId}:${conversationId}`;
@@ -134,6 +140,7 @@
         function clearSystem() {
             chatHistory.length = 0;
             Object.keys(traceByContext).forEach((k) => delete traceByContext[k]);
+            Object.keys(pendingLogsByContext).forEach((k) => delete pendingLogsByContext[k]);
             activeContextKey = null;
             lastResults = [];
             trace.innerHTML = '';
@@ -222,8 +229,10 @@
         }
 
         runBtn.onclick = async () => {
-            const goal = document.getElementById('goalInput').value;
+            const goalInput = document.getElementById('goalInput');
+            const goal = goalInput.value;
             if (!goal) return;
+            goalInput.value = '';
 
             runBtn.disabled = true;
             runBtn.innerHTML = '<i class="fas fa-sync animate-spin"></i> <span>Processing...</span>';
@@ -265,6 +274,9 @@
                             lastResults = data;
                             renderResults(lastResults);
                             chatHistory.push({ goal: goal, result: JSON.stringify(data.final_result || []).substring(0, 200) });
+                            if (chatHistory.length > MAX_CHAT_HISTORY) {
+                                chatHistory.splice(0, chatHistory.length - MAX_CHAT_HISTORY);
+                            }
                             renderTraceThreadSelect();
                         }
                     }
@@ -287,13 +299,58 @@
 
         function appendLog(log) {
             const ck = log.context_key || localContextKey();
+            const isNewContext = !traceByContext[ck];
             if (!traceByContext[ck]) traceByContext[ck] = [];
             traceByContext[ck].push(log);
+            if (traceByContext[ck].length > MAX_TRACE_LOGS_PER_CONTEXT) {
+                traceByContext[ck] = traceByContext[ck].slice(-MAX_TRACE_LOGS_PER_CONTEXT);
+            }
+            const contextKeys = Object.keys(traceByContext);
+            if (contextKeys.length > MAX_CONTEXTS) {
+                const toRemove = contextKeys.slice(0, contextKeys.length - MAX_CONTEXTS);
+                toRemove.forEach((k) => {
+                    delete traceByContext[k];
+                    delete pendingLogsByContext[k];
+                });
+            }
             activeContextKey = ck;
-            renderTraceThreadSelect();
-            const showKey = activeContextKey || ck;
-            if (showKey !== ck) return;
-            appendLogCard(log);
+            if (isNewContext) {
+                renderTraceThreadSelect();
+            }
+            if (!pendingLogsByContext[ck]) pendingLogsByContext[ck] = [];
+            pendingLogsByContext[ck].push(log);
+            scheduleFlushLogs();
+        }
+
+        function scheduleFlushLogs() {
+            if (flushScheduled) return;
+            flushScheduled = true;
+            requestAnimationFrame(() => {
+                flushScheduled = false;
+                flushLogs();
+            });
+        }
+
+        function flushLogs() {
+            const ck = activeContextKey || localContextKey();
+            const logs = pendingLogsByContext[ck] || [];
+            if (!logs.length) return;
+            pendingLogsByContext[ck] = [];
+            if (traceViewMode !== 'logs') {
+                renderTrace();
+                return;
+            }
+            const fragment = document.createDocumentFragment();
+            logs.forEach((log) => {
+                const card = buildLogCard(log);
+                if (card) fragment.appendChild(card);
+            });
+            document.getElementById('traceEmptyState')?.remove();
+            trace.appendChild(fragment);
+            while (trace.children.length > MAX_TRACE_LOGS_PER_CONTEXT) {
+                trace.removeChild(trace.firstElementChild);
+            }
+            trace.scrollTop = trace.scrollHeight;
         }
 
         function renderTrace() {
@@ -365,12 +422,15 @@
             logs.forEach((log) => appendLogCard(log));
         }
 
-        function appendLogCard(log) {
-            document.getElementById('traceEmptyState')?.remove();
+        function buildLogCard(log) {
             const div = document.createElement('div');
             const colors = { 'PERCEIVE': 'text-cyan-400', 'REASON': 'text-amber-400', 'ACT': 'text-red-400', 'EVAL': 'text-green-400', 'SYSTEM': 'text-purple-400', 'TRACE': 'text-violet-400', 'LEARN': 'text-fuchsia-400', 'POLICY': 'text-orange-400' };
             const bgs = { 'PERCEIVE': 'bg-cyan-400', 'REASON': 'bg-amber-400', 'ACT': 'bg-red-400', 'EVAL': 'bg-green-400', 'SYSTEM': 'bg-purple-400', 'TRACE': 'bg-violet-400', 'LEARN': 'bg-fuchsia-400', 'POLICY': 'bg-orange-400' };
             const roleTag = (log.role || FIXED_ROLE).toUpperCase();
+            const rawContent = String(log.content ?? '');
+            const content = rawContent.length > MAX_CARD_CONTENT_CHARS
+                ? `${rawContent.slice(0, MAX_CARD_CONTENT_CHARS)} ...[truncated]`
+                : rawContent;
 
             div.className = "trace-card glass p-4 rounded-xl animate-fade mb-3 border border-white/5";
             div.innerHTML = `
@@ -384,9 +444,19 @@
                     </span>
                 </div>
                 <div class="text-[10px] mono text-white/25 mb-1 trace-text-wrap" title="${log.context_key || ''}">${(log.context_key || '').slice(0, 96)}${(log.context_key || '').length > 96 ? '…' : ''}</div>
-                <div class="text-[12px] text-slate-200 font-medium leading-relaxed trace-text-wrap">${log.content}</div>
+                <div class="text-[12px] text-slate-200 font-medium leading-relaxed trace-text-wrap">${escapeHtml(content)}</div>
             `;
+            return div;
+        }
+
+        function appendLogCard(log) {
+            document.getElementById('traceEmptyState')?.remove();
+            const div = buildLogCard(log);
+            if (!div) return;
             trace.appendChild(div);
+            while (trace.children.length > MAX_TRACE_LOGS_PER_CONTEXT) {
+                trace.removeChild(trace.firstElementChild);
+            }
             trace.scrollTop = trace.scrollHeight;
         }
 

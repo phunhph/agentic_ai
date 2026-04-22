@@ -1,6 +1,7 @@
 import json
 import ollama
 import math
+import hashlib
 from pathlib import Path
 from infra.settings import (
     OLLAMA_EMBEDDING_MODEL,
@@ -36,8 +37,10 @@ class MetadataRAG:
             return None
 
     def _schema_signature(self) -> str:
+        # Use a stable digest so cache remains reusable across process restarts.
         items = [self.model, *[f"{k}:{v}" for k, v in sorted(self.schema_kb.items())]]
-        return str(hash("|".join(items)))
+        raw = "|".join(items).encode("utf-8")
+        return hashlib.sha256(raw).hexdigest()
 
     def _load_cached_embeddings(self) -> bool:
         if RAG_FORCE_REBUILD or not self._cache_path.exists():
