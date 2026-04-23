@@ -1,6 +1,6 @@
-# Agentic AI System Architecture
+# Agentic AI System Architecture (Updated)
 
-This codebase is organized by layer and by domain module to keep planning, execution, and data access easy to maintain.
+This codebase is organized by execution layer and learning loop so planning quality, latency, and safety can evolve without breaking runtime flow.
 
 ## Directory Map (Current)
 
@@ -50,15 +50,18 @@ This codebase is organized by layer and by domain module to keep planning, execu
 └── scripts/                             # Seed/eval helper scripts
 ```
 
-## Agent Loop
+## Agent Loop (Runtime)
 
 1. **Perceive** (`agent/perception.py`)
    - Normalize text.
    - Parse intent/entities.
    - Build request contract.
 2. **Reason** (`dynamic_metadata/planner.py` via `agent/orchestrator.py`)
-   - Reuse lessons only when entities are compatible.
-   - Otherwise infer tool/args from metadata graph + matrix cases.
+   - Learning-first reuse: apply `knowledge_hits` only when entity/structure are compatible.
+   - Intent fast-path: short-circuit tool selection when intent signal is clear.
+   - Autonomous scoring fallback: infer tool/args from metadata graph + matrix cases.
+   - Build join path and choice constraints when needed.
+   - Emit uncertainty trace (`decision_state`, `decision_confidence`, `decision_reason`).
 3. **Act** (`agent/action.py`)
    - Enforce policy.
    - Execute tool from `tools/tool_registry.py`.
@@ -68,11 +71,64 @@ This codebase is organized by layer and by domain module to keep planning, execu
    - Penalize wrong lessons/cases.
    - Auto-refresh matrix evaluation.
 
+### Decision State Contract
+
+Planner returns one of:
+
+- `auto_execute`: continue to tool execution.
+- `ask_clarify`: orchestrator returns clarify question and skips DB call.
+- `safe_block`: planner blocks execution in strict learned-only conditions.
+
+The decision state is available in `planner_trace` and consumed by orchestrator policy handling.
+
+## Dynamic Planner Internals
+
+`dynamic_metadata/planner.py` includes:
+
+- **Caching layer**
+  - case match cache
+  - entity extraction cache
+  - join path cache
+- **Uncertainty calibration**
+  - base evidence floor
+  - learning-score bonus
+  - case-success bonus
+- **Governance signals**
+  - `complexity_score`
+  - `complexity_budget`
+  - `complexity_budget_exceeded`
+  - `rejection_signals`
+
+## Matrix Learning + Eval
+
+Data files:
+
+- `storage/dynamic_cases.json`: learning case matrix.
+- `storage/dynamic_eval_report.json`: latest quality report.
+
+Runner:
+
+- `scripts/eval_dynamic_cases.py`
+
+Core metrics:
+
+- `tool_accuracy`
+- `path_resolution_success`
+- `choice_constraint_success`
+- `entity_match_rate`
+- `strict_block_rate`
+- `decision_state_rate`
+- `decision_reason_distribution`
+- `avg_calibrated_evidence_floor`
+- `latency_ms` (`mean/p50/p95`)
+
 ## Design Notes
 
 - `modules/*` folders are the primary implementation surface for domain logic.
 - Legacy top-level tool/repository files are thin wrappers to avoid breaking existing imports.
-- Current policy is single-role (`DEFAULT`) with tool allowlist controlled in `infra/policy.py`.
+- Current policy uses role-based allowlist in `infra/policy.py`.
+- Dynamic planner can ask for clarification instead of over-executing low-signal requests.
+- Strict mode remains available to prevent inference beyond learned evidence.
 
 ## Import Conventions (Team Standard)
 

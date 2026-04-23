@@ -1,122 +1,143 @@
-# AGENTIC CORE v3.5 | Enterprise AI Operating System
+# AGENTIC CORE v3.6 | Dynamic Planner + Self-Learning
 
-**Agentic Core** là một hệ thống AI điều hành doanh nghiệp thế hệ mới, được xây dựng trên kiến trúc **Agentic Operational Workflow (V4)**. Hệ thống cho phép tự động hóa các tác vụ phức tạp trong quản lý kho, bán hàng và chăm sóc khách hàng thông qua các Agent tự trị.
+`Agentic Core` là hệ thống AI vận hành nghiệp vụ theo mô hình `Perceive -> Reason -> Act -> Eval`, đã được nâng cấp với:
+
+- Dynamic metadata planner ưu tiên học từ kinh nghiệm trước.
+- Uncertainty manager (`auto_execute`, `ask_clarify`, `safe_block`).
+- Fast-path + cache để giảm độ trễ planner.
+- Matrix learning/eval tự động để theo dõi chất lượng và tiến hóa theo dữ liệu thật.
 
 ---
 
-## Tài liệu tham khảo
-
-- **Lý thuyết Framework**: [AGENTIC-AI-FRAMEWORK (Notion)](https://www.notion.so/AGENTIC-AI-FRAMEWORK-348f2ac486d180509668fd4f75487845)
-
----
-
-## 📊 Sơ đồ hoạt động (System Flow)
+## System Flow (Current)
 
 ```mermaid
 graph LR
-    User((Người dùng)) --> API[FastAPI]
-    API --> Orch{Orch}
-
-    subgraph agent [🧠 Agent Core]
-        Orch --> Perc[Perc]
-        Perc --> Brain[Brain]
-        Brain --> Act[Act]
-        Act --> Eval[Eval]
-        Eval -.->|Retry| Brain
-    end
-
-    subgraph storage [💾 Knowledge & Data]
-        RAG[(RAG)]
-        Mem[(Memory)]
-        DB[(Postgres)]
-        Lrn{Learning}
-    end
-
-    Brain ==> RAG
-    Brain ==> Mem
-    Act ==> DB
-    Act -.->|Learn| Lrn
-    Eval ==>|Done| Final[Final]
-    Final -.->|Save| Lrn
-    Lrn -.->|Update| Mem
-    Final --> User
-
-    %% Dark Mode Style
-    linkStyle default stroke:#fff,stroke-width:2px
-    style agent fill:#0a0d14,stroke:#3b82f6,color:#fff
-    style storage fill:#0a0d14,stroke:#ef4444,color:#fff
+    U((User)) --> API[FastAPI]
+    API --> O[AgentOrchestrator]
+    O --> P[Perception]
+    P --> R[Dynamic Planner]
+    R --> D{Decision State}
+    D -->|auto_execute| A[Action Tool]
+    D -->|ask_clarify| C[Clarify Response]
+    D -->|safe_block| B[Safe Block]
+    A --> E[Evaluator]
+    E -->|retry| R
+    E -->|done| F[Final Payload]
+    C --> F
+    B --> F
+    F --> U
 ```
 
-### 🧠 Giải thích luồng vận hành (Agentic Workflow):
+## Learning & Correctness Flow
 
-1.  **Perception (Tiếp nhận)**: Agent nhận thông tin, chuẩn hóa văn bản và xác định vai trò người dùng.
-2.  **Reasoning (Suy luận)**: LLM kết hợp với **RAG** (để hiểu database) và **Episodic Memory** (để nhớ lịch sử) để lập kế hoạch.
-3.  **Action (Hành động)**: Thực thi công cụ và truy vấn Database thực tế.
-4.  **Learning (Học tập)**: Mọi hành động và kết quả đều được **Learning Manager** ghi lại để Agent "rút kinh nghiệm" cho lần sau.
-5.  **Evaluation (Đánh giá)**: Kiểm tra xem kết quả đã đáp ứng yêu cầu chưa. Nếu chưa đạt, Agent sẽ tự động quay lại bước suy luận để tìm phương án khác.
+```mermaid
+graph TD
+    UQ[User Query] --> P1[Perception: normalize + intent + entities]
+    P1 --> P2[Planner: learning-first + metadata reasoning]
+    P2 --> D{Decision State}
+    D -->|auto_execute| X1[Execute Tool]
+    D -->|ask_clarify| X2[Ask Clarify]
+    D -->|safe_block| X3[Safe Block]
+    X1 --> V[Validate Result]
+    V --> C{Correct?}
+    C -->|yes| L1[Reinforce lesson/case]
+    C -->|no| L2[Penalize/Prune + store reject signals]
+    X2 --> L3[Wait clarified input]
+    X3 --> L3
+    L1 --> R[Update metrics report]
+    L2 --> R
+```
+
+### Correctness checklist (pass/fail)
+
+- `PASS` khi: tool đúng, entity/filter khớp, path/choice đúng, không vi phạm policy/strict.
+- `FAIL` khi: tool drift, mismatch entity/filter, reuse lesson sai ngữ cảnh, hoặc execute khi đáng ra phải clarify/block.
+- Hệ thống đo liên tục qua:
+  - `tool_accuracy`
+  - `entity_match_rate`
+  - `path_resolution_success`
+  - `choice_constraint_success`
+  - `strict_block_rate`
+  - `decision_state_rate`
+
+### Runtime behavior
+
+1. `Perception`: chuẩn hóa query, trích xuất intent/entity, request contract.
+2. `Reason`:
+   - Ưu tiên `knowledge_hits` nếu tương thích entity/structure.
+   - Nếu không, chạy metadata planner với:
+     - intent fast-path,
+     - autonomous scoring theo table alias + case memory,
+     - join path + choice constraints.
+3. `Uncertainty`:
+   - `auto_execute`: đi tiếp sang `Action`.
+   - `ask_clarify`: dừng DB call, trả câu hỏi làm rõ ngay cho user.
+   - `safe_block`: chặn trong strict mode khi thiếu bằng chứng đã học.
+4. `Action + Eval`: thực thi tool, đánh giá dữ liệu trả về, cập nhật learning.
+5. `Final`: trả `final_payload` gồm `final_result`, `planner_trace`, `selected_tool`, `db_call_executed`.
 
 ---
 
-## 📄 Mô tả Hệ thống (Detailed Description)
+## Planner Enhancements (v3.6)
 
-Hệ thống **Agentic Core** là một giải pháp AI tự hành được thiết kế để xử lý các nghiệp vụ ERP (Quản trị nguồn lực doanh nghiệp) một cách thông minh. Khác với các phần mềm truyền thống dựa trên form nhập liệu, Agentic Core cho phép người dùng giao tiếp bằng ngôn ngữ tự nhiên.
-
-### Khả năng cốt lõi:
-- **Tự trị (Autonomous)**: Agent tự tìm kiếm các bảng dữ liệu liên quan mà không cần con người chỉ định.
-- **Tiến hóa (Evolution)**: Hệ thống càng dùng nhiều càng thông minh nhờ cơ chế Learning (Vector Store memory).
-- **Đa vai trò (Multi-Role)**: Tự động chuyển đổi giữa vai trò **BUYER** (mua hàng/tra cứu) và **ADMIN** (thống kê/quản trị) dựa trên ngữ cảnh câu hỏi.
-
----
-
-## 🚀 Tính năng nổi bật
-
-- **🧠 Llama 3 Reasoning Engine**: Khả năng suy luận đa bước vượt trội.
-- **🔍 Vector ML Semantic Search**: Tìm kiếm Schema và Kinh nghiệm bằng Vector Similarity (Ollama Embeddings).
-- **📦 Multi-Domain Support**: Hỗ trợ đầy đủ **Inventory** và **Sales** (Customers, Orders).
-- **🖥️ Enterprise Dashboard**: Giao diện Live Stream logs cao cấp.
+- **Fast path**: bypass scoring khi intent rõ/tín hiệu đủ.
+- **Planner cache**: cache cục bộ cho `match_case`, `extract_entities`, `find_paths`.
+- **Adaptive uncertainty calibration**:
+  - `calibrated_evidence_floor` được điều chỉnh theo `knowledge score` và `case_success_ratio`.
+- **Governance guardrails**:
+  - `complexity_score`
+  - `PLANNER_COMPLEXITY_BUDGET`
+  - cờ `complexity_budget_exceeded`.
 
 ---
 
-## 🏗️ Cấu trúc Modular (System Modules)
+## Evaluation Metrics (Matrix Report)
 
-1. **`agent/`**: Lớp nhận thức (Cognition), bao gồm Brain, Orchestrator và các Node xử lý (Perceive, Act, Eval).
-2. **`memory/`**: Bộ nhớ Agent, bao gồm Episodic Memory (quá khứ ngắn hạn) và Semantic Memory (Vector RAG).
-3. **`storage/`**: Hạ tầng dữ liệu thô, quản lý kết nối PostgreSQL và SQLAlchemy Models.
-4. **`infra/`**: Hạ tầng hệ thống, quản lý Config, Policy (RBAC), Context và Domain logic.
-5. **`tools/`**: Danh mục các công cụ thực thi (Tools Registry).
-6. **`web/`**: Giao diện người dùng (FastAPI Templates).
+File báo cáo: `storage/dynamic_eval_report.json`
 
----
+Các metric chính:
 
-## 🛠️ Stack Công nghệ
+- `tool_accuracy`
+- `path_resolution_success`
+- `choice_constraint_success`
+- `entity_match_rate`
+- `strict_block_rate`
+- `decision_state_rate` (`auto_execute` / `ask_clarify` / `safe_block`)
+- `decision_reason_distribution`
+- `avg_calibrated_evidence_floor`
+- `latency_ms` (`mean`, `p50`, `p95`)
 
-- **Backend**: FastAPI, SQLAlchemy.
-- **AI**: Ollama (Llama 3), Vector RAG.
-- **UI**: TailwindCSS, Glassmorphism design.
-
----
-
-## 📥 Hướng dẫn khởi chạy
+Chạy eval:
 
 ```bash
-# 1. Cài đặt dependency
-pip install -r requirements.txt
-
-# 2. Thiết lập biến môi trường (Windows PowerShell)
-$env:APP_HOST="127.0.0.1"
-$env:APP_PORT="8000"
-$env:DATABASE_URL="postgresql://postgres:123456@localhost:5432/agentic_store"
-$env:OLLAMA_CHAT_MODEL="llama3:latest"
-$env:OLLAMA_REASONING_MODEL="gemma3:4b"
-$env:OLLAMA_EMBEDDING_MODEL="llama3:latest"
-
-# 3. Seeding dữ liệu
-python seed_db.py
-
-# 4. Chạy Server
-python main.py
+python scripts/eval_dynamic_cases.py
 ```
-Truy cập: **http://127.0.0.1:8000**
 
 ---
-*Phát triển bởi PHUNH*
+
+## Key Configuration
+
+Trong `infra/settings.py`:
+
+- `ENABLE_DYNAMIC_METADATA_PLANNER`
+- `STRICT_LEARNED_ONLY_MODE`
+- `STRICT_MIN_EVIDENCE_SIMILARITY`
+- `UNCERTAINTY_BASE_ASK_CLARIFY_EVIDENCE`
+- `UNCERTAINTY_LEARNING_SCORE_BONUS_MAX`
+- `UNCERTAINTY_CASE_SUCCESS_BONUS_MAX`
+- `PLANNER_COMPLEXITY_BUDGET`
+- `MATRIX_CASE_MIN_SIMILARITY`
+- `MATRIX_CASE_PRIOR_WEIGHT`
+
+---
+
+## Quick Start
+
+```bash
+pip install -r requirements.txt
+python seed_db.py
+python main.py
+```
+
+Truy cập: `http://127.0.0.1:8000`

@@ -1,12 +1,19 @@
 """Chạy eval ma trận case trên planner metadata và ghi nhận tri thức."""
 
 from __future__ import annotations
+import statistics
+import time
 from dynamic_metadata.planner import plan_with_metadata
 
 def run_eval(cases: list[dict]) -> dict:
     total = len(cases)
     if not total:
-        return {"total_cases": 0, "tool_accuracy": 0.0}
+        return {
+            "total_cases": 0,
+            "tool_accuracy": 0.0,
+            "strict_block_rate": 0.0,
+            "latency_ms": {"mean": 0.0, "p50": 0.0, "p95": 0.0},
+        }
 
     metrics = {
         "tool_ok": 0,
@@ -14,8 +21,15 @@ def run_eval(cases: list[dict]) -> dict:
         "choice_ok": 0,
         "knowledge_hit": 0,
         "entity_ok": 0,
+        "strict_blocked": 0,
+        "auto_execute": 0,
+        "ask_clarify": 0,
+        "safe_block": 0,
     }
     rows: list[dict] = []
+    latency_ms_samples: list[float] = []
+    calibrated_floors: list[float] = []
+    decision_reason_count: dict[str, int] = {}
 
     for case in cases:
         state_entities: dict = {}
@@ -39,8 +53,22 @@ def run_eval(cases: list[dict]) -> dict:
         knowledge_hits = case.get("knowledge_hits", [])
         
         # 2. Thực thi Planner động (Lớp Planning)
+        start_time = time.perf_counter()
         decision = plan_with_metadata(state, knowledge_hits=knowledge_hits)
+        elapsed_ms = (time.perf_counter() - start_time) * 1000.0
+        latency_ms_samples.append(elapsed_ms)
         trace = decision.get("trace", {})
+        is_strict_blocked = bool(trace.get("strict_blocked"))
+        metrics["strict_blocked"] += int(is_strict_blocked)
+        decision_state = str(trace.get("decision_state", "auto_execute")).strip() or "auto_execute"
+        decision_reason = str(trace.get("decision_reason", "sufficient_signal")).strip() or "sufficient_signal"
+        if decision_state in {"auto_execute", "ask_clarify", "safe_block"}:
+            metrics[decision_state] += 1
+        decision_reason_count[decision_reason] = decision_reason_count.get(decision_reason, 0) + 1
+        try:
+            calibrated_floors.append(float(trace.get("calibrated_evidence_floor", 0.0) or 0.0))
+        except (TypeError, ValueError):
+            pass
 
         # 3. Dynamic Validation (Lean Logic - So khớp dựa trên kỳ vọng của Case)
         # Kiểm tra Tool
@@ -90,8 +118,16 @@ def run_eval(cases: list[dict]) -> dict:
             "success": tool_match and path_match and choice_match,
             "entity_match": entity_match,
             "trace": trace,
-            "knowledge_applied": is_knowledge_used
+            "knowledge_applied": is_knowledge_used,
+            "strict_blocked": is_strict_blocked,
+            "decision_state": decision_state,
+            "decision_reason": decision_reason,
+            "latency_ms": round(elapsed_ms, 3),
         })
+
+    sorted_samples = sorted(latency_ms_samples)
+    p50_idx = int(0.5 * (len(sorted_samples) - 1))
+    p95_idx = int(0.95 * (len(sorted_samples) - 1))
 
     # 4. Trả về báo cáo chuẩn cho Matrix Gate đọc
     return {
@@ -101,5 +137,20 @@ def run_eval(cases: list[dict]) -> dict:
         "choice_constraint_success": metrics["choice_ok"] / total,
         "entity_match_rate": metrics["entity_ok"] / total,
         "correction_reuse_hit_rate": metrics["knowledge_hit"] / total,
+        "strict_block_rate": metrics["strict_blocked"] / total,
+        "decision_state_rate": {
+            "auto_execute": metrics["auto_execute"] / total,
+            "ask_clarify": metrics["ask_clarify"] / total,
+            "safe_block": metrics["safe_block"] / total,
+        },
+        "decision_reason_distribution": decision_reason_count,
+        "avg_calibrated_evidence_floor": round((sum(calibrated_floors) / len(calibrated_floors)), 4)
+        if calibrated_floors
+        else 0.0,
+        "latency_ms": {
+            "mean": round(statistics.fmean(latency_ms_samples), 3),
+            "p50": round(sorted_samples[p50_idx], 3),
+            "p95": round(sorted_samples[p95_idx], 3),
+        },
         "rows": rows,
     }

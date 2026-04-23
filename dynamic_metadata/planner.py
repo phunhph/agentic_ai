@@ -15,14 +15,67 @@ from infra.settings import (
     STRICT_LEARNED_ONLY_MODE,
     STRICT_MIN_EVIDENCE_SIMILARITY,
     PLANNER_GENERIC_LIST_KEYWORDS,
+    PLANNER_COMPLEXITY_BUDGET,
+    UNCERTAINTY_BASE_ASK_CLARIFY_EVIDENCE,
+    UNCERTAINTY_CASE_SUCCESS_BONUS_MAX,
+    UNCERTAINTY_LEARNING_SCORE_BONUS_MAX,
 )
 from tools.tool_registry import TOOL_REGISTRY
 
 _TOKEN_PATTERN = re.compile(r"[a-zA-Z0-9àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]+")
+_PLANNER_CACHE_MAX_SIZE = 256
+_CASE_MATCH_CACHE: dict[str, dict[str, Any] | None] = {}
+_ENTITY_EXTRACT_CACHE: dict[str, dict[str, Any]] = {}
+_JOIN_PATH_CACHE: dict[tuple[str, str, int], list[dict[str, Any]]] = {}
 
 
 def _tokenize(text: str) -> set[str]:
     return {m.group(0).lower() for m in _TOKEN_PATTERN.finditer(text or "")}
+
+
+def _cache_set(cache: dict[Any, Any], key: Any, value: Any) -> None:
+    if key not in cache and len(cache) >= _PLANNER_CACHE_MAX_SIZE:
+        cache.pop(next(iter(cache)))
+    cache[key] = value
+
+
+def _cached_match_case(goal: str) -> dict[str, Any] | None:
+    cache_key = str(goal or "").strip().lower()
+    if cache_key in _CASE_MATCH_CACHE:
+        return _CASE_MATCH_CACHE[cache_key]
+    value = match_case(goal)
+    _cache_set(_CASE_MATCH_CACHE, cache_key, value)
+    return value
+
+
+def _cached_extract_entities(query: str) -> dict[str, Any]:
+    cache_key = str(query or "").strip().lower()
+    if cache_key in _ENTITY_EXTRACT_CACHE:
+        return _ENTITY_EXTRACT_CACHE[cache_key]
+    value = extract_entities(query)
+    _cache_set(_ENTITY_EXTRACT_CACHE, cache_key, value)
+    return value
+
+
+def _cached_find_path(provider, from_table: str, to_table: str, max_depth: int) -> list[dict[str, Any]]:
+    key = (str(from_table), str(to_table), int(max_depth))
+    if key in _JOIN_PATH_CACHE:
+        return _JOIN_PATH_CACHE[key]
+    paths = provider.find_paths(from_table, to_table, max_depth=max_depth)
+    join_path: list[dict[str, Any]] = []
+    if paths:
+        join_path = [
+            {
+                "from_table": edge.from_table,
+                "to_table": edge.to_table,
+                "relation_type": edge.relation_type,
+                "join_table": edge.join_table,
+                "choice_group": edge.choice_group,
+            }
+            for edge in paths[0]
+        ]
+    _cache_set(_JOIN_PATH_CACHE, key, join_path)
+    return join_path
 
 
 def _build_tool_args(tool_name: str, keyword: str, entities: dict[str, Any]) -> dict[str, Any]:
@@ -68,6 +121,111 @@ def _condition_keys(entities: dict[str, Any]) -> set[str]:
     return out
 
 
+def _can_use_intent_fast_path(*, current_intent: str, intent_tool: str, entities: dict[str, Any], keyword: str) -> tuple[bool, str]:
+    if not current_intent or current_intent == "UNKNOWN":
+        return False, "intent_unknown"
+    if not intent_tool or intent_tool not in MATRIX_ALLOWED_TOOLS:
+        return False, "intent_tool_unavailable"
+
+    if current_intent.endswith("_LIST"):
+        # LIST intents are deterministic enough to bypass expensive autonomous scoring.
+        return True, "list_intent_fast_path"
+
+    core_entity_keys = ("contract_id", "customer_name", "bd_owner_id", "am_sales_id", "assignee_id")
+    if any(entities.get(k) not in (None, "") for k in core_entity_keys):
+        return True, "core_entity_fast_path"
+    if str(keyword or "").strip():
+        return True, "keyword_fast_path"
+    return False, "insufficient_signal"
+
+
+def _resolve_decision_state(
+    *,
+    strict_blocked: bool,
+    current_intent: str,
+    mentioned_tables: list[str],
+    entities: dict[str, Any],
+    knowledge_hits: list[dict],
+    case_similarity: float,
+    case_success_ratio: float,
+    calibrated_evidence_floor: float,
+) -> tuple[str, float, str]:
+    core_entity_keys = ("contract_id", "customer_name", "bd_owner_id", "am_sales_id", "assignee_id")
+    has_core_entities = any(entities.get(k) not in (None, "") for k in core_entity_keys)
+    has_table_signal = bool(mentioned_tables)
+    has_learned_hits = bool(knowledge_hits)
+    has_intent_signal = bool(current_intent and current_intent != "UNKNOWN")
+
+    confidence = 0.0
+    if has_intent_signal:
+        confidence += 0.2
+    if has_table_signal:
+        confidence += 0.2
+    if has_core_entities:
+        confidence += 0.3
+    if has_learned_hits:
+        confidence += 0.2
+    confidence += min(0.1, max(0.0, case_similarity) * 0.1)
+    confidence += min(0.1, max(0.0, case_success_ratio) * 0.1)
+
+    if strict_blocked:
+        return "safe_block", round(confidence, 3), "strict_learned_only_mode_blocked"
+    if not has_intent_signal and not has_table_signal and not has_core_entities and case_similarity < 0.4:
+        return "ask_clarify", round(confidence, 3), "low_signal_ambiguous_query"
+    if not has_learned_hits and case_similarity < calibrated_evidence_floor:
+        return "ask_clarify", round(confidence, 3), "low_evidence_without_learning_hit"
+    return "auto_execute", round(confidence, 3), "sufficient_signal"
+
+
+def _compute_calibrated_evidence_floor(
+    *,
+    knowledge_hits: list[dict],
+    case_success_ratio: float,
+) -> tuple[float, dict[str, float]]:
+    learning_scores: list[float] = []
+    for hit in knowledge_hits or []:
+        if not isinstance(hit, dict):
+            continue
+        raw = hit.get("score", hit.get("final_match_score", 0.0))
+        try:
+            learning_scores.append(float(raw or 0.0))
+        except (TypeError, ValueError):
+            continue
+    avg_learning_score = (sum(learning_scores) / len(learning_scores)) if learning_scores else 0.0
+    learning_bonus = min(
+        UNCERTAINTY_LEARNING_SCORE_BONUS_MAX,
+        max(0.0, avg_learning_score) * UNCERTAINTY_LEARNING_SCORE_BONUS_MAX,
+    )
+    case_bonus = min(
+        UNCERTAINTY_CASE_SUCCESS_BONUS_MAX,
+        max(0.0, case_success_ratio) * UNCERTAINTY_CASE_SUCCESS_BONUS_MAX,
+    )
+    evidence_floor = max(0.1, UNCERTAINTY_BASE_ASK_CLARIFY_EVIDENCE - learning_bonus - case_bonus)
+    return round(evidence_floor, 4), {
+        "base": float(UNCERTAINTY_BASE_ASK_CLARIFY_EVIDENCE),
+        "avg_learning_score": round(avg_learning_score, 4),
+        "learning_bonus": round(learning_bonus, 4),
+        "case_success_ratio": round(max(0.0, case_success_ratio), 4),
+        "case_bonus": round(case_bonus, 4),
+    }
+
+
+def _estimate_planner_complexity(
+    *,
+    mentioned_tables: list[str],
+    knowledge_hits: list[dict],
+    choice_constraints: list[dict[str, Any]],
+    join_path: list[dict[str, Any]],
+) -> int:
+    # Lightweight complexity proxy to enforce "Simplicity First".
+    score = 0
+    score += min(4, len(mentioned_tables or []))
+    score += min(4, len(knowledge_hits or []))
+    score += min(4, len(choice_constraints or []))
+    score += min(4, len(join_path or []))
+    return score
+
+
 def _structure_compatible(
     *,
     current_intent: str,
@@ -86,7 +244,7 @@ def _structure_compatible(
 
     hit_ref_query = str(hit.get("original_query", "")).strip() or str(hit.get("correction_text", "")).strip()
     if hit_ref_query:
-        hit_tables = set(extract_entities(hit_ref_query).get("mentioned_tables", []) or [])
+        hit_tables = set(_cached_extract_entities(hit_ref_query).get("mentioned_tables", []) or [])
         cur_tables = set(current_tables or [])
         if cur_tables and hit_tables and cur_tables.isdisjoint(hit_tables):
             return False, f"table_scope_mismatch:{sorted(list(cur_tables))}!={sorted(list(hit_tables))}"
@@ -120,7 +278,7 @@ def _select_tool_autonomously(
     best_tool = MATRIX_DEFAULT_TOOL if MATRIX_DEFAULT_TOOL in candidates else candidates[0]
     best_score = -1.0
     debug_scores: dict[str, float] = {}
-    case_match = match_case(goal)
+    case_match = _cached_match_case(goal)
     case_info = None
     case_expected_tool = None
     case_expected_entities: set[str] = set()
@@ -172,7 +330,7 @@ def _select_tool_autonomously(
 def plan_with_metadata(state: dict, knowledge_hits: list[dict] | None = None) -> dict:
     provider = get_metadata_provider()
     goal = state.get("goal", "")
-    extracted = state.get("entity_extract") if isinstance(state.get("entity_extract"), dict) else extract_entities(goal)
+    extracted = state.get("entity_extract") if isinstance(state.get("entity_extract"), dict) else _cached_extract_entities(goal)
     
     # Lấy tri thức từ Metadata và Kinh nghiệm quá khứ
     mentioned_tables = extracted["mentioned_tables"]
@@ -249,40 +407,45 @@ def plan_with_metadata(state: dict, knowledge_hits: list[dict] | None = None) ->
 
     # 2. Cơ chế Suy luận Động (Dynamic Reasoning)
     primary_table = mentioned_tables[0] if mentioned_tables else None
-    inferred_default = infer_best_tool_for_tables(
-        mentioned_tables,
-        allowed_tools=MATRIX_ALLOWED_TOOLS,
-        default_tool=MATRIX_DEFAULT_TOOL,
-    )
-    tool, selector_trace, case_info = _select_tool_autonomously(
-        provider,
-        goal=extracted["normalized_goal"],
-        mentioned_tables=mentioned_tables,
-        entities=entities,
-    )
     intent_tool = INTENT_TOOL_HINT.get(current_intent, "")
-    if intent_tool and intent_tool in MATRIX_ALLOWED_TOOLS:
-        # Khi intent đã rõ ràng, ưu tiên tool theo intent để tránh drift sang bảng khác.
+    use_fast_path, fast_path_reason = _can_use_intent_fast_path(
+        current_intent=current_intent,
+        intent_tool=intent_tool,
+        entities=entities,
+        keyword=keyword,
+    )
+    case_info = None
+    if use_fast_path:
+        # Khi intent đã rõ ràng và có đủ tín hiệu, dùng fast-path để giảm latency.
         tool = intent_tool
+        selector_trace = {"reason": "intent_fast_path", "detail": fast_path_reason, "score": None, "scores": {}}
+    else:
+        inferred_default = infer_best_tool_for_tables(
+            mentioned_tables,
+            allowed_tools=MATRIX_ALLOWED_TOOLS,
+            default_tool=MATRIX_DEFAULT_TOOL,
+        )
+        tool, selector_trace, case_info = _select_tool_autonomously(
+            provider,
+            goal=extracted["normalized_goal"],
+            mentioned_tables=mentioned_tables,
+            entities=entities,
+        )
+        if tool not in MATRIX_ALLOWED_TOOLS:
+            tool = inferred_default
     if tool not in MATRIX_ALLOWED_TOOLS:
-        tool = inferred_default
+        tool = MATRIX_DEFAULT_TOOL
     args = _build_tool_args(tool, keyword, entities)
 
     # 3. Tự động vẽ đường JOIN (Pathfinding Evolution)
     join_path: list[dict[str, Any]] = []
     if len(mentioned_tables) >= 2:
-        paths = provider.find_paths(mentioned_tables[0], mentioned_tables[1], max_depth=MATRIX_MAX_PATH_DEPTH)
-        if paths:
-            join_path = [
-                {
-                    "from_table": edge.from_table,
-                    "to_table": edge.to_table,
-                    "relation_type": edge.relation_type,
-                    "join_table": edge.join_table,
-                    "choice_group": edge.choice_group,
-                }
-                for edge in paths[0]
-            ]
+        join_path = _cached_find_path(
+            provider,
+            mentioned_tables[0],
+            mentioned_tables[1],
+            MATRIX_MAX_PATH_DEPTH,
+        )
 
     # 4. Tự động mở rộng bộ lọc (Choice Expansion)
     choice_constraints: list[dict[str, Any]] = []
@@ -299,6 +462,11 @@ def plan_with_metadata(state: dict, knowledge_hits: list[dict] | None = None) ->
     strict_blocked = False
     strict_reason = ""
     case_similarity = float((case_info or {}).get("similarity", 0.0) if isinstance(case_info, dict) else 0.0)
+    case_success_ratio = float((case_info or {}).get("success_ratio", 0.0) if isinstance(case_info, dict) else 0.0)
+    calibrated_evidence_floor, evidence_calibration = _compute_calibrated_evidence_floor(
+        knowledge_hits=knowledge_hits,
+        case_success_ratio=case_success_ratio,
+    )
     bootstrap_learning = bool(state.get("bootstrap_learning", False))
     if (
         STRICT_LEARNED_ONLY_MODE
@@ -313,6 +481,24 @@ def plan_with_metadata(state: dict, knowledge_hits: list[dict] | None = None) ->
         )
         tool = "final_answer"
         args = {}
+
+    decision_state, decision_confidence, decision_reason = _resolve_decision_state(
+        strict_blocked=strict_blocked,
+        current_intent=current_intent,
+        mentioned_tables=mentioned_tables,
+        entities=entities,
+        knowledge_hits=knowledge_hits,
+        case_similarity=case_similarity,
+        case_success_ratio=case_success_ratio,
+        calibrated_evidence_floor=calibrated_evidence_floor,
+    )
+    complexity_score = _estimate_planner_complexity(
+        mentioned_tables=mentioned_tables,
+        knowledge_hits=knowledge_hits,
+        choice_constraints=choice_constraints,
+        join_path=join_path,
+    )
+    complexity_budget_exceeded = complexity_score > PLANNER_COMPLEXITY_BUDGET
 
     trace = {
         "planner_mode": "autonomous_metadata",
@@ -329,6 +515,19 @@ def plan_with_metadata(state: dict, knowledge_hits: list[dict] | None = None) ->
         "strict_reason": strict_reason,
         "knowledge_reject_reason": knowledge_reject_reason,
         "target_identities": extracted.get("identities", []),
+        "decision_state": decision_state,
+        "decision_confidence": decision_confidence,
+        "decision_reason": decision_reason,
+        "calibrated_evidence_floor": calibrated_evidence_floor,
+        "evidence_calibration": evidence_calibration,
+        "rejection_signals": {
+            "knowledge_reject_reason": knowledge_reject_reason,
+            "strict_reason": strict_reason,
+            "decision_reason": decision_reason,
+        },
+        "complexity_score": complexity_score,
+        "complexity_budget": PLANNER_COMPLEXITY_BUDGET,
+        "complexity_budget_exceeded": complexity_budget_exceeded,
     }
 
     return {

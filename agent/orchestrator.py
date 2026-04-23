@@ -35,6 +35,26 @@ from storage.repositories.knowledge_repository import (
 )
 
 
+def _build_clarify_observation(query_text: str, trace: dict) -> dict:
+    reason = str((trace or {}).get("decision_reason", "")).strip()
+    entities = (trace or {}).get("selected_entities", [])
+    entity_hint = ", ".join([str(x) for x in entities[:2]]) if isinstance(entities, list) else ""
+    if reason == "low_signal_ambiguous_query":
+        question = "Bạn muốn xem dữ liệu nào cụ thể hơn (accounts, contacts, contracts hay opportunities)?"
+    elif reason == "low_evidence_without_learning_hit":
+        question = "Bạn vui lòng bổ sung thêm điều kiện (ví dụ tên khách hàng, assignee hoặc mã contract) để mình truy vấn chính xác."
+    else:
+        question = "Bạn vui lòng làm rõ mục tiêu truy vấn để mình chọn đúng công cụ."
+    if entity_hint:
+        question = f"{question} (Tín hiệu hiện có: {entity_hint})"
+    return {
+        "type": "ask_clarify",
+        "message": question,
+        "reason": reason or "uncertain_planning",
+        "original_query": query_text,
+    }
+
+
 class AgentOrchestrator:
     def __init__(self):
         self.memory = AgentMemory()
@@ -377,6 +397,19 @@ class AgentOrchestrator:
             )
             if trace.get("strict_blocked"):
                 yield await emit_log("POLICY", f"STRICT_LEARNED_ONLY: {trace.get('strict_reason', 'blocked')}", "BLOCKED")
+
+            if trace.get("decision_state") == "ask_clarify":
+                clarify_observation = _build_clarify_observation(clean_goal, trace)
+                state["observations"] = [clarify_observation]
+                state["selected_tool"] = "final_answer"
+                state["selected_args"] = {}
+                state["is_finished"] = True
+                yield await emit_log(
+                    "POLICY",
+                    f"ASK_CLARIFY: {clarify_observation.get('message', '')}",
+                    "CLARIFY",
+                )
+                break
 
             if tool not in ("final_answer", "error"):
                 allowed, deny_reason = is_tool_allowed(detected_role, tool)

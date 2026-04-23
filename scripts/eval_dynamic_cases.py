@@ -31,6 +31,30 @@ def main() -> None:
             report["tool_accuracy"], report["path_resolution_success"], report["choice_constraint_success"]
         )
     )
+    latency = report.get("latency_ms", {}) if isinstance(report.get("latency_ms"), dict) else {}
+    print(
+        "entity_match_rate={:.2f} strict_block_rate={:.2f} latency_ms(mean/p50/p95)=({:.2f}/{:.2f}/{:.2f})".format(
+            report.get("entity_match_rate", 0.0),
+            report.get("strict_block_rate", 0.0),
+            float(latency.get("mean", 0.0)),
+            float(latency.get("p50", 0.0)),
+            float(latency.get("p95", 0.0)),
+        )
+    )
+    state_rate = report.get("decision_state_rate", {}) if isinstance(report.get("decision_state_rate"), dict) else {}
+    print(
+        "decision_state_rate(auto/clarify/block)=({:.2f}/{:.2f}/{:.2f})".format(
+            float(state_rate.get("auto_execute", 0.0)),
+            float(state_rate.get("ask_clarify", 0.0)),
+            float(state_rate.get("safe_block", 0.0)),
+        )
+    )
+    print(
+        "avg_calibrated_evidence_floor={:.3f} decision_reason_distribution={}".format(
+            float(report.get("avg_calibrated_evidence_floor", 0.0)),
+            report.get("decision_reason_distribution", {}),
+        )
+    )
 
 
 if __name__ == "__main__":
