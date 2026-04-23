@@ -92,12 +92,19 @@ def _build_tool_args(tool_name: str, keyword: str, entities: dict[str, Any]) -> 
 
 
 def _entities_compatible(current: dict[str, Any], learned: dict[str, Any]) -> tuple[bool, str]:
-    compare_keys = ("contract_id", "customer_name", "bd_owner_id", "am_sales_id")
+    compare_keys = ("contract_id", "customer_name", "contact_id", "bd_owner_id", "am_sales_id", "assignee_id", "root_table")
     for k in compare_keys:
         cur = str(current.get(k, "")).strip().lower()
         old = str(learned.get(k, "")).strip().lower()
         if cur and old and cur != old:
             return False, f"entity_mismatch:{k}"
+    cur_kw = str(current.get("keyword", "")).strip().lower()
+    old_kw = str(learned.get("keyword", "")).strip().lower()
+    if cur_kw and old_kw:
+        cur_tokens = set(cur_kw.split())
+        old_tokens = set(old_kw.split())
+        if cur_tokens and old_tokens and cur_tokens.isdisjoint(old_tokens):
+            return False, "entity_mismatch:keyword_scope"
     return True, ""
 
 
@@ -172,7 +179,9 @@ def _resolve_decision_state(
         return "safe_block", round(confidence, 3), "strict_learned_only_mode_blocked"
     if not has_intent_signal and not has_table_signal and not has_core_entities and case_similarity < 0.4:
         return "ask_clarify", round(confidence, 3), "low_signal_ambiguous_query"
-    if not has_learned_hits and case_similarity < calibrated_evidence_floor:
+    if not has_learned_hits and case_similarity < calibrated_evidence_floor and not (
+        has_intent_signal and (has_table_signal or has_core_entities)
+    ):
         return "ask_clarify", round(confidence, 3), "low_evidence_without_learning_hit"
     return "auto_execute", round(confidence, 3), "sufficient_signal"
 
@@ -226,11 +235,167 @@ def _estimate_planner_complexity(
     return score
 
 
+def _build_tool_call_profile(
+    *,
+    tool: str,
+    args: dict[str, Any],
+    current_intent: str,
+    mentioned_tables: list[str],
+    join_path: list[dict[str, Any]],
+    choice_constraints: list[dict[str, Any]],
+    decision_state: str,
+) -> dict[str, Any]:
+    reserved_plan_keys = {"root_table", "include_tables", "limit", "id_filters", "filters"}
+    filter_keys = [k for k, v in (args or {}).items() if k not in reserved_plan_keys and v not in (None, "", [], {})]
+    plan_filters = args.get("filters") if isinstance(args.get("filters"), list) else []
+    if plan_filters:
+        filter_keys.extend(
+            [
+                str(f.get("field")).split(".", 1)[-1]
+                for f in plan_filters
+                if isinstance(f, dict) and str(f.get("field", "")).strip()
+            ]
+        )
+    if isinstance(args.get("id_filters"), dict):
+        filter_keys.extend([str(k) for k, v in args.get("id_filters", {}).items() if v not in (None, "")])
+    has_id_filter = any(str(k).endswith("_id") or str(k).endswith("id") for k in filter_keys)
+    has_keyword_filter = "keyword" in filter_keys
+    has_customer_filter = "customer_name" in filter_keys
+    has_choice_filter = bool(choice_constraints)
+    is_multi_table = len(set(mentioned_tables or [])) >= 2 or bool(join_path)
+    is_statistical = tool.startswith("compare_") or current_intent.endswith("_COMPARE")
+    is_detail_lookup = "details" in tool or current_intent.endswith("_DETAILS")
+    is_create = tool.startswith("create_") or current_intent.endswith("_CREATE")
+    is_advisory = decision_state in {"ask_clarify", "safe_block"} or tool == "final_answer"
+
+    if is_advisory:
+        query_mode = "advisory_or_guardrail"
+    elif tool == "dynamic_query":
+        query_mode = "metadata_dynamic_query"
+    elif tool == "get_account_360":
+        query_mode = "multi_entity_overview"
+    elif is_statistical:
+        query_mode = "statistical_analysis"
+    elif is_detail_lookup:
+        query_mode = "detail_lookup"
+    elif is_create:
+        query_mode = "create_write"
+    else:
+        query_mode = "list_retrieval"
+
+    if has_id_filter:
+        search_strategy = "id_lookup"
+    elif has_choice_filter:
+        search_strategy = "choice_constraint_lookup"
+    elif has_keyword_filter:
+        search_strategy = "keyword_search"
+    elif has_customer_filter:
+        search_strategy = "relationship_filter"
+    elif tool.startswith("list_"):
+        search_strategy = "list_all_or_broad_scan"
+    else:
+        search_strategy = "intent_mapped"
+
+    statistics_focus = None
+    if tool == "compare_account_stats":
+        statistics_focus = "account_count_by_owner"
+    elif tool == "compare_contact_stats":
+        statistics_focus = "contact_count_by_assignee"
+    elif tool == "compare_contract_stats":
+        statistics_focus = "contract_count_and_value_by_assignee"
+    elif tool == "compare_opportunity_stats":
+        statistics_focus = "opportunity_count_and_value_by_owner"
+
+    return {
+        "query_mode": query_mode,
+        "search_strategy": search_strategy,
+        "is_multi_table_query": is_multi_table,
+        "table_scope": list(dict.fromkeys(mentioned_tables or [])),
+        "join_depth": len(join_path or []),
+        "has_filters": bool(filter_keys or has_choice_filter),
+        "filter_keys": filter_keys,
+        "choice_groups": sorted(
+            list(
+                {
+                    str(c.get("choice_group"))
+                    for c in (choice_constraints or [])
+                    if isinstance(c, dict) and c.get("choice_group")
+                }
+            )
+        ),
+        "is_statistical": is_statistical,
+        "statistics_focus": statistics_focus,
+        "is_advisory": is_advisory,
+        "advisory_mode": decision_state if is_advisory else "",
+    }
+
+
+def _infer_root_table(current_intent: str, mentioned_tables: list[str], selected_tool: str) -> str:
+    if current_intent.startswith("ACCOUNT_") or "account" in selected_tool:
+        return "hbl_account"
+    if current_intent.startswith("CONTACT_") or "contact" in selected_tool:
+        return "hbl_contact"
+    if current_intent.startswith("CONTRACT_") or "contract" in selected_tool:
+        return "hbl_contract"
+    if current_intent.startswith("OPPORTUNITY_") or "opportunit" in selected_tool:
+        return "hbl_opportunities"
+    if mentioned_tables:
+        return str(mentioned_tables[0])
+    return "hbl_account"
+
+
+def _build_dynamic_query_args(
+    *,
+    current_intent: str,
+    selected_tool: str,
+    mentioned_tables: list[str],
+    entities: dict[str, Any],
+    keyword: str,
+    request_contract: dict[str, Any],
+) -> dict[str, Any]:
+    provider = get_metadata_provider()
+    root_table = _infer_root_table(current_intent, mentioned_tables, selected_tool)
+    include_tables = [t for t in list(dict.fromkeys(mentioned_tables or [])) if t and t != root_table]
+    if not include_tables and root_table == "hbl_account":
+        include_tables = ["hbl_contact", "hbl_opportunities", "hbl_contract"]
+    table_spec = next((t for t in provider._schema.tables if t.name == root_table), None)
+    root_pk = table_spec.primary_key if table_spec else ""
+    id_filters: dict[str, Any] = {}
+    if current_intent.endswith("_DETAILS") and root_pk:
+        for k, v in (entities or {}).items():
+            if v in (None, "", [], {}):
+                continue
+            if str(k).endswith("_id"):
+                id_filters[root_pk] = v
+                break
+    filters = request_contract.get("filters", []) if isinstance(request_contract, dict) else []
+    normalized_filters: list[dict[str, Any]] = []
+    if isinstance(filters, list):
+        for f in filters:
+            if not isinstance(f, dict):
+                continue
+            field = str(f.get("field", "")).strip()
+            op = str(f.get("op", "contains")).strip().lower()
+            value = f.get("value")
+            if not field or value in (None, ""):
+                continue
+            normalized_filters.append({"field": field, "op": "eq" if op == "eq" else "contains", "value": value})
+    return {
+        "root_table": root_table,
+        "keyword": str(keyword or entities.get("keyword", "")).strip(),
+        "include_tables": include_tables,
+        "limit": 20,
+        "id_filters": id_filters,
+        "filters": normalized_filters,
+    }
+
+
 def _structure_compatible(
     *,
     current_intent: str,
     current_tables: list[str],
     current_entities: dict[str, Any],
+    current_request_contract: dict[str, Any],
     hit: dict[str, Any],
 ) -> tuple[bool, str]:
     resolved_intent = str(hit.get("resolved_intent", "")).strip().upper()
@@ -257,6 +422,22 @@ def _structure_compatible(
     hit_core = hit_keys.intersection(core_keys)
     if cur_core and hit_core and cur_core != hit_core:
         return False, f"condition_key_mismatch:{sorted(list(cur_core))}!={sorted(list(hit_core))}"
+
+    # If current request has explicit filters, require hit to carry at least compatible entity hints.
+    cur_filters = current_request_contract.get("filters", []) if isinstance(current_request_contract, dict) else []
+    if isinstance(cur_filters, list) and cur_filters:
+        expected_keys = set()
+        for f in cur_filters:
+            if not isinstance(f, dict):
+                continue
+            field = str(f.get("field", "")).strip().lower()
+            if not field:
+                continue
+            expected_keys.add(field.split(".", 1)[-1])
+        if expected_keys and hit_entities:
+            hit_keys_expanded = {str(k).strip().lower() for k in hit_entities.keys()}
+            if expected_keys.isdisjoint(hit_keys_expanded):
+                return False, "filter_scope_mismatch:no_overlap_with_hit_entities"
     return True, ""
 
 
@@ -361,6 +542,7 @@ def plan_with_metadata(state: dict, knowledge_hits: list[dict] | None = None) ->
                 current_intent=current_intent,
                 current_tables=mentioned_tables,
                 current_entities=entities,
+                current_request_contract=state.get("request_contract", {}) if isinstance(state.get("request_contract"), dict) else {},
                 hit=hit,
             )
             if ok_struct:
@@ -386,6 +568,25 @@ def plan_with_metadata(state: dict, knowledge_hits: list[dict] | None = None) ->
                 and "customer_name" not in args
             ):
                 args["customer_name"] = entities.get("customer_name")
+            if resolved_tool in {
+                "list_accounts",
+                "list_contacts",
+                "list_contracts",
+                "list_opportunities",
+                "get_contact_details",
+                "get_contract_details",
+                "get_account_overview",
+                "get_account_360",
+            }:
+                args = _build_dynamic_query_args(
+                    current_intent=current_intent,
+                    selected_tool=resolved_tool,
+                    mentioned_tables=mentioned_tables,
+                    entities=entities,
+                    keyword=keyword,
+                    request_contract=state.get("request_contract", {}),
+                )
+                resolved_tool = "dynamic_query"
             return {
                 "thought": f"Bắt chước giải pháp đã thành công trong quá khứ cho case: {selected_experience.get('pattern')}",
                 "tool": resolved_tool,
@@ -433,9 +634,42 @@ def plan_with_metadata(state: dict, knowledge_hits: list[dict] | None = None) ->
         )
         if tool not in MATRIX_ALLOWED_TOOLS:
             tool = inferred_default
+        if (
+            not current_intent
+            and "hbl_contact" in set(mentioned_tables or [])
+            and tool == "list_accounts"
+            and "list_contacts" in MATRIX_ALLOWED_TOOLS
+        ):
+            # Avoid account drift for contact-scoped queries that mention account as relationship context.
+            tool = "list_contacts"
+            selector_trace["reason"] = "contact_scope_prefer_list_contacts"
     if tool not in MATRIX_ALLOWED_TOOLS:
         tool = MATRIX_DEFAULT_TOOL
+    if tool == "get_account_360" and current_intent != "ACCOUNT_360":
+        # Keep account-360 for explicit holistic-account intents only.
+        tool = intent_tool if intent_tool in MATRIX_ALLOWED_TOOLS else MATRIX_DEFAULT_TOOL
     args = _build_tool_args(tool, keyword, entities)
+    # Reduce hard-coded read-tools: route retrieval/detail/overview to dynamic query engine.
+    if tool in {
+        "list_accounts",
+        "list_contacts",
+        "list_contracts",
+        "list_opportunities",
+        "get_contact_details",
+        "get_contract_details",
+        "get_account_overview",
+        "get_account_360",
+    }:
+        args = _build_dynamic_query_args(
+            current_intent=current_intent,
+            selected_tool=tool,
+            mentioned_tables=mentioned_tables,
+            entities=entities,
+            keyword=keyword,
+            request_contract=state.get("request_contract", {}),
+        )
+        tool = "dynamic_query"
+        selector_trace["reason"] = f"{selector_trace.get('reason', '')}_routed_dynamic_query".strip("_")
 
     # 3. Tự động vẽ đường JOIN (Pathfinding Evolution)
     join_path: list[dict[str, Any]] = []
@@ -499,6 +733,15 @@ def plan_with_metadata(state: dict, knowledge_hits: list[dict] | None = None) ->
         join_path=join_path,
     )
     complexity_budget_exceeded = complexity_score > PLANNER_COMPLEXITY_BUDGET
+    tool_call_profile = _build_tool_call_profile(
+        tool=tool,
+        args=args,
+        current_intent=current_intent,
+        mentioned_tables=mentioned_tables,
+        join_path=join_path,
+        choice_constraints=choice_constraints,
+        decision_state=decision_state,
+    )
 
     trace = {
         "planner_mode": "autonomous_metadata",
@@ -528,6 +771,7 @@ def plan_with_metadata(state: dict, knowledge_hits: list[dict] | None = None) ->
         "complexity_score": complexity_score,
         "complexity_budget": PLANNER_COMPLEXITY_BUDGET,
         "complexity_budget_exceeded": complexity_budget_exceeded,
+        "tool_call_profile": tool_call_profile,
     }
 
     return {

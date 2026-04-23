@@ -8,7 +8,10 @@ INTENT_TOOL_HINT = {
     "ACCOUNT_LIST": "list_accounts",
     "ACCOUNT_CREATE": "create_account",
     "ACCOUNT_COMPARE": "compare_account_stats",
+    "ACCOUNT_360": "get_account_360",
+    "DYNAMIC_QUERY": "dynamic_query",
     "CONTACT_LIST": "list_contacts",
+    "CONTACT_DETAILS": "get_contact_details",
     "CONTACT_CREATE": "create_contact",
     "CONTACT_COMPARE": "compare_contact_stats",
     "CONTRACT_LIST": "list_contracts",
@@ -63,6 +66,35 @@ def resolve_request(intent: str, entities: dict) -> NormalizedRequest:
             )
         # keyword có thể rỗng khi user muốn lấy toàn bộ danh sách account.
 
+    elif intent == "ACCOUNT_360":
+        keyword = str(entities.get("keyword", entities.get("customer_name", ""))).strip()
+        if keyword:
+            normalized_entities["keyword"] = keyword
+            filters.append(
+                RequestFilter(
+                    field="hbl_account.hbl_account_name",
+                    op="contains",
+                    value=keyword,
+                )
+            )
+        else:
+            unresolved.append("keyword")
+
+    elif intent == "DYNAMIC_QUERY":
+        root_table = str(entities.get("root_table", "")).strip()
+        include_tables = entities.get("include_tables") if isinstance(entities.get("include_tables"), list) else []
+        keyword = str(entities.get("keyword", "")).strip()
+        limit = entities.get("limit", 20)
+        if root_table:
+            normalized_entities["root_table"] = root_table
+        else:
+            unresolved.append("root_table")
+        if include_tables:
+            normalized_entities["include_tables"] = [str(x).strip() for x in include_tables if str(x).strip()]
+        if keyword:
+            normalized_entities["keyword"] = keyword
+        normalized_entities["limit"] = int(limit) if str(limit).isdigit() else 20
+
     elif intent == "ACCOUNT_CREATE":
         name = str(entities.get("name", entities.get("account_name", entities.get("keyword", "")))).strip()
         if name:
@@ -100,6 +132,30 @@ def resolve_request(intent: str, entities: dict) -> NormalizedRequest:
                 )
             )
         # keyword/customer_name có thể rỗng khi user muốn lấy toàn bộ danh sách contact.
+
+    elif intent == "CONTACT_DETAILS":
+        contact_id = str(entities.get("contact_id", "")).strip()
+        keyword = str(entities.get("keyword", "")).strip()
+        if contact_id:
+            normalized_entities["contact_id"] = contact_id
+            filters.append(
+                RequestFilter(
+                    field="hbl_contact.hbl_contactid",
+                    op="eq",
+                    value=contact_id,
+                )
+            )
+        elif keyword:
+            normalized_entities["keyword"] = keyword
+            filters.append(
+                RequestFilter(
+                    field="hbl_contact.hbl_contact_name",
+                    op="contains",
+                    value=keyword,
+                )
+            )
+        else:
+            unresolved.append("contact_id_or_keyword")
 
     elif intent == "CONTACT_CREATE":
         contact_name = str(entities.get("contact_name", entities.get("name", entities.get("keyword", "")))).strip()
@@ -188,6 +244,7 @@ def resolve_request(intent: str, entities: dict) -> NormalizedRequest:
 
     elif intent == "CONTRACT_DETAILS":
         contract_id = str(entities.get("contract_id", entities.get("order_id", ""))).strip()
+        keyword = str(entities.get("keyword", "")).strip()
         if contract_id:
             normalized_entities["contract_id"] = contract_id
             filters.append(
@@ -197,8 +254,17 @@ def resolve_request(intent: str, entities: dict) -> NormalizedRequest:
                     value=contract_id,
                 )
             )
+        elif keyword:
+            normalized_entities["keyword"] = keyword
+            filters.append(
+                RequestFilter(
+                    field="hbl_contract.hbl_contract_name",
+                    op="contains",
+                    value=keyword,
+                )
+            )
         else:
-            unresolved.append("contract_id")
+            unresolved.append("contract_id_or_keyword")
 
     elif intent == "ACCOUNT_OVERVIEW":
         # Không cần filter, tool trả thống kê tổng quát

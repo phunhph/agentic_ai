@@ -295,6 +295,8 @@ class AgentOrchestrator:
                         role=detected_role,
                         domain=domain,
                         limit=MATRIX_KNOWLEDGE_HITS_LIMIT,
+                        query_intent=str(state.get("intent", "")),
+                        query_entities=state.get("entities", {}) if isinstance(state.get("entities"), dict) else {},
                     )
                 finally:
                     db.close()

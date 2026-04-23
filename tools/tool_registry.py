@@ -10,8 +10,11 @@ from tools.modules import (
     compare_contract_stats_tool,
     create_account,
     create_contact,
+    get_contact_details,
     create_contract_tool,
     create_opportunity,
+    dynamic_query,
+    get_account_360,
     get_account_overview,
     get_contract_details,
     list_accounts,
@@ -55,6 +58,10 @@ def _args_get_account_overview(args: dict[str, Any]) -> list[Any]:
     return []
 
 
+def _args_get_account_360(args: dict[str, Any]) -> list[Any]:
+    return [args.get("keyword", "")]
+
+
 def _args_create_account(args: dict[str, Any]) -> list[Any]:
     return [
         args.get("name", ""),
@@ -81,6 +88,10 @@ def _args_create_contact(args: dict[str, Any]) -> list[Any]:
         args.get("phone"),
         args.get("title"),
     ]
+
+
+def _args_get_contact_details(args: dict[str, Any]) -> list[Any]:
+    return [args.get("contact_id"), args.get("keyword")]
 
 
 def _args_compare_contact_stats(args: dict[str, Any]) -> list[Any]:
@@ -120,6 +131,19 @@ def _args_compare_opportunity_stats(args: dict[str, Any]) -> list[Any]:
     return []
 
 
+def _args_dynamic_query(args: dict[str, Any]) -> list[Any]:
+    return [
+        {
+            "root_table": args.get("root_table", "hbl_account"),
+            "keyword": args.get("keyword", ""),
+            "include_tables": args.get("include_tables") if isinstance(args.get("include_tables"), list) else [],
+            "limit": args.get("limit", 20),
+            "id_filters": args.get("id_filters") if isinstance(args.get("id_filters"), dict) else {},
+            "filters": args.get("filters") if isinstance(args.get("filters"), list) else [],
+        }
+    ]
+
+
 TOOL_REGISTRY: dict[str, dict[str, Any]] = {
     "list_accounts": {
         "func": list_accounts,
@@ -134,6 +158,13 @@ TOOL_REGISTRY: dict[str, dict[str, Any]] = {
         "description": "Thống kê tổng quan account",
         "arg_hints": [],
         "output_fields": ["category", "account_count", "total_records"],
+    },
+    "get_account_360": {
+        "func": get_account_360,
+        "extract_args": _args_get_account_360,
+        "description": "Lấy hồ sơ account đầy đủ gồm contacts, opportunities và contracts liên quan",
+        "arg_hints": ["keyword"],
+        "output_fields": ["account", "contacts", "opportunities", "contracts", "summary"],
     },
     "create_account": {
         "func": create_account,
@@ -155,6 +186,13 @@ TOOL_REGISTRY: dict[str, dict[str, Any]] = {
         "description": "Lấy danh sách liên hệ, có thể lọc theo từ khóa và account/customer",
         "arg_hints": ["keyword", "customer_name"],
         "output_fields": ["contact_id", "contact_name", "title", "email", "phone", "customer", "assignee", "next_action_date"],
+    },
+    "get_contact_details": {
+        "func": get_contact_details,
+        "extract_args": _args_get_contact_details,
+        "description": "Lấy chi tiết contact theo ID hoặc từ khóa",
+        "arg_hints": ["contact_id", "keyword"],
+        "output_fields": ["contact_id", "contact_name", "title", "email", "phone", "customer", "assignee", "next_action_date", "meta"],
     },
     "create_contact": {
         "func": create_contact,
@@ -218,6 +256,13 @@ TOOL_REGISTRY: dict[str, dict[str, Any]] = {
         "description": "Thống kê so sánh cơ hội theo owner",
         "arg_hints": [],
         "output_fields": ["owner_id", "owner_name", "opportunity_count", "total_estimated_value"],
+    },
+    "dynamic_query": {
+        "func": dynamic_query,
+        "extract_args": _args_dynamic_query,
+        "description": "Truy vấn động theo metadata với root table và các bảng liên quan",
+        "arg_hints": ["root_table", "keyword", "include_tables", "limit"],
+        "output_fields": ["root_table", "root_records", "related_records", "plan", "error"],
     },
 }
 

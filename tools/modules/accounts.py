@@ -3,6 +3,7 @@ from storage.repositories.modules.accounts import (
     compare_account_owner_stats,
     count_accounts,
     create_account as repo_create_account,
+    get_account_360_with_context,
     search_accounts_with_rollup,
 )
 
@@ -21,6 +22,14 @@ def get_account_overview():
     with get_db() as db:
         count = count_accounts(db)
         return [{"category": "account", "account_count": count, "total_records": count}]
+
+
+def get_account_360(keyword: str):
+    with get_db() as db:
+        details = get_account_360_with_context(db, keyword)
+        if not details:
+            return {"error": "Không tìm thấy account"}
+        return details
 
 
 def create_account(
@@ -50,5 +59,5 @@ def compare_account_stats():
         return compare_account_owner_stats(db)
 
 
-__all__ = ["list_accounts", "get_account_overview", "create_account", "compare_account_stats"]
+__all__ = ["list_accounts", "get_account_overview", "get_account_360", "create_account", "compare_account_stats"]
 

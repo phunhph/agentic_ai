@@ -1,4 +1,4 @@
-from tools.modules.contacts import compare_contact_stats_tool, create_contact, list_contacts
+from tools.modules.contacts import compare_contact_stats_tool, create_contact, get_contact_details, list_contacts
 
-__all__ = ["list_contacts", "create_contact", "compare_contact_stats_tool"]
+__all__ = ["list_contacts", "get_contact_details", "create_contact", "compare_contact_stats_tool"]
 

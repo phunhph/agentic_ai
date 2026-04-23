@@ -78,6 +78,8 @@ def find_similar_lessons(
     role: str,
     domain: str,
     limit: int = 5,
+    query_intent: str | None = None,
+    query_entities: dict | None = None,
 ) -> list[dict]:
     q = _normalize_text(query)
     q_tokens = _token_set(q)
@@ -91,6 +93,8 @@ def find_similar_lessons(
         .all()
     )
     scored: list[tuple[float, AgentKnowledgeBase, float]] = []
+    current_intent = str(query_intent or "").strip().upper()
+    current_entities = query_entities if isinstance(query_entities, dict) else {}
     for row in rows:
         text_ref = f"{row.original_query or ''} {row.correction_text or ''}".strip()
         text_score = _jaccard(q_tokens, _token_set(text_ref))
@@ -98,6 +102,36 @@ def find_similar_lessons(
             continue
         db_score = float(row.score or 0.0)
         final_score = (LEARNING_SCORE_WEIGHT * db_score) + (LEARNING_TEXT_WEIGHT * text_score)
+
+        # Intent/entity-aware adaptation: avoid reusing lessons that only "look similar" by wording.
+        row_intent = str(row.resolved_intent or "").strip().upper()
+        if current_intent and row_intent:
+            if current_intent == row_intent:
+                final_score += 0.08
+            else:
+                final_score -= 0.08
+
+        try:
+            row_entities = json.loads(row.resolved_entities_json or "{}")
+        except Exception:
+            row_entities = {}
+        if isinstance(row_entities, dict) and current_entities:
+            overlap = 0
+            mismatches = 0
+            for k in ("contract_id", "customer_name", "contact_id", "bd_owner_id", "am_sales_id", "assignee_id", "root_table"):
+                cur = str(current_entities.get(k, "")).strip().lower()
+                old = str(row_entities.get(k, "")).strip().lower()
+                if not cur or not old:
+                    continue
+                if cur == old:
+                    overlap += 1
+                else:
+                    mismatches += 1
+            if overlap:
+                final_score += min(0.1, overlap * 0.03)
+            if mismatches:
+                final_score -= min(0.12, mismatches * 0.04)
+
         if final_score < LEARNING_FINAL_MATCH_MIN:
             continue
         scored.append((final_score, row, text_score))

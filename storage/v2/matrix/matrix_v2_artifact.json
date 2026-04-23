@@ -1,0 +1,10 @@
+{
+  "version": "v2-20260423100126",
+  "train_samples": 40,
+  "trained_at": "2026-04-23T10:01:26.942634+00:00",
+  "knowledge_graph": {
+    "version": "v2-graph-20260423100126",
+    "node_count": 15,
+    "edge_count": 29
+  }
+}

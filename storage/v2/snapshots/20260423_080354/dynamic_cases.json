@@ -1,0 +1,166 @@
+[
+  {
+    "query": "Cho tôi xem danh sách systemuser",
+    "expected_tool": "list_accounts",
+    "expected_entities": [
+      "systemuser"
+    ]
+  },
+  {
+    "query": "Cho tôi xem danh sách hbl_account",
+    "expected_tool": "list_accounts",
+    "expected_entities": [
+      "hbl_account"
+    ]
+  },
+  {
+    "query": "Cho tôi xem danh sách hbl_contact",
+    "expected_tool": "list_contacts",
+    "expected_entities": [
+      "hbl_contact"
+    ]
+  },
+  {
+    "query": "Cho tôi xem danh sách hbl_opportunities",
+    "expected_tool": "list_opportunities",
+    "expected_entities": [
+      "hbl_opportunities"
+    ]
+  },
+  {
+    "query": "Cho tôi xem danh sách hbl_contract",
+    "expected_tool": "create_contract",
+    "expected_entities": [
+      "hbl_contract"
+    ]
+  },
+  {
+    "query": "Cho tôi xem danh sách choice_option",
+    "expected_tool": "list_accounts",
+    "expected_entities": [
+      "choice_option"
+    ]
+  },
+  {
+    "query": "Tìm hbl_contract liên quan đến hbl_account",
+    "expected_tool": "list_accounts",
+    "expected_entities": [
+      "hbl_contract",
+      "hbl_account"
+    ]
+  },
+  {
+    "query": "Tìm hbl_opportunities liên quan đến hbl_account",
+    "expected_tool": "get_account_360",
+    "expected_entities": [
+      "hbl_opportunities",
+      "hbl_account"
+    ]
+  },
+  {
+    "query": "Tìm hbl_contact liên quan đến hbl_account",
+    "expected_tool": "list_contacts",
+    "expected_entities": [
+      "hbl_contact",
+      "hbl_account"
+    ]
+  },
+  {
+    "query": "Khách hàng thuộc nhóm SI",
+    "expected_tool": "list_accounts",
+    "choice_group": "hbl_cust_choice_industry",
+    "choice_label": "SI",
+    "expected_choice_code": "135150001"
+  },
+  {
+    "query": "Khách hàng thuộc nhóm Singapore",
+    "expected_tool": "list_accounts",
+    "choice_group": "hbl_cust_choice_country",
+    "choice_label": "Singapore",
+    "expected_choice_code": "135150000"
+  },
+  {
+    "query": "Khách hàng thuộc nhóm <10M",
+    "expected_tool": "list_accounts",
+    "choice_group": "hbl_cust_choice_revenue",
+    "choice_label": "<10M",
+    "expected_choice_code": "135150000"
+  },
+  {
+    "query": "Khách hàng thuộc nhóm Linkedin",
+    "expected_tool": "list_accounts",
+    "choice_group": "mc_contact_source_choice",
+    "choice_label": "Linkedin",
+    "expected_choice_code": "758130000"
+  },
+  {
+    "query": "Khách hàng thuộc nhóm Following",
+    "expected_tool": "list_accounts",
+    "choice_group": "hbl_opportunities_status_choice",
+    "choice_label": "Following",
+    "expected_choice_code": "135150000"
+  },
+  {
+    "query": "Khách hàng thuộc nhóm Adapting",
+    "expected_tool": "list_accounts",
+    "choice_group": "hbl_contract_status_choice",
+    "choice_label": "Adapting",
+    "expected_choice_code": "135150000"
+  },
+  {
+    "query": "Khách hàng thuộc nhóm 1",
+    "expected_tool": "list_accounts",
+    "choice_group": "mc_monthchoice",
+    "choice_label": "1",
+    "expected_choice_code": "1"
+  },
+  {
+    "query": "list contacts",
+    "expected_tool": "list_contacts",
+    "expected_entities": [
+      "hbl_contact"
+    ]
+  },
+  {
+    "query": "cho toi toan bo thong tin ve account Demo Account 8 cung voi opp contact contract lien quan lay du lieu tong hop account contact contract lien quan thong tin chi tiet contact Demo Contact 16",
+    "expected_tool": "get_account_360",
+    "usage_count": 3,
+    "success_count": 0,
+    "last_success": false
+  },
+  {
+    "query": "cho tôi thông tin của acocutn Demo Account 8",
+    "expected_tool": "dynamic_query",
+    "usage_count": 2,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "danh sach contact co account la Demo Account 8",
+    "expected_tool": "list_contacts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "báo cáo thống kê hệ thống",
+    "expected_tool": "list_accounts",
+    "usage_count": 1,
+    "success_count": 0,
+    "last_success": false
+  },
+  {
+    "query": "thông tin account Demo Account 8",
+    "expected_tool": "list_contacts",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  },
+  {
+    "query": "thông tin accoutn Demo Account 8",
+    "expected_tool": "get_account_overview",
+    "usage_count": 1,
+    "success_count": 1,
+    "last_success": true
+  }
+]

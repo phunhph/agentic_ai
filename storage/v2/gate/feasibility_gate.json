@@ -1,0 +1,16 @@
+{
+  "passed": false,
+  "metrics": {
+    "tool_plan_correctness": 0.0,
+    "filter_fidelity": 0.0,
+    "join_correctness": 0.0,
+    "graph_coverage": 0.9667
+  },
+  "thresholds": {
+    "tool_plan_correctness": 0.8,
+    "filter_fidelity": 0.8,
+    "join_correctness": 0.8,
+    "graph_coverage": 0.8
+  },
+  "action": "rollback_to_v1"
+}

@@ -164,10 +164,101 @@ def search_accounts_with_rollup(
     ]
 
 
+def get_account_360_with_context(db: Session, keyword: str) -> dict | None:
+    accounts = search_accounts(db, keyword)
+    if not accounts:
+        return None
+    account = accounts[0]
+    account_id = account.hbl_accountid
+
+    contacts = (
+        db.query(HblContact)
+        .filter(HblContact.hbl_contact_accountid == account_id)
+        .order_by(HblContact.createdon.desc())
+        .limit(20)
+        .all()
+    )
+    opportunities = (
+        db.query(HblOpportunities)
+        .filter(HblOpportunities.hbl_opportunities_accountid == account_id)
+        .order_by(HblOpportunities.createdon.desc())
+        .limit(20)
+        .all()
+    )
+    opp_ids = [o.hbl_opportunitiesid for o in opportunities if o.hbl_opportunitiesid]
+    contracts = (
+        db.query(HblContract)
+        .filter(HblContract.hbl_contract_opportunityid.in_(opp_ids))
+        .order_by(HblContract.createdon.desc())
+        .limit(20)
+        .all()
+        if opp_ids
+        else []
+    )
+
+    owner_ids = {
+        account.cr987_account_am_salesid,
+        account.cr987_account_bdid,
+        *[c.mc_contact_assigneeid for c in contacts if c.mc_contact_assigneeid],
+        *[ct.mc_contract_assigneeid for ct in contracts if ct.mc_contract_assigneeid],
+    }
+    owner_ids = {x for x in owner_ids if x}
+    users = db.query(SystemUser).filter(SystemUser.systemuserid.in_(owner_ids)).all() if owner_ids else []
+    user_map = {u.systemuserid: u.fullname for u in users}
+
+    opp_map = {o.hbl_opportunitiesid: o.hbl_opportunities_name for o in opportunities}
+
+    return {
+        "account": {
+            "id": account.hbl_accountid,
+            "name": account.hbl_account_name,
+            "website": account.hbl_account_website,
+            "domain": account.hbl_account_special_domain,
+            "am_sales": user_map.get(account.cr987_account_am_salesid),
+            "bd_owner": user_map.get(account.cr987_account_bdid),
+        },
+        "contacts": [
+            {
+                "contact_id": c.hbl_contactid,
+                "contact_name": c.hbl_contact_name,
+                "title": c.hbl_contact_title,
+                "email": c.hbl_contact_email,
+                "phone": c.hbl_contact_phone,
+                "assignee": user_map.get(c.mc_contact_assigneeid),
+            }
+            for c in contacts
+        ],
+        "opportunities": [
+            {
+                "opportunity_id": o.hbl_opportunitiesid,
+                "opportunity_name": o.hbl_opportunities_name,
+                "owner_id": o.cr987_opportunities_ownerid,
+                "estimated_value": float(o.cr987_opportunities_estimated_value or 0.0),
+            }
+            for o in opportunities
+        ],
+        "contracts": [
+            {
+                "contract_id": ct.hbl_contractid,
+                "contract_name": ct.hbl_contract_name,
+                "opportunity": opp_map.get(ct.hbl_contract_opportunityid),
+                "assignee": user_map.get(ct.mc_contract_assigneeid),
+            }
+            for ct in contracts
+        ],
+        "summary": {
+            "contact_count": len(contacts),
+            "opportunity_count": len(opportunities),
+            "contract_count": len(contracts),
+        },
+    }
+
+
 __all__ = [
     "search_accounts",
     "count_accounts",
     "search_accounts_with_rollup",
+    "get_account_360_with_context",
     "create_account",
     "compare_account_owner_stats",
 ]

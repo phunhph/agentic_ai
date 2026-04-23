@@ -1,0 +1,244 @@
+{
+  "version": "v2-graph-20260423100126",
+  "trained_at": "2026-04-23T10:01:26.945628+00:00",
+  "node_count": 15,
+  "edge_count": 29,
+  "nodes": [
+    {
+      "id": "intent:analyze",
+      "support": 8
+    },
+    {
+      "id": "intent:retrieve",
+      "support": 9
+    },
+    {
+      "id": "intent:unknown",
+      "support": 23
+    },
+    {
+      "id": "table:hbl_account",
+      "support": 30
+    },
+    {
+      "id": "table:hbl_contact",
+      "support": 4
+    },
+    {
+      "id": "table:hbl_contract",
+      "support": 3
+    },
+    {
+      "id": "table:hbl_opportunities",
+      "support": 3
+    },
+    {
+      "id": "tool:create_contract",
+      "support": 1
+    },
+    {
+      "id": "tool:dynamic_query",
+      "support": 1
+    },
+    {
+      "id": "tool:get_account_360",
+      "support": 2
+    },
+    {
+      "id": "tool:get_account_overview",
+      "support": 1
+    },
+    {
+      "id": "tool:list_accounts",
+      "support": 12
+    },
+    {
+      "id": "tool:list_contacts",
+      "support": 5
+    },
+    {
+      "id": "tool:list_opportunities",
+      "support": 1
+    },
+    {
+      "id": "tool:v2_query_executor",
+      "support": 17
+    }
+  ],
+  "edges": [
+    {
+      "from": "intent:analyze",
+      "to": "table:hbl_account",
+      "type": "maps_to",
+      "weight": 3
+    },
+    {
+      "from": "intent:analyze",
+      "to": "table:hbl_contact",
+      "type": "maps_to",
+      "weight": 2
+    },
+    {
+      "from": "intent:analyze",
+      "to": "table:hbl_contract",
+      "type": "maps_to",
+      "weight": 1
+    },
+    {
+      "from": "intent:analyze",
+      "to": "table:hbl_opportunities",
+      "type": "maps_to",
+      "weight": 2
+    },
+    {
+      "from": "intent:analyze",
+      "to": "tool:v2_query_executor",
+      "type": "selects",
+      "weight": 8
+    },
+    {
+      "from": "intent:retrieve",
+      "to": "table:hbl_account",
+      "type": "maps_to",
+      "weight": 4
+    },
+    {
+      "from": "intent:retrieve",
+      "to": "table:hbl_contact",
+      "type": "maps_to",
+      "weight": 2
+    },
+    {
+      "from": "intent:retrieve",
+      "to": "table:hbl_contract",
+      "type": "maps_to",
+      "weight": 2
+    },
+    {
+      "from": "intent:retrieve",
+      "to": "table:hbl_opportunities",
+      "type": "maps_to",
+      "weight": 1
+    },
+    {
+      "from": "intent:retrieve",
+      "to": "tool:v2_query_executor",
+      "type": "selects",
+      "weight": 9
+    },
+    {
+      "from": "intent:unknown",
+      "to": "table:hbl_account",
+      "type": "maps_to",
+      "weight": 23
+    },
+    {
+      "from": "intent:unknown",
+      "to": "tool:create_contract",
+      "type": "selects",
+      "weight": 1
+    },
+    {
+      "from": "intent:unknown",
+      "to": "tool:dynamic_query",
+      "type": "selects",
+      "weight": 1
+    },
+    {
+      "from": "intent:unknown",
+      "to": "tool:get_account_360",
+      "type": "selects",
+      "weight": 2
+    },
+    {
+      "from": "intent:unknown",
+      "to": "tool:get_account_overview",
+      "type": "selects",
+      "weight": 1
+    },
+    {
+      "from": "intent:unknown",
+      "to": "tool:list_accounts",
+      "type": "selects",
+      "weight": 12
+    },
+    {
+      "from": "intent:unknown",
+      "to": "tool:list_contacts",
+      "type": "selects",
+      "weight": 5
+    },
+    {
+      "from": "intent:unknown",
+      "to": "tool:list_opportunities",
+      "type": "selects",
+      "weight": 1
+    },
+    {
+      "from": "table:hbl_account",
+      "to": "tool:create_contract",
+      "type": "served_by",
+      "weight": 1
+    },
+    {
+      "from": "table:hbl_account",
+      "to": "tool:dynamic_query",
+      "type": "served_by",
+      "weight": 1
+    },
+    {
+      "from": "table:hbl_account",
+      "to": "tool:get_account_360",
+      "type": "served_by",
+      "weight": 2
+    },
+    {
+      "from": "table:hbl_account",
+      "to": "tool:get_account_overview",
+      "type": "served_by",
+      "weight": 1
+    },
+    {
+      "from": "table:hbl_account",
+      "to": "tool:list_accounts",
+      "type": "served_by",
+      "weight": 12
+    },
+    {
+      "from": "table:hbl_account",
+      "to": "tool:list_contacts",
+      "type": "served_by",
+      "weight": 5
+    },
+    {
+      "from": "table:hbl_account",
+      "to": "tool:list_opportunities",
+      "type": "served_by",
+      "weight": 1
+    },
+    {
+      "from": "table:hbl_account",
+      "to": "tool:v2_query_executor",
+      "type": "served_by",
+      "weight": 7
+    },
+    {
+      "from": "table:hbl_contact",
+      "to": "tool:v2_query_executor",
+      "type": "served_by",
+      "weight": 4
+    },
+    {
+      "from": "table:hbl_contract",
+      "to": "tool:v2_query_executor",
+      "type": "served_by",
+      "weight": 3
+    },
+    {
+      "from": "table:hbl_opportunities",
+      "to": "tool:v2_query_executor",
+      "type": "served_by",
+      "weight": 3
+    }
+  ]
+}

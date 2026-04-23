@@ -1,0 +1,2377 @@
+{
+  "total_cases": 23,
+  "tool_accuracy": 0.08695652173913043,
+  "path_resolution_success": 1.0,
+  "choice_constraint_success": 1.0,
+  "entity_match_rate": 1.0,
+  "correction_reuse_hit_rate": 0.0,
+  "strict_block_rate": 0.0,
+  "decision_state_rate": {
+    "auto_execute": 1.0,
+    "ask_clarify": 0.0,
+    "safe_block": 0.0
+  },
+  "decision_reason_distribution": {
+    "sufficient_signal": 23
+  },
+  "avg_calibrated_evidence_floor": 0.4348,
+  "latency_ms": {
+    "mean": 0.605,
+    "p50": 0.463,
+    "p95": 0.862
+  },
+  "rows": [
+    {
+      "query": "Cho tôi xem danh sách systemuser",
+      "tool": "dynamic_query",
+      "expected_tool": "list_accounts",
+      "success": false,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "systemuser"
+        ],
+        "join_path": [],
+        "choice_constraints": [],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 5.0,
+          "scores": {
+            "list_accounts": 5.0,
+            "get_account_overview": 1.0,
+            "get_account_360": 1.0,
+            "create_account": 1.0,
+            "compare_account_stats": 1.0,
+            "list_contacts": 3.0,
+            "get_contact_details": 1.0,
+            "create_contact": 1.0,
+            "compare_contact_stats": 1.0,
+            "list_contracts": 3.0,
+            "create_contract": 1.0,
+            "compare_contract_stats": 1.0,
+            "get_contract_details": 1.0,
+            "list_opportunities": 3.0,
+            "create_opportunity": 1.0,
+            "compare_opportunity_stats": 1.0,
+            "dynamic_query": 1.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "Cho tôi xem danh sách systemuser",
+          "expected_tool": "list_accounts",
+          "expected_entities": [
+            "systemuser"
+          ],
+          "similarity": 1.0,
+          "success_ratio": 0.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.3,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.45,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 0.0,
+          "case_bonus": 0.0
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 1,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "keyword_search",
+          "is_multi_table_query": false,
+          "table_scope": [
+            "systemuser"
+          ],
+          "join_depth": 0,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 2.151
+    },
+    {
+      "query": "Cho tôi xem danh sách hbl_account",
+      "tool": "dynamic_query",
+      "expected_tool": "list_accounts",
+      "success": false,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "hbl_account"
+        ],
+        "join_path": [],
+        "choice_constraints": [],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 9.0,
+          "scores": {
+            "list_accounts": 9.0,
+            "get_account_overview": 5.0,
+            "get_account_360": 5.0,
+            "create_account": 5.0,
+            "compare_account_stats": 5.0,
+            "list_contacts": 7.0,
+            "get_contact_details": 1.0,
+            "create_contact": 1.0,
+            "compare_contact_stats": 1.0,
+            "list_contracts": 3.0,
+            "create_contract": 1.0,
+            "compare_contract_stats": 1.0,
+            "get_contract_details": 1.0,
+            "list_opportunities": 3.0,
+            "create_opportunity": 1.0,
+            "compare_opportunity_stats": 1.0,
+            "dynamic_query": 1.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "Cho tôi xem danh sách hbl_account",
+          "expected_tool": "list_accounts",
+          "expected_entities": [
+            "hbl_account"
+          ],
+          "similarity": 1.0,
+          "success_ratio": 0.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.3,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.45,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 0.0,
+          "case_bonus": 0.0
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 1,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "keyword_search",
+          "is_multi_table_query": false,
+          "table_scope": [
+            "hbl_account"
+          ],
+          "join_depth": 0,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 0.463
+    },
+    {
+      "query": "Cho tôi xem danh sách hbl_contact",
+      "tool": "dynamic_query",
+      "expected_tool": "list_contacts",
+      "success": false,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "hbl_contact"
+        ],
+        "join_path": [],
+        "choice_constraints": [],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 8.0,
+          "scores": {
+            "list_accounts": 3.0,
+            "get_account_overview": 1.0,
+            "get_account_360": 4.0,
+            "create_account": 1.0,
+            "compare_account_stats": 1.0,
+            "list_contacts": 8.0,
+            "get_contact_details": 5.0,
+            "create_contact": 5.0,
+            "compare_contact_stats": 5.0,
+            "list_contracts": 3.0,
+            "create_contract": 1.0,
+            "compare_contract_stats": 1.0,
+            "get_contract_details": 1.0,
+            "list_opportunities": 3.0,
+            "create_opportunity": 1.0,
+            "compare_opportunity_stats": 1.0,
+            "dynamic_query": 1.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "Cho tôi xem danh sách hbl_contact",
+          "expected_tool": "list_contacts",
+          "expected_entities": [
+            "hbl_contact"
+          ],
+          "similarity": 1.0,
+          "success_ratio": 0.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.3,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.45,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 0.0,
+          "case_bonus": 0.0
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 1,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "keyword_search",
+          "is_multi_table_query": false,
+          "table_scope": [
+            "hbl_contact"
+          ],
+          "join_depth": 0,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 0.524
+    },
+    {
+      "query": "Cho tôi xem danh sách hbl_opportunities",
+      "tool": "dynamic_query",
+      "expected_tool": "list_opportunities",
+      "success": false,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "hbl_opportunities"
+        ],
+        "join_path": [],
+        "choice_constraints": [],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 9.0,
+          "scores": {
+            "list_accounts": 3.0,
+            "get_account_overview": 1.0,
+            "get_account_360": 5.0,
+            "create_account": 1.0,
+            "compare_account_stats": 1.0,
+            "list_contacts": 3.0,
+            "get_contact_details": 1.0,
+            "create_contact": 1.0,
+            "compare_contact_stats": 1.0,
+            "list_contracts": 3.0,
+            "create_contract": 1.0,
+            "compare_contract_stats": 1.0,
+            "get_contract_details": 1.0,
+            "list_opportunities": 9.0,
+            "create_opportunity": 4.0,
+            "compare_opportunity_stats": 4.0,
+            "dynamic_query": 1.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "Cho tôi xem danh sách hbl_opportunities",
+          "expected_tool": "list_opportunities",
+          "expected_entities": [
+            "hbl_opportunities"
+          ],
+          "similarity": 1.0,
+          "success_ratio": 0.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.3,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.45,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 0.0,
+          "case_bonus": 0.0
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 1,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "keyword_search",
+          "is_multi_table_query": false,
+          "table_scope": [
+            "hbl_opportunities"
+          ],
+          "join_depth": 0,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 0.439
+    },
+    {
+      "query": "Cho tôi xem danh sách hbl_contract",
+      "tool": "create_contract",
+      "expected_tool": "create_contract",
+      "success": true,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "hbl_contract"
+        ],
+        "join_path": [],
+        "choice_constraints": [],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring",
+          "score": 7.0,
+          "scores": {
+            "list_accounts": 3.0,
+            "get_account_overview": 1.0,
+            "get_account_360": 1.0,
+            "create_account": 1.0,
+            "compare_account_stats": 1.0,
+            "list_contacts": 3.0,
+            "get_contact_details": 1.0,
+            "create_contact": 1.0,
+            "compare_contact_stats": 1.0,
+            "list_contracts": 3.0,
+            "create_contract": 7.0,
+            "compare_contract_stats": 5.0,
+            "get_contract_details": 5.0,
+            "list_opportunities": 3.0,
+            "create_opportunity": 1.0,
+            "compare_opportunity_stats": 1.0,
+            "dynamic_query": 1.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "Cho tôi xem danh sách hbl_contract",
+          "expected_tool": "create_contract",
+          "expected_entities": [
+            "hbl_contract"
+          ],
+          "similarity": 1.0,
+          "success_ratio": 0.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.3,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.45,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 0.0,
+          "case_bonus": 0.0
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 1,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "create_write",
+          "search_strategy": "intent_mapped",
+          "is_multi_table_query": false,
+          "table_scope": [
+            "hbl_contract"
+          ],
+          "join_depth": 0,
+          "has_filters": false,
+          "filter_keys": [],
+          "choice_groups": [],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 0.422
+    },
+    {
+      "query": "Cho tôi xem danh sách choice_option",
+      "tool": "dynamic_query",
+      "expected_tool": "list_accounts",
+      "success": false,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "choice_option"
+        ],
+        "join_path": [],
+        "choice_constraints": [],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 5.0,
+          "scores": {
+            "list_accounts": 5.0,
+            "get_account_overview": 1.0,
+            "get_account_360": 1.0,
+            "create_account": 1.0,
+            "compare_account_stats": 1.0,
+            "list_contacts": 3.0,
+            "get_contact_details": 1.0,
+            "create_contact": 1.0,
+            "compare_contact_stats": 1.0,
+            "list_contracts": 3.0,
+            "create_contract": 1.0,
+            "compare_contract_stats": 1.0,
+            "get_contract_details": 1.0,
+            "list_opportunities": 3.0,
+            "create_opportunity": 1.0,
+            "compare_opportunity_stats": 1.0,
+            "dynamic_query": 1.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "Cho tôi xem danh sách choice_option",
+          "expected_tool": "list_accounts",
+          "expected_entities": [
+            "choice_option"
+          ],
+          "similarity": 1.0,
+          "success_ratio": 0.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.3,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.45,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 0.0,
+          "case_bonus": 0.0
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 1,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "keyword_search",
+          "is_multi_table_query": false,
+          "table_scope": [
+            "choice_option"
+          ],
+          "join_depth": 0,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 0.392
+    },
+    {
+      "query": "Tìm hbl_contract liên quan đến hbl_account",
+      "tool": "dynamic_query",
+      "expected_tool": "list_accounts",
+      "success": false,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "hbl_contract",
+          "hbl_account"
+        ],
+        "join_path": [
+          {
+            "from_table": "hbl_contract",
+            "to_table": "hbl_opportunities",
+            "relation_type": "lookup",
+            "join_table": null,
+            "choice_group": null
+          },
+          {
+            "from_table": "hbl_opportunities",
+            "to_table": "hbl_account",
+            "relation_type": "lookup",
+            "join_table": null,
+            "choice_group": null
+          }
+        ],
+        "choice_constraints": [],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 7.0,
+          "scores": {
+            "list_accounts": 7.0,
+            "get_account_overview": 6.0,
+            "get_account_360": 7.0,
+            "create_account": 5.0,
+            "compare_account_stats": 5.0,
+            "list_contacts": 6.0,
+            "get_contact_details": 1.0,
+            "create_contact": 2.0,
+            "compare_contact_stats": 1.0,
+            "list_contracts": 1.0,
+            "create_contract": 5.0,
+            "compare_contract_stats": 5.0,
+            "get_contract_details": 5.0,
+            "list_opportunities": 1.0,
+            "create_opportunity": 1.0,
+            "compare_opportunity_stats": 1.0,
+            "dynamic_query": 3.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "Tìm hbl_contract liên quan đến hbl_account",
+          "expected_tool": "list_accounts",
+          "expected_entities": [
+            "hbl_account",
+            "hbl_contract"
+          ],
+          "similarity": 1.0,
+          "success_ratio": 0.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.3,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.45,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 0.0,
+          "case_bonus": 0.0
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 4,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "keyword_search",
+          "is_multi_table_query": true,
+          "table_scope": [
+            "hbl_contract",
+            "hbl_account"
+          ],
+          "join_depth": 2,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 0.541
+    },
+    {
+      "query": "Tìm hbl_opportunities liên quan đến hbl_account",
+      "tool": "dynamic_query",
+      "expected_tool": "get_account_360",
+      "success": false,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "hbl_opportunities",
+          "hbl_account"
+        ],
+        "join_path": [
+          {
+            "from_table": "hbl_opportunities",
+            "to_table": "hbl_account",
+            "relation_type": "lookup",
+            "join_table": null,
+            "choice_group": null
+          }
+        ],
+        "choice_constraints": [],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 13.0,
+          "scores": {
+            "list_accounts": 5.0,
+            "get_account_overview": 6.0,
+            "get_account_360": 13.0,
+            "create_account": 5.0,
+            "compare_account_stats": 5.0,
+            "list_contacts": 6.0,
+            "get_contact_details": 1.0,
+            "create_contact": 2.0,
+            "compare_contact_stats": 1.0,
+            "list_contracts": 1.0,
+            "create_contract": 1.0,
+            "compare_contract_stats": 1.0,
+            "get_contract_details": 1.0,
+            "list_opportunities": 5.0,
+            "create_opportunity": 4.0,
+            "compare_opportunity_stats": 4.0,
+            "dynamic_query": 3.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "Tìm hbl_opportunities liên quan đến hbl_account",
+          "expected_tool": "get_account_360",
+          "expected_entities": [
+            "hbl_account",
+            "hbl_opportunities"
+          ],
+          "similarity": 1.0,
+          "success_ratio": 0.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.3,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.45,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 0.0,
+          "case_bonus": 0.0
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 3,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "keyword_search",
+          "is_multi_table_query": true,
+          "table_scope": [
+            "hbl_opportunities",
+            "hbl_account"
+          ],
+          "join_depth": 1,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 0.513
+    },
+    {
+      "query": "Tìm hbl_contact liên quan đến hbl_account",
+      "tool": "dynamic_query",
+      "expected_tool": "list_contacts",
+      "success": false,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "hbl_contact",
+          "hbl_account"
+        ],
+        "join_path": [
+          {
+            "from_table": "hbl_contact",
+            "to_table": "hbl_account",
+            "relation_type": "lookup",
+            "join_table": null,
+            "choice_group": null
+          }
+        ],
+        "choice_constraints": [],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 11.0,
+          "scores": {
+            "list_accounts": 5.0,
+            "get_account_overview": 6.0,
+            "get_account_360": 10.0,
+            "create_account": 5.0,
+            "compare_account_stats": 5.0,
+            "list_contacts": 11.0,
+            "get_contact_details": 5.0,
+            "create_contact": 6.0,
+            "compare_contact_stats": 5.0,
+            "list_contracts": 1.0,
+            "create_contract": 1.0,
+            "compare_contract_stats": 1.0,
+            "get_contract_details": 1.0,
+            "list_opportunities": 1.0,
+            "create_opportunity": 1.0,
+            "compare_opportunity_stats": 1.0,
+            "dynamic_query": 3.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "Tìm hbl_contact liên quan đến hbl_account",
+          "expected_tool": "list_contacts",
+          "expected_entities": [
+            "hbl_account",
+            "hbl_contact"
+          ],
+          "similarity": 1.0,
+          "success_ratio": 0.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.3,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.45,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 0.0,
+          "case_bonus": 0.0
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 3,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "keyword_search",
+          "is_multi_table_query": true,
+          "table_scope": [
+            "hbl_contact",
+            "hbl_account"
+          ],
+          "join_depth": 1,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 0.499
+    },
+    {
+      "query": "Khách hàng thuộc nhóm SI",
+      "tool": "dynamic_query",
+      "expected_tool": "list_accounts",
+      "success": false,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "hbl_account"
+        ],
+        "join_path": [],
+        "choice_constraints": [
+          {
+            "left_table": "hbl_account",
+            "join_table": "hbl_account_industry_choice",
+            "right_table": "choice_option",
+            "left_fk": "hbl_accountid",
+            "right_fk": "choice_optionid",
+            "choice_group": "hbl_cust_choice_industry",
+            "choice_code": "135150001",
+            "choice_label": "SI"
+          }
+        ],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 5.0,
+          "scores": {
+            "list_accounts": 5.0,
+            "get_account_overview": 3.0,
+            "get_account_360": 3.0,
+            "create_account": 3.0,
+            "compare_account_stats": 3.0,
+            "list_contacts": 3.0,
+            "get_contact_details": 0.0,
+            "create_contact": 0.0,
+            "compare_contact_stats": 0.0,
+            "list_contracts": 0.0,
+            "create_contract": 0.0,
+            "compare_contract_stats": 0.0,
+            "get_contract_details": 0.0,
+            "list_opportunities": 1.0,
+            "create_opportunity": 1.0,
+            "compare_opportunity_stats": 0.0,
+            "dynamic_query": 0.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "Khách hàng thuộc nhóm SI",
+          "expected_tool": "list_accounts",
+          "expected_entities": [],
+          "similarity": 1.0,
+          "success_ratio": 0.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.3,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.45,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 0.0,
+          "case_bonus": 0.0
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 2,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "choice_constraint_lookup",
+          "is_multi_table_query": false,
+          "table_scope": [
+            "hbl_account"
+          ],
+          "join_depth": 0,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [
+            "hbl_cust_choice_industry"
+          ],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 0.426
+    },
+    {
+      "query": "Khách hàng thuộc nhóm Singapore",
+      "tool": "dynamic_query",
+      "expected_tool": "list_accounts",
+      "success": false,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "hbl_account"
+        ],
+        "join_path": [],
+        "choice_constraints": [
+          {
+            "left_table": "hbl_account",
+            "join_table": "hbl_account_country_choice",
+            "right_table": "choice_option",
+            "left_fk": "hbl_accountid",
+            "right_fk": "choice_optionid",
+            "choice_group": "hbl_cust_choice_country",
+            "choice_code": "135150000",
+            "choice_label": "Singapore"
+          }
+        ],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 5.0,
+          "scores": {
+            "list_accounts": 5.0,
+            "get_account_overview": 3.0,
+            "get_account_360": 3.0,
+            "create_account": 3.0,
+            "compare_account_stats": 3.0,
+            "list_contacts": 3.0,
+            "get_contact_details": 0.0,
+            "create_contact": 0.0,
+            "compare_contact_stats": 0.0,
+            "list_contracts": 0.0,
+            "create_contract": 0.0,
+            "compare_contract_stats": 0.0,
+            "get_contract_details": 0.0,
+            "list_opportunities": 1.0,
+            "create_opportunity": 1.0,
+            "compare_opportunity_stats": 0.0,
+            "dynamic_query": 0.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "Khách hàng thuộc nhóm Singapore",
+          "expected_tool": "list_accounts",
+          "expected_entities": [],
+          "similarity": 1.0,
+          "success_ratio": 0.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.3,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.45,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 0.0,
+          "case_bonus": 0.0
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 2,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "choice_constraint_lookup",
+          "is_multi_table_query": false,
+          "table_scope": [
+            "hbl_account"
+          ],
+          "join_depth": 0,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [
+            "hbl_cust_choice_country"
+          ],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 0.41
+    },
+    {
+      "query": "Khách hàng thuộc nhóm <10M",
+      "tool": "dynamic_query",
+      "expected_tool": "list_accounts",
+      "success": false,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "hbl_account"
+        ],
+        "join_path": [],
+        "choice_constraints": [
+          {
+            "left_table": "hbl_account",
+            "join_table": "hbl_account_revenue_choice",
+            "right_table": "choice_option",
+            "left_fk": "hbl_accountid",
+            "right_fk": "choice_optionid",
+            "choice_group": "hbl_cust_choice_revenue",
+            "choice_code": "135150000",
+            "choice_label": "<10M"
+          }
+        ],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 5.0,
+          "scores": {
+            "list_accounts": 5.0,
+            "get_account_overview": 3.0,
+            "get_account_360": 3.0,
+            "create_account": 3.0,
+            "compare_account_stats": 3.0,
+            "list_contacts": 3.0,
+            "get_contact_details": 0.0,
+            "create_contact": 0.0,
+            "compare_contact_stats": 0.0,
+            "list_contracts": 0.0,
+            "create_contract": 0.0,
+            "compare_contract_stats": 0.0,
+            "get_contract_details": 0.0,
+            "list_opportunities": 1.0,
+            "create_opportunity": 1.0,
+            "compare_opportunity_stats": 0.0,
+            "dynamic_query": 0.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "Khách hàng thuộc nhóm <10M",
+          "expected_tool": "list_accounts",
+          "expected_entities": [],
+          "similarity": 1.0,
+          "success_ratio": 0.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.3,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.45,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 0.0,
+          "case_bonus": 0.0
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 2,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "choice_constraint_lookup",
+          "is_multi_table_query": false,
+          "table_scope": [
+            "hbl_account"
+          ],
+          "join_depth": 0,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [
+            "hbl_cust_choice_revenue"
+          ],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 0.409
+    },
+    {
+      "query": "Khách hàng thuộc nhóm Linkedin",
+      "tool": "dynamic_query",
+      "expected_tool": "list_accounts",
+      "success": false,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "hbl_account"
+        ],
+        "join_path": [],
+        "choice_constraints": [
+          {
+            "left_table": "hbl_contact",
+            "join_table": "hbl_contact_source_choice_map",
+            "right_table": "choice_option",
+            "left_fk": "hbl_contactid",
+            "right_fk": "choice_optionid",
+            "choice_group": "mc_contact_source_choice",
+            "choice_code": "758130000",
+            "choice_label": "Linkedin"
+          }
+        ],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 5.0,
+          "scores": {
+            "list_accounts": 5.0,
+            "get_account_overview": 3.0,
+            "get_account_360": 3.0,
+            "create_account": 3.0,
+            "compare_account_stats": 3.0,
+            "list_contacts": 3.0,
+            "get_contact_details": 0.0,
+            "create_contact": 0.0,
+            "compare_contact_stats": 0.0,
+            "list_contracts": 0.0,
+            "create_contract": 0.0,
+            "compare_contract_stats": 0.0,
+            "get_contract_details": 0.0,
+            "list_opportunities": 1.0,
+            "create_opportunity": 1.0,
+            "compare_opportunity_stats": 0.0,
+            "dynamic_query": 0.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "Khách hàng thuộc nhóm Linkedin",
+          "expected_tool": "list_accounts",
+          "expected_entities": [],
+          "similarity": 1.0,
+          "success_ratio": 0.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.3,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.45,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 0.0,
+          "case_bonus": 0.0
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 2,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "choice_constraint_lookup",
+          "is_multi_table_query": false,
+          "table_scope": [
+            "hbl_account"
+          ],
+          "join_depth": 0,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [
+            "mc_contact_source_choice"
+          ],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 0.862
+    },
+    {
+      "query": "Khách hàng thuộc nhóm Following",
+      "tool": "dynamic_query",
+      "expected_tool": "list_accounts",
+      "success": false,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "hbl_account"
+        ],
+        "join_path": [],
+        "choice_constraints": [
+          {
+            "left_table": "hbl_opportunities",
+            "join_table": "hbl_opportunities_status_choice_map",
+            "right_table": "choice_option",
+            "left_fk": "hbl_opportunitiesid",
+            "right_fk": "choice_optionid",
+            "choice_group": "hbl_opportunities_status_choice",
+            "choice_code": "135150000",
+            "choice_label": "Following"
+          }
+        ],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 5.0,
+          "scores": {
+            "list_accounts": 5.0,
+            "get_account_overview": 3.0,
+            "get_account_360": 3.0,
+            "create_account": 3.0,
+            "compare_account_stats": 3.0,
+            "list_contacts": 3.0,
+            "get_contact_details": 0.0,
+            "create_contact": 0.0,
+            "compare_contact_stats": 0.0,
+            "list_contracts": 0.0,
+            "create_contract": 0.0,
+            "compare_contract_stats": 0.0,
+            "get_contract_details": 0.0,
+            "list_opportunities": 1.0,
+            "create_opportunity": 1.0,
+            "compare_opportunity_stats": 0.0,
+            "dynamic_query": 0.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "Khách hàng thuộc nhóm Following",
+          "expected_tool": "list_accounts",
+          "expected_entities": [],
+          "similarity": 1.0,
+          "success_ratio": 0.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.3,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.45,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 0.0,
+          "case_bonus": 0.0
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 2,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "choice_constraint_lookup",
+          "is_multi_table_query": false,
+          "table_scope": [
+            "hbl_account"
+          ],
+          "join_depth": 0,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [
+            "hbl_opportunities_status_choice"
+          ],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 1.481
+    },
+    {
+      "query": "Khách hàng thuộc nhóm Adapting",
+      "tool": "dynamic_query",
+      "expected_tool": "list_accounts",
+      "success": false,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "hbl_account"
+        ],
+        "join_path": [],
+        "choice_constraints": [
+          {
+            "left_table": "hbl_contract",
+            "join_table": "hbl_contract_status_choice_map",
+            "right_table": "choice_option",
+            "left_fk": "hbl_contractid",
+            "right_fk": "choice_optionid",
+            "choice_group": "hbl_contract_status_choice",
+            "choice_code": "135150000",
+            "choice_label": "Adapting"
+          }
+        ],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 5.0,
+          "scores": {
+            "list_accounts": 5.0,
+            "get_account_overview": 3.0,
+            "get_account_360": 3.0,
+            "create_account": 3.0,
+            "compare_account_stats": 3.0,
+            "list_contacts": 3.0,
+            "get_contact_details": 0.0,
+            "create_contact": 0.0,
+            "compare_contact_stats": 0.0,
+            "list_contracts": 0.0,
+            "create_contract": 0.0,
+            "compare_contract_stats": 0.0,
+            "get_contract_details": 0.0,
+            "list_opportunities": 1.0,
+            "create_opportunity": 1.0,
+            "compare_opportunity_stats": 0.0,
+            "dynamic_query": 0.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "Khách hàng thuộc nhóm Adapting",
+          "expected_tool": "list_accounts",
+          "expected_entities": [],
+          "similarity": 1.0,
+          "success_ratio": 0.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.3,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.45,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 0.0,
+          "case_bonus": 0.0
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 2,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "choice_constraint_lookup",
+          "is_multi_table_query": false,
+          "table_scope": [
+            "hbl_account"
+          ],
+          "join_depth": 0,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [
+            "hbl_contract_status_choice"
+          ],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 0.54
+    },
+    {
+      "query": "Khách hàng thuộc nhóm 1",
+      "tool": "dynamic_query",
+      "expected_tool": "list_accounts",
+      "success": false,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "hbl_account"
+        ],
+        "join_path": [],
+        "choice_constraints": [
+          {
+            "left_table": "hbl_contract",
+            "join_table": "hbl_contract_invoiced_month_choice_map",
+            "right_table": "choice_option",
+            "left_fk": "hbl_contractid",
+            "right_fk": "choice_optionid",
+            "choice_group": "mc_monthchoice",
+            "choice_code": "1",
+            "choice_label": "1"
+          }
+        ],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 5.0,
+          "scores": {
+            "list_accounts": 5.0,
+            "get_account_overview": 3.0,
+            "get_account_360": 3.0,
+            "create_account": 3.0,
+            "compare_account_stats": 3.0,
+            "list_contacts": 3.0,
+            "get_contact_details": 0.0,
+            "create_contact": 0.0,
+            "compare_contact_stats": 0.0,
+            "list_contracts": 0.0,
+            "create_contract": 0.0,
+            "compare_contract_stats": 0.0,
+            "get_contract_details": 0.0,
+            "list_opportunities": 1.0,
+            "create_opportunity": 1.0,
+            "compare_opportunity_stats": 0.0,
+            "dynamic_query": 0.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "Khách hàng thuộc nhóm 1",
+          "expected_tool": "list_accounts",
+          "expected_entities": [],
+          "similarity": 1.0,
+          "success_ratio": 0.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.3,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.45,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 0.0,
+          "case_bonus": 0.0
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 2,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "choice_constraint_lookup",
+          "is_multi_table_query": false,
+          "table_scope": [
+            "hbl_account"
+          ],
+          "join_depth": 0,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [
+            "mc_monthchoice"
+          ],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 0.534
+    },
+    {
+      "query": "list contacts",
+      "tool": "dynamic_query",
+      "expected_tool": "list_contacts",
+      "success": false,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "hbl_contact"
+        ],
+        "join_path": [],
+        "choice_constraints": [],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 8.0,
+          "scores": {
+            "list_accounts": 2.0,
+            "get_account_overview": 1.0,
+            "get_account_360": 5.0,
+            "create_account": 1.0,
+            "compare_account_stats": 1.0,
+            "list_contacts": 8.0,
+            "get_contact_details": 4.0,
+            "create_contact": 4.0,
+            "compare_contact_stats": 4.0,
+            "list_contracts": 2.0,
+            "create_contract": 1.0,
+            "compare_contract_stats": 1.0,
+            "get_contract_details": 1.0,
+            "list_opportunities": 2.0,
+            "create_opportunity": 1.0,
+            "compare_opportunity_stats": 1.0,
+            "dynamic_query": 1.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "list contacts",
+          "expected_tool": "list_contacts",
+          "expected_entities": [
+            "hbl_contact"
+          ],
+          "similarity": 1.0,
+          "success_ratio": 0.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.3,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.45,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 0.0,
+          "case_bonus": 0.0
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 1,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "keyword_search",
+          "is_multi_table_query": false,
+          "table_scope": [
+            "hbl_contact"
+          ],
+          "join_depth": 0,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 0.459
+    },
+    {
+      "query": "cho toi toan bo thong tin ve account Demo Account 8 cung voi opp contact contract lien quan lay du lieu tong hop account contact contract lien quan thong tin chi tiet contact Demo Contact 16",
+      "tool": "dynamic_query",
+      "expected_tool": "get_account_360",
+      "success": false,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "hbl_account",
+          "hbl_contact",
+          "hbl_contract"
+        ],
+        "join_path": [
+          {
+            "from_table": "hbl_account",
+            "to_table": "hbl_contact",
+            "relation_type": "lookup",
+            "join_table": null,
+            "choice_group": null
+          }
+        ],
+        "choice_constraints": [],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 10.0,
+          "scores": {
+            "list_accounts": 4.0,
+            "get_account_overview": 5.0,
+            "get_account_360": 10.0,
+            "create_account": 5.0,
+            "compare_account_stats": 4.0,
+            "list_contacts": 7.0,
+            "get_contact_details": 5.0,
+            "create_contact": 5.0,
+            "compare_contact_stats": 4.0,
+            "list_contracts": 0.0,
+            "create_contract": 5.0,
+            "compare_contract_stats": 4.0,
+            "get_contract_details": 5.0,
+            "list_opportunities": 0.0,
+            "create_opportunity": 0.0,
+            "compare_opportunity_stats": 0.0,
+            "dynamic_query": 1.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "cho toi toan bo thong tin ve account Demo Account 8 cung voi opp contact contract lien quan lay du lieu tong hop account contact contract lien quan thong tin chi tiet contact Demo Contact 16",
+          "expected_tool": "get_account_360",
+          "expected_entities": [],
+          "similarity": 1.0,
+          "success_ratio": 0.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.3,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.45,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 0.0,
+          "case_bonus": 0.0
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 4,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "keyword_search",
+          "is_multi_table_query": true,
+          "table_scope": [
+            "hbl_account",
+            "hbl_contact",
+            "hbl_contract"
+          ],
+          "join_depth": 1,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 0.754
+    },
+    {
+      "query": "cho tôi thông tin của acocutn Demo Account 8",
+      "tool": "dynamic_query",
+      "expected_tool": "dynamic_query",
+      "success": true,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "hbl_account"
+        ],
+        "join_path": [],
+        "choice_constraints": [],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 4.0,
+          "scores": {
+            "list_accounts": 4.0,
+            "get_account_overview": 4.0,
+            "get_account_360": 4.0,
+            "create_account": 4.0,
+            "compare_account_stats": 4.0,
+            "list_contacts": 4.0,
+            "get_contact_details": 0.0,
+            "create_contact": 0.0,
+            "compare_contact_stats": 0.0,
+            "list_contracts": 0.0,
+            "create_contract": 0.0,
+            "compare_contract_stats": 0.0,
+            "get_contract_details": 0.0,
+            "list_opportunities": 0.0,
+            "create_opportunity": 0.0,
+            "compare_opportunity_stats": 0.0,
+            "dynamic_query": 3.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "cho tôi thông tin của acocutn Demo Account 8",
+          "expected_tool": "dynamic_query",
+          "expected_entities": [],
+          "similarity": 1.0,
+          "success_ratio": 0.5
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.35,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.4,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 0.5,
+          "case_bonus": 0.05
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 1,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "keyword_search",
+          "is_multi_table_query": false,
+          "table_scope": [
+            "hbl_account"
+          ],
+          "join_depth": 0,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 0.442
+    },
+    {
+      "query": "danh sach contact co account la Demo Account 8",
+      "tool": "dynamic_query",
+      "expected_tool": "list_contacts",
+      "success": false,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "hbl_contact",
+          "hbl_account"
+        ],
+        "join_path": [
+          {
+            "from_table": "hbl_contact",
+            "to_table": "hbl_account",
+            "relation_type": "lookup",
+            "join_table": null,
+            "choice_group": null
+          }
+        ],
+        "choice_constraints": [],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 12.0,
+          "scores": {
+            "list_accounts": 5.0,
+            "get_account_overview": 4.0,
+            "get_account_360": 7.0,
+            "create_account": 4.0,
+            "compare_account_stats": 4.0,
+            "list_contacts": 12.0,
+            "get_contact_details": 4.0,
+            "create_contact": 4.0,
+            "compare_contact_stats": 4.0,
+            "list_contracts": 1.0,
+            "create_contract": 0.0,
+            "compare_contract_stats": 0.0,
+            "get_contract_details": 0.0,
+            "list_opportunities": 1.0,
+            "create_opportunity": 0.0,
+            "compare_opportunity_stats": 0.0,
+            "dynamic_query": 0.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "danh sach contact co account la Demo Account 8",
+          "expected_tool": "list_contacts",
+          "expected_entities": [],
+          "similarity": 1.0,
+          "success_ratio": 1.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.4,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.35,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 1.0,
+          "case_bonus": 0.1
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 3,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "keyword_search",
+          "is_multi_table_query": true,
+          "table_scope": [
+            "hbl_contact",
+            "hbl_account"
+          ],
+          "join_depth": 1,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 0.486
+    },
+    {
+      "query": "báo cáo thống kê hệ thống",
+      "tool": "dynamic_query",
+      "expected_tool": "list_accounts",
+      "success": false,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [],
+        "join_path": [],
+        "choice_constraints": [],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 2.0,
+          "scores": {
+            "list_accounts": 2.0,
+            "get_account_overview": 2.0,
+            "get_account_360": 0.0,
+            "create_account": 0.0,
+            "compare_account_stats": 2.0,
+            "list_contacts": 1.0,
+            "get_contact_details": 0.0,
+            "create_contact": 1.0,
+            "compare_contact_stats": 2.0,
+            "list_contracts": 0.0,
+            "create_contract": 0.0,
+            "compare_contract_stats": 2.0,
+            "get_contract_details": 0.0,
+            "list_opportunities": 0.0,
+            "create_opportunity": 0.0,
+            "compare_opportunity_stats": 2.0,
+            "dynamic_query": 0.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "báo cáo thống kê hệ thống",
+          "expected_tool": "list_accounts",
+          "expected_entities": [],
+          "similarity": 1.0,
+          "success_ratio": 0.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.1,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.45,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 0.0,
+          "case_bonus": 0.0
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 0,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "keyword_search",
+          "is_multi_table_query": false,
+          "table_scope": [],
+          "join_depth": 0,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 0.34
+    },
+    {
+      "query": "thông tin account Demo Account 8",
+      "tool": "dynamic_query",
+      "expected_tool": "list_contacts",
+      "success": false,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "hbl_account"
+        ],
+        "join_path": [],
+        "choice_constraints": [],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 8.0,
+          "scores": {
+            "list_accounts": 4.0,
+            "get_account_overview": 4.0,
+            "get_account_360": 4.0,
+            "create_account": 4.0,
+            "compare_account_stats": 4.0,
+            "list_contacts": 8.0,
+            "get_contact_details": 0.0,
+            "create_contact": 0.0,
+            "compare_contact_stats": 0.0,
+            "list_contracts": 0.0,
+            "create_contract": 0.0,
+            "compare_contract_stats": 0.0,
+            "get_contract_details": 0.0,
+            "list_opportunities": 0.0,
+            "create_opportunity": 0.0,
+            "compare_opportunity_stats": 0.0,
+            "dynamic_query": 0.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "thông tin account Demo Account 8",
+          "expected_tool": "list_contacts",
+          "expected_entities": [],
+          "similarity": 1.0,
+          "success_ratio": 1.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.4,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.35,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 1.0,
+          "case_bonus": 0.1
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 1,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "keyword_search",
+          "is_multi_table_query": false,
+          "table_scope": [
+            "hbl_account"
+          ],
+          "join_depth": 0,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 0.414
+    },
+    {
+      "query": "thông tin accoutn Demo Account 8",
+      "tool": "dynamic_query",
+      "expected_tool": "get_account_overview",
+      "success": false,
+      "entity_match": true,
+      "trace": {
+        "planner_mode": "autonomous_metadata",
+        "selected_entities": [
+          "hbl_account"
+        ],
+        "join_path": [],
+        "choice_constraints": [],
+        "knowledge_hits": [],
+        "metadata_version": "db.json",
+        "tool_selector": {
+          "reason": "autonomous scoring_routed_dynamic_query",
+          "score": 8.0,
+          "scores": {
+            "list_accounts": 4.0,
+            "get_account_overview": 4.0,
+            "get_account_360": 4.0,
+            "create_account": 4.0,
+            "compare_account_stats": 4.0,
+            "list_contacts": 8.0,
+            "get_contact_details": 0.0,
+            "create_contact": 0.0,
+            "compare_contact_stats": 0.0,
+            "list_contracts": 0.0,
+            "create_contract": 0.0,
+            "compare_contract_stats": 0.0,
+            "get_contract_details": 0.0,
+            "list_opportunities": 0.0,
+            "create_opportunity": 0.0,
+            "compare_opportunity_stats": 0.0,
+            "dynamic_query": 0.0
+          }
+        },
+        "matrix_case_match": {
+          "query": "thông tin account Demo Account 8",
+          "expected_tool": "list_contacts",
+          "expected_entities": [],
+          "similarity": 1.0,
+          "success_ratio": 1.0
+        },
+        "strict_learned_only_mode": true,
+        "bootstrap_learning": true,
+        "strict_blocked": false,
+        "strict_reason": "",
+        "knowledge_reject_reason": "",
+        "target_identities": [],
+        "decision_state": "auto_execute",
+        "decision_confidence": 0.4,
+        "decision_reason": "sufficient_signal",
+        "calibrated_evidence_floor": 0.35,
+        "evidence_calibration": {
+          "base": 0.45,
+          "avg_learning_score": 0.0,
+          "learning_bonus": 0.0,
+          "case_success_ratio": 1.0,
+          "case_bonus": 0.1
+        },
+        "rejection_signals": {
+          "knowledge_reject_reason": "",
+          "strict_reason": "",
+          "decision_reason": "sufficient_signal"
+        },
+        "complexity_score": 1,
+        "complexity_budget": 16,
+        "complexity_budget_exceeded": false,
+        "tool_call_profile": {
+          "query_mode": "metadata_dynamic_query",
+          "search_strategy": "keyword_search",
+          "is_multi_table_query": false,
+          "table_scope": [
+            "hbl_account"
+          ],
+          "join_depth": 0,
+          "has_filters": true,
+          "filter_keys": [
+            "keyword"
+          ],
+          "choice_groups": [],
+          "is_statistical": false,
+          "statistics_focus": null,
+          "is_advisory": false,
+          "advisory_mode": ""
+        }
+      },
+      "knowledge_applied": false,
+      "strict_blocked": false,
+      "decision_state": "auto_execute",
+      "decision_reason": "sufficient_signal",
+      "latency_ms": 0.42
+    }
+  ]
+}

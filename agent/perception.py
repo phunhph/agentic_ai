@@ -23,9 +23,59 @@ _ACCOUNT_NAME_PATTERNS = [
 ]
 _CREATE_VERBS = tuple(PERCEPTION_CREATE_VERBS)
 _COMPARE_VERBS = tuple(PERCEPTION_COMPARE_VERBS)
+_DETAIL_HINTS = ("chi tiet", "chi tiết", "thong tin", "thông tin", "detail")
+_ENTITY_STOP_MARKERS = (
+    " cung voi ",
+    " cùng với ",
+    " lien quan ",
+    " liên quan ",
+    " va ",
+    " và ",
+    " voi ",
+    " với ",
+    " customer ",
+    " opp ",
+    " opportunity ",
+    " opportunities ",
+    " contract ",
+    " contact ",
+    " account ",
+)
+
+
+def _extract_named_phrase_after(normalized_goal: str, token: str) -> str:
+    marker = f" {token} "
+    text = f" {normalized_goal} "
+    if marker not in text:
+        return ""
+    tail = text.split(marker, 1)[-1]
+    tail = re.sub(r"^(la|là|is|=)\s+", "", tail).strip()
+    if not tail:
+        return ""
+    cut = len(tail)
+    padded_tail = f" {tail} "
+    for stop in _ENTITY_STOP_MARKERS:
+        idx = padded_tail.find(stop)
+        if idx > 0:
+            cut = min(cut, max(0, idx - 1))
+    cleaned = tail[:cut].strip(" ,.;:-_")
+    return " ".join(cleaned.split())
 
 
 def _extract_customer_name_from_account_phrase(normalized_goal: str) -> str:
+    m = re.search(
+        r"\b(?:account|acocunt|acount|accout)\s+(.*?)(?:\s+(?:cung voi|cùng với|lien quan|liên quan|va|và|voi|với)\b|$)",
+        normalized_goal,
+        re.IGNORECASE,
+    )
+    if m:
+        candidate = re.sub(r"^(la|là|is|=)\s+", "", m.group(1)).strip(" ,.;:-_")
+        if candidate:
+            return " ".join(candidate.split())
+    for alias in ("account", "acocunt", "acount", "accout"):
+        guessed = _extract_named_phrase_after(normalized_goal, alias)
+        if guessed:
+            return guessed
     for p in _ACCOUNT_NAME_PATTERNS:
         m = p.search(normalized_goal)
         if m:
@@ -37,9 +87,7 @@ def _extract_customer_name_from_account_phrase(normalized_goal: str) -> str:
             break
     if not marker:
         return ""
-    tail = normalized_goal.split(marker, 1)[-1]
-    tail = re.sub(r"^(la|là|is)\s+", "", tail).strip()
-    return tail
+    return _extract_named_phrase_after(normalized_goal, marker)
 
 
 def _fast_path_intent_entities(normalized_goal: str) -> tuple[str, dict] | None:
@@ -50,7 +98,58 @@ def _fast_path_intent_entities(normalized_goal: str) -> tuple[str, dict] | None:
     has_account = any(t in normalized_goal for t in ("account", "accounts", "acocunt", "acount", "accout"))
     is_create = any(v in normalized_goal for v in _CREATE_VERBS)
     is_compare = any(v in normalized_goal for v in _COMPARE_VERBS)
+    is_detail = any(v in normalized_goal for v in _DETAIL_HINTS)
+    wants_all_scope = any(v in normalized_goal for v in ("toan bo", "toàn bộ", "tong hop", "tổng hợp", "lien quan", "liên quan", "cung voi", "cùng với"))
+    table_hits = [
+        ("hbl_account", has_account),
+        ("hbl_contact", has_contact),
+        ("hbl_contract", has_contract),
+        ("hbl_opportunities", has_opportunity),
+    ]
+    mentioned = [name for name, ok in table_hits if ok]
 
+    if len(mentioned) >= 2 and wants_all_scope:
+        root_table = "hbl_account" if has_account else mentioned[0]
+        include_tables = [t for t in mentioned if t != root_table]
+        keyword = _extract_customer_name_from_account_phrase(normalized_goal) if has_account else ""
+        if not keyword:
+            keyword = normalized_goal
+        return "DYNAMIC_QUERY", {
+            "root_table": root_table,
+            "include_tables": include_tables,
+            "keyword": keyword,
+            "limit": 20,
+        }
+
+    if has_account and is_detail and wants_all_scope and (has_contact or has_contract or has_opportunity):
+        keyword = _extract_customer_name_from_account_phrase(normalized_goal)
+        if not keyword:
+            keyword = normalized_goal
+            for token in ("toan bo", "toàn bộ", "thong tin", "thông tin", "ve", "về", "account", "accoutn", "accout", "acocunt", "lien quan", "liên quan", "cung voi", "cùng với"):
+                keyword = re.sub(rf"\b{re.escape(token)}\b", " ", keyword)
+            keyword = " ".join(keyword.split()).strip()
+        return "ACCOUNT_360", {"keyword": keyword} if keyword else {}
+
+    if has_contact and is_detail:
+        keyword = _extract_named_phrase_after(normalized_goal, "contact")
+        if not keyword:
+            keyword = normalized_goal
+            for token in ("chi tiet", "chi tiết", "thong tin", "thông tin", "cua", "của", "contact"):
+                keyword = re.sub(rf"\b{re.escape(token)}\b", " ", keyword)
+            keyword = " ".join(keyword.split()).strip()
+        return "CONTACT_DETAILS", {"keyword": keyword} if keyword else {}
+    if has_contract and is_detail:
+        keyword = _extract_named_phrase_after(normalized_goal, "contract")
+        if not keyword:
+            keyword = normalized_goal
+            for token in ("chi tiet", "chi tiết", "thong tin", "thông tin", "cua", "của", "contract"):
+                keyword = re.sub(rf"\b{re.escape(token)}\b", " ", keyword)
+            keyword = " ".join(keyword.split()).strip()
+        entities = {"keyword": keyword} if keyword else {}
+        contract_id_match = re.search(r"\b(?:cr\d+|[0-9a-f]{8}-[0-9a-f-]{27})\b", normalized_goal, re.IGNORECASE)
+        if contract_id_match:
+            entities["contract_id"] = contract_id_match.group(0)
+        return "CONTRACT_DETAILS", entities
     if has_contact and is_create:
         return "CONTACT_CREATE", {}
     if has_contact and is_compare:
@@ -88,6 +187,32 @@ def _heuristic_fallback_intent(normalized_goal: str, intent: str, entities: dict
     heuristic_trace = {"applied": False, "reason": ""}
     if intent != "UNKNOWN":
         return intent, out, heuristic_trace
+
+    if (
+        "account" in normalized_goal
+        and any(v in normalized_goal for v in _DETAIL_HINTS)
+        and any(v in normalized_goal for v in ("toan bo", "toàn bộ", "lien quan", "liên quan", "cung voi", "cùng với"))
+        and any(t in normalized_goal for t in ("contact", "contract", "opportunity", "opportunities", "opp"))
+    ):
+        guessed = _extract_customer_name_from_account_phrase(normalized_goal)
+        if guessed:
+            out["keyword"] = guessed
+        heuristic_trace["applied"] = True
+        heuristic_trace["reason"] = "fallback_from_UNKNOWN_to_ACCOUNT_360"
+        return "ACCOUNT_360", out, heuristic_trace
+
+    if any(v in normalized_goal for v in ("toan bo", "toàn bộ", "lien quan", "liên quan", "cung voi", "cùng với")):
+        extracted = extract_entities(normalized_goal)
+        tables = extracted.get("mentioned_tables", []) if isinstance(extracted, dict) else []
+        if isinstance(tables, list) and len(tables) >= 2:
+            root_table = "hbl_account" if "hbl_account" in tables else str(tables[0])
+            out["root_table"] = root_table
+            out["include_tables"] = [str(t) for t in tables if str(t) and str(t) != root_table]
+            out["keyword"] = _extract_customer_name_from_account_phrase(normalized_goal) or normalized_goal
+            out["limit"] = 20
+            heuristic_trace["applied"] = True
+            heuristic_trace["reason"] = "fallback_from_UNKNOWN_to_DYNAMIC_QUERY"
+            return "DYNAMIC_QUERY", out, heuristic_trace
 
     if any(v in normalized_goal for v in _CREATE_VERBS) and any(
         t in normalized_goal for t in ("account", "accounts", "acocunt", "acount", "accout")
@@ -129,7 +254,9 @@ def _heuristic_fallback_intent(normalized_goal: str, intent: str, entities: dict
         heuristic_trace["reason"] = "fallback_from_UNKNOWN_to_CONTRACT_COMPARE"
         return "CONTRACT_COMPARE", out, heuristic_trace
 
-    if out.get("contract_id"):
+    if "contact" in normalized_goal and any(v in normalized_goal for v in _DETAIL_HINTS):
+        inferred_tool = "get_contact_details"
+    elif out.get("contract_id"):
         inferred_tool = "get_contract_details"
     else:
         extracted = extract_entities(normalized_goal)

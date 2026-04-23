@@ -77,6 +77,59 @@ def list_contacts_with_context(db: Session, keyword: str = "", customer_name: st
     ]
 
 
+def get_contact_details_with_context(
+    db: Session,
+    contact_id: str | None = None,
+    keyword: str | None = None,
+) -> dict | None:
+    query = db.query(HblContact).outerjoin(HblAccount, HblContact.hbl_contact_accountid == HblAccount.hbl_accountid)
+    row: HblContact | None = None
+    cid = str(contact_id or "").strip()
+    if cid:
+        row = query.filter(HblContact.hbl_contactid == cid).first()
+    if not row:
+        kw = str(keyword or "").strip()
+        if not kw:
+            return None
+        token = f"%{kw}%"
+        row = (
+            query.filter(
+                (HblContact.hbl_contact_name.ilike(token))
+                | (HblContact.hbl_contact_email.ilike(token))
+                | (HblContact.hbl_contact_phone.ilike(token))
+            )
+            .order_by(HblContact.createdon.desc())
+            .first()
+        )
+    if not row:
+        return None
+
+    account = (
+        db.query(HblAccount).filter(HblAccount.hbl_accountid == row.hbl_contact_accountid).first()
+        if row.hbl_contact_accountid
+        else None
+    )
+    assignee = (
+        db.query(SystemUser).filter(SystemUser.systemuserid == row.mc_contact_assigneeid).first()
+        if row.mc_contact_assigneeid
+        else None
+    )
+    return {
+        "contact_id": row.hbl_contactid,
+        "contact_name": row.hbl_contact_name,
+        "title": row.hbl_contact_title,
+        "email": row.hbl_contact_email,
+        "phone": row.hbl_contact_phone,
+        "customer": account.hbl_account_name if account else None,
+        "assignee": assignee.fullname if assignee else None,
+        "next_action_date": str(row.hbl_contact_next_action_date) if row.hbl_contact_next_action_date else None,
+        "meta": {
+            "created_on": str(row.createdon) if row.createdon else None,
+            "modified_on": str(row.modifiedon) if row.modifiedon else None,
+        },
+    }
+
+
 def create_contact(
     db: Session,
     *,
@@ -150,6 +203,7 @@ def compare_contact_stats(db: Session) -> list[dict]:
 
 __all__ = [
     "list_contacts_with_context",
+    "get_contact_details_with_context",
     "create_contact",
     "compare_contact_stats",
 ]

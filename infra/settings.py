@@ -25,7 +25,7 @@ APP_HOST = os.getenv("APP_HOST", "127.0.0.1")
 APP_PORT = get_env_int("APP_PORT", 8000)
 
 DATABASE_URL = os.getenv(
-    "DATABASE_URL", "postgresql://postgres:123456@localhost:5432/agent_db"
+    "DATABASE_URL", "postgresql://postgres:123456@localhost:5432/agentic_store"
 )
 
 OLLAMA_CHAT_MODEL = os.getenv("OLLAMA_CHAT_MODEL", "llama3:latest")
@@ -68,7 +68,7 @@ MATRIX_ALLOWED_TOOLS = {
     t.strip()
     for t in os.getenv(
         "MATRIX_ALLOWED_TOOLS",
-        "list_accounts,create_account,compare_account_stats,list_contacts,create_contact,compare_contact_stats,list_contracts,create_contract,compare_contract_stats,get_contract_details,list_opportunities,create_opportunity,compare_opportunity_stats,get_account_overview,final_answer",
+        "list_accounts,create_account,compare_account_stats,list_contacts,get_contact_details,create_contact,compare_contact_stats,list_contracts,create_contract,compare_contract_stats,get_contract_details,list_opportunities,create_opportunity,compare_opportunity_stats,get_account_overview,get_account_360,dynamic_query,final_answer",
     ).split(",")
     if t.strip()
 }
@@ -114,3 +114,6 @@ PLANNER_GENERIC_LIST_KEYWORDS = set(
     )
 )
 PLANNER_COMPLEXITY_BUDGET = get_env_int("PLANNER_COMPLEXITY_BUDGET", 16)
+V2_GATE_MIN_PLAN_CORRECTNESS = get_env_float("V2_GATE_MIN_PLAN_CORRECTNESS", 0.8)
+V2_GATE_MIN_FILTER_FIDELITY = get_env_float("V2_GATE_MIN_FILTER_FIDELITY", 0.8)
+V2_GATE_MIN_JOIN_CORRECTNESS = get_env_float("V2_GATE_MIN_JOIN_CORRECTNESS", 0.8)

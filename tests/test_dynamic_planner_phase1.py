@@ -101,6 +101,22 @@ def test_resolve_decision_state_returns_safe_block_when_strict_blocked():
     assert reason == "strict_learned_only_mode_blocked"
 
 
+def test_resolve_decision_state_allows_execute_when_intent_and_scope_are_clear():
+    state, confidence, reason = planner._resolve_decision_state(
+        strict_blocked=False,
+        current_intent="ACCOUNT_360",
+        mentioned_tables=["hbl_account", "hbl_contact"],
+        entities={"keyword": "Demo Account 8"},
+        knowledge_hits=[],
+        case_similarity=0.0,
+        case_success_ratio=0.0,
+        calibrated_evidence_floor=0.45,
+    )
+    assert state == "auto_execute"
+    assert 0.0 <= confidence <= 1.0
+    assert reason == "sufficient_signal"
+
+
 def test_compute_calibrated_evidence_floor_decreases_with_feedback():
     floor, details = planner._compute_calibrated_evidence_floor(
         knowledge_hits=[{"score": 0.8}, {"final_match_score": 0.9}],
@@ -119,3 +135,60 @@ def test_estimate_planner_complexity_is_bounded():
         join_path=[{}, {}, {}, {}, {}],
     )
     assert score == 16
+
+
+def test_tool_call_profile_marks_statistical_query():
+    profile = planner._build_tool_call_profile(
+        tool="compare_contract_stats",
+        args={},
+        current_intent="CONTRACT_COMPARE",
+        mentioned_tables=["hbl_contract"],
+        join_path=[],
+        choice_constraints=[],
+        decision_state="auto_execute",
+    )
+    assert profile["query_mode"] == "statistical_analysis"
+    assert profile["is_statistical"] is True
+    assert profile["statistics_focus"] == "contract_count_and_value_by_assignee"
+
+
+def test_tool_call_profile_marks_multi_table_filtering():
+    profile = planner._build_tool_call_profile(
+        tool="list_contacts",
+        args={"customer_name": "Demo Account 1"},
+        current_intent="CONTACT_LIST",
+        mentioned_tables=["hbl_contact", "hbl_account"],
+        join_path=[{"from_table": "hbl_contact", "to_table": "hbl_account"}],
+        choice_constraints=[],
+        decision_state="auto_execute",
+    )
+    assert profile["is_multi_table_query"] is True
+    assert profile["search_strategy"] == "relationship_filter"
+    assert "customer_name" in profile["filter_keys"]
+
+
+def test_tool_call_profile_marks_multi_entity_overview():
+    profile = planner._build_tool_call_profile(
+        tool="get_account_360",
+        args={"keyword": "Demo Account 8"},
+        current_intent="ACCOUNT_360",
+        mentioned_tables=["hbl_account", "hbl_contact", "hbl_opportunities", "hbl_contract"],
+        join_path=[{"from_table": "hbl_account", "to_table": "hbl_contact"}],
+        choice_constraints=[],
+        decision_state="auto_execute",
+    )
+    assert profile["query_mode"] == "multi_entity_overview"
+    assert profile["is_multi_table_query"] is True
+
+
+def test_tool_call_profile_marks_dynamic_query_mode():
+    profile = planner._build_tool_call_profile(
+        tool="dynamic_query",
+        args={"root_table": "hbl_account", "include_tables": ["hbl_contact", "hbl_contract"]},
+        current_intent="DYNAMIC_QUERY",
+        mentioned_tables=["hbl_account", "hbl_contact", "hbl_contract"],
+        join_path=[],
+        choice_constraints=[],
+        decision_state="auto_execute",
+    )
+    assert profile["query_mode"] == "metadata_dynamic_query"
