@@ -1,16 +1,20 @@
 {
-  "version": "v2-graph-20260423100126",
-  "trained_at": "2026-04-23T10:01:26.945628+00:00",
-  "node_count": 15,
-  "edge_count": 29,
+  "version": "v2-graph-20260423100731",
+  "trained_at": "2026-04-23T10:07:31.579338+00:00",
+  "node_count": 16,
+  "edge_count": 31,
   "nodes": [
     {
       "id": "intent:analyze",
       "support": 8
     },
     {
+      "id": "intent:create",
+      "support": 1
+    },
+    {
       "id": "intent:retrieve",
-      "support": 9
+      "support": 10
     },
     {
       "id": "intent:unknown",
@@ -18,7 +22,7 @@
     },
     {
       "id": "table:hbl_account",
-      "support": 30
+      "support": 31
     },
     {
       "id": "table:hbl_contact",
@@ -30,7 +34,7 @@
     },
     {
       "id": "table:hbl_opportunities",
-      "support": 3
+      "support": 4
     },
     {
       "id": "tool:create_contract",
@@ -62,7 +66,7 @@
     },
     {
       "id": "tool:v2_query_executor",
-      "support": 17
+      "support": 19
     }
   ],
   "edges": [
@@ -97,6 +101,18 @@
       "weight": 8
     },
     {
+      "from": "intent:create",
+      "to": "table:hbl_account",
+      "type": "maps_to",
+      "weight": 1
+    },
+    {
+      "from": "intent:create",
+      "to": "tool:v2_query_executor",
+      "type": "selects",
+      "weight": 1
+    },
+    {
       "from": "intent:retrieve",
       "to": "table:hbl_account",
       "type": "maps_to",
@@ -118,13 +134,13 @@
       "from": "intent:retrieve",
       "to": "table:hbl_opportunities",
       "type": "maps_to",
-      "weight": 1
+      "weight": 2
     },
     {
       "from": "intent:retrieve",
       "to": "tool:v2_query_executor",
       "type": "selects",
-      "weight": 9
+      "weight": 10
     },
     {
       "from": "intent:unknown",
@@ -220,7 +236,7 @@
       "from": "table:hbl_account",
       "to": "tool:v2_query_executor",
       "type": "served_by",
-      "weight": 7
+      "weight": 8
     },
     {
       "from": "table:hbl_contact",
@@ -238,7 +254,7 @@
       "from": "table:hbl_opportunities",
       "to": "tool:v2_query_executor",
       "type": "served_by",
-      "weight": 3
+      "weight": 4
     }
   ]
 }

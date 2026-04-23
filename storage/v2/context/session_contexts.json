@@ -46,5 +46,29 @@
     "join_path": [],
     "last_query": "thông tin contact Demo Contact 2",
     "last_normalized_query": "thông tin contact Demo Contact 2"
+  },
+  "final-check": {
+    "ts": 1776938775.3020594,
+    "intent": "retrieve",
+    "entities": [
+      "hbl_opportunities"
+    ],
+    "request_filters": [],
+    "root_table": "hbl_opportunities",
+    "join_path": [],
+    "last_query": "danh sách opportunities",
+    "last_normalized_query": "danh sách opportunities"
+  },
+  "v2-1776938800302-lui98myu": {
+    "ts": 1776938880.5791512,
+    "intent": "retrieve",
+    "entities": [
+      "hbl_account"
+    ],
+    "request_filters": [],
+    "root_table": "hbl_account",
+    "join_path": [],
+    "last_query": "danh sách account",
+    "last_normalized_query": "danh sách account"
   }
 }
