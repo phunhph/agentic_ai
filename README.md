@@ -49,6 +49,22 @@ graph TD
     L2 --> R
 ```
 
+### Lean Flow Spec (ý nghĩa chuẩn)
+
+`Lean flow` trong hệ thống này nghĩa là: **ít bước nhất nhưng vẫn đúng và an toàn**.
+
+- Không đủ tín hiệu -> `ask_clarify` (không query DB bừa).
+- Đủ tín hiệu -> chạy đúng 1 tool chính, hạn chế loop không cần thiết.
+- Có kết quả hợp lệ -> kết thúc sớm (short-circuit).
+- Sai/mismatch -> ghi tín hiệu lỗi để học lại thay vì thêm heuristic phức tạp ngay.
+
+Mục tiêu của lean flow:
+
+- Giảm latency (`p50/p95`).
+- Giảm số lần retry loop không tạo giá trị.
+- Tăng tỉ lệ đúng ngay lần đầu (`first-pass`).
+- Giữ an toàn (không suy diễn khi bằng chứng yếu).
+
 ### Correctness checklist (pass/fail)
 
 - `PASS` khi: tool đúng, entity/filter khớp, path/choice đúng, không vi phạm policy/strict.
@@ -60,6 +76,55 @@ graph TD
   - `choice_constraint_success`
   - `strict_block_rate`
   - `decision_state_rate`
+
+## Learning Points In Code (học ở đâu)
+
+Các điểm hệ thống thực sự "học" theo runtime:
+
+1. **Recall tri thức cũ trước khi plan**
+   - `agent/orchestrator.py` gọi `find_similar_lessons(...)`.
+   - `dynamic_metadata/planner.py` nhận `knowledge_hits` để reuse nếu tương thích.
+
+2. **Học từ kết quả action thành công/thất bại**
+   - `agent/orchestrator.py` gọi `mark_lessons_outcome(...)`.
+   - DB lesson score/usage được cập nhật ở `storage/repositories/knowledge_repository.py`.
+
+3. **Phạt tri thức sai**
+   - Khi entity/filter mismatch: `penalize_lessons(...)` + `prune_low_confidence_lessons(...)`.
+   - Tránh lesson kém chất lượng tiếp tục ảnh hưởng quyết định sau.
+
+4. **Học cấp matrix case**
+   - `upsert_case_from_run(...)` trong `dynamic_metadata/matrix_learning.py`.
+   - Tăng/giảm độ tin cậy case qua `usage_count`, `success_count`, `penalize_case(...)`.
+
+5. **Đánh giá chất lượng học**
+   - `refresh_matrix_eval_report()` và `scripts/eval_dynamic_cases.py`.
+   - Xuất báo cáo ở `storage/dynamic_eval_report.json`.
+
+## Input -> Analysis -> Decision -> Verification (đặc tả rõ)
+
+1. **Input acceptance**
+   - Chuẩn hóa query và role/domain ở `agent/perception.py`.
+   - Trích xuất `intent`, `entities`, `request_contract`.
+
+2. **Analysis**
+   - Planner chạy theo thứ tự:
+     - learning-first reuse,
+     - intent fast-path,
+     - autonomous metadata scoring fallback.
+   - Sinh `trace` để audit quyết định.
+
+3. **Decision**
+   - Planner trả:
+     - `tool`, `args`
+     - `decision_state`
+     - `decision_confidence`
+     - `decision_reason`
+
+4. **Verification (đúng/sai)**
+   - So khớp kết quả với entity/filter và expectation.
+   - Nếu sai -> penalty/prune + reject signals.
+   - Nếu đúng -> reinforce score + cập nhật case.
 
 ### Runtime behavior
 
