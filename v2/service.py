@@ -836,14 +836,35 @@ def run_v2_pipeline(query: str, role: str = "DEFAULT", session_id: str = "", lan
     else:
         learned = {"score_breakdown": {}, "firewall_decision": firewall_event.get("decision")}
     before_eval = evaluate_matrix_v2()
-    if evidence.get("eligible") and firewall_event.get("decision") == "allow":
+    # Understanding-first training: only promote samples that represent
+    # successful, trusted execution behavior to avoid teaching wrong patterns.
+    can_promote_sample = bool(
+        evidence.get("eligible")
+        and firewall_event.get("decision") == "allow"
+        and execution.success
+        and trust_gate.get("trusted", False)
+    )
+    if can_promote_sample:
         appended_sample = append_trainset_sample(runtime_sample)
     else:
+        if not execution.success:
+            blocked_reason = "non_success_execution_sample"
+        elif not trust_gate.get("trusted", False):
+            blocked_reason = "untrusted_runtime_sample"
+        elif firewall_event.get("decision") != "allow":
+            blocked_reason = "blocked_by_firewall"
+        else:
+            blocked_reason = "insufficient_learning_evidence"
         appended_sample = {
             "status": "skipped",
-            "reason": "blocked_by_firewall" if firewall_event.get("decision") != "allow" else "insufficient_learning_evidence",
+            "reason": blocked_reason,
             "evidence": evidence,
             "firewall": firewall_event,
+            "quality_gate": {
+                "execution_success": bool(execution.success),
+                "trust_gate": bool(trust_gate.get("trusted", False)),
+                "firewall_allow": firewall_event.get("decision") == "allow",
+            },
         }
     if appended_sample.get("status") == "appended":
         train_artifact = train_matrix_v2()

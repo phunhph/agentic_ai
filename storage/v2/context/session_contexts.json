@@ -1,12 +1,157 @@
 {
-  "v2-1777018471738-ethkmxne": {
-    "ts": 1777018471.742131,
-    "intent": "",
-    "entities": [],
-    "request_filters": [],
-    "root_table": "",
+  "auto-train-detail_and_followup_contact-r1": {
+    "ts": 1777020993.270275,
+    "intent": "retrieve",
+    "entities": [
+      "hbl_contact"
+    ],
+    "request_filters": [
+      {
+        "field": "hbl_contact.hbl_contact_name",
+        "op": "eq",
+        "value": "<redacted>"
+      }
+    ],
+    "root_table": "hbl_contact",
     "join_path": [],
-    "last_query": "",
-    "last_normalized_query": ""
+    "last_query": "chi tiết contact Demo Contact <num>",
+    "last_normalized_query": "chi tiết contact Demo Contact <num>"
+  },
+  "auto-train-detail_and_followup_contract-r1": {
+    "ts": 1777021221.5975983,
+    "intent": "retrieve",
+    "entities": [
+      "hbl_contract"
+    ],
+    "request_filters": [
+      {
+        "field": "hbl_contract.hbl_contract_name",
+        "op": "eq",
+        "value": "<redacted>"
+      }
+    ],
+    "root_table": "hbl_contract",
+    "join_path": [],
+    "last_query": "chi tiết contract Demo Contract <num> nhé",
+    "last_normalized_query": "chi tiết contract Demo Contract <num> nhé"
+  },
+  "auto-train-detail_and_followup_opportunity-r1": {
+    "ts": 1777021499.933317,
+    "intent": "retrieve",
+    "entities": [
+      "hbl_opportunities"
+    ],
+    "request_filters": [
+      {
+        "field": "hbl_opportunities.hbl_opportunities_name",
+        "op": "eq",
+        "value": "<redacted>"
+      }
+    ],
+    "root_table": "hbl_opportunities",
+    "join_path": [],
+    "last_query": "chi tiết opportunity demo opportunity <num>",
+    "last_normalized_query": "chi tiết opportunity demo opportunity <num>"
+  },
+  "auto-train-create_and_update_like-r1": {
+    "ts": 1777021669.117711,
+    "intent": "retrieve",
+    "entities": [
+      "hbl_opportunities"
+    ],
+    "request_filters": [
+      {
+        "field": "hbl_opportunities.hbl_opportunities_name",
+        "op": "eq",
+        "value": "<redacted>"
+      }
+    ],
+    "root_table": "hbl_opportunities",
+    "join_path": [],
+    "last_query": "chi tiết opportunity Demo Opportunity <num>",
+    "last_normalized_query": "chi tiết opportunity Demo Opportunity <num>"
+  },
+  "auto-train-english_variants-r1": {
+    "ts": 1777022038.994963,
+    "intent": "retrieve",
+    "entities": [
+      "hbl_contract"
+    ],
+    "request_filters": [
+      {
+        "field": "hbl_contract.hbl_contract_name",
+        "op": "eq",
+        "value": "<redacted>"
+      }
+    ],
+    "root_table": "hbl_contract",
+    "join_path": [],
+    "last_query": "details contract Demo Contract <num>",
+    "last_normalized_query": "details contract Demo Contract <num>"
+  },
+  "auto-train-mixed_noise_real_chat_vi-r1": {
+    "ts": 1777020720.3308861,
+    "intent": "retrieve",
+    "entities": [
+      "hbl_account"
+    ],
+    "request_filters": [
+      {
+        "field": "hbl_account.hbl_account_name",
+        "op": "contains",
+        "value": "<redacted>"
+      }
+    ],
+    "root_table": "hbl_account",
+    "join_path": [],
+    "last_query": "ok lấy chi tiết account đó luôn",
+    "last_normalized_query": "ok lấy chi tiết account đó luôn"
+  },
+  "auto-train-cross_table_chain_requests-r1": {
+    "ts": 1777020785.9645607,
+    "intent": "analyze",
+    "entities": [
+      "hbl_account",
+      "hbl_contract"
+    ],
+    "request_filters": [
+      {
+        "field": "hbl_contract.hbl_account_name",
+        "op": "eq",
+        "value": "<redacted>"
+      },
+      {
+        "field": "hbl_account.hbl_account_name",
+        "op": "eq",
+        "value": "<redacted>"
+      }
+    ],
+    "root_table": "hbl_contract",
+    "join_path": [
+      {
+        "from_table": "hbl_contract",
+        "to_table": "hbl_opportunities",
+        "relation_type": "metadata_lookup_path"
+      },
+      {
+        "from_table": "hbl_opportunities",
+        "to_table": "hbl_account",
+        "relation_type": "metadata_lookup_path"
+      }
+    ],
+    "last_query": "lấy contract liên quan account Demo Account <num>",
+    "last_normalized_query": "lấy contract liên quan account Demo Account <num>"
+  },
+  "auto-train-ambiguous_cases_for_clarify-r1": {
+    "ts": 1777022258.4830985,
+    "intent": "analyze",
+    "entities": [
+      "hbl_contact"
+    ],
+    "request_filters": [],
+    "root_table": "hbl_contact",
+    "join_path": [],
+    "last_query": "lấy thông tin liên quan giúp mình",
+    "last_normalized_query": "lấy thông tin liên quan giúp mình"
   }
 }
