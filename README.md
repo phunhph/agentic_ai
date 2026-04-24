@@ -11,20 +11,33 @@
 
 ## Runtime Flow (v2)
 
-Luồng runtime được tách thành 2 nhánh rõ ràng: `execute` hoặc `clarify`.
+Thiết kế theo nguyên tắc: **quyết định an toàn trước, thực thi sau**.  
+Mỗi request chỉ đi vào 1 trong 2 nhánh cuối: `execute` hoặc `clarify`.
 
 ```mermaid
-flowchart LR
-    U[User Query] --> I[Ingest\nnormalize + intent + entities + filters + ambiguity]
-    I --> R[Reason\nchoose root/tool + planner trace]
-    R --> P[Plan\ncompile execution plan from metadata]
-    P --> G{Trust Gate\nschema + consistency}
-    G -->|Pass| X[Execute\nquery/update/aggregate]
-    G -->|Fail| C[Clarify\nreturn safe recommendation]
-    X --> O[Response Composition\nprofessional text + tactician + lean]
+flowchart TD
+    U[1. User Query] --> I[2. Ingest\nintent/entities/filters/ambiguity]
+    I --> R[3. Reason\nroot/tool/planner trace]
+    R --> P[4. Plan\nmetadata-normalized plan]
+    P --> G{5. Trust Gate\nschema + reasoning consistency}
+    G -->|Pass| X[6A. Execute\nquery/update/aggregate]
+    G -->|Fail| C[6B. Clarify\nsafe recommendation]
+    X --> O[7. Response\nprofessional + tactician + lean]
     C --> O
-    O --> U
+    O --> M[8. Learn\nfirewall + anti-rote + eval]
 ```
+
+### Runtime Step Map
+
+| Step | Input | Gate / Rule | Output |
+|---|---|---|---|
+| Ingest | raw query | parse + ambiguity estimate | structured request |
+| Reason | structured request | select root/tool | planner trace |
+| Plan | reason trace + metadata | normalize fields/joins | execution plan |
+| Trust Gate | execution plan | schema valid + consistency pass | `trusted` / `untrusted` |
+| Execute / Clarify | trusted flag | trusted -> execute, else clarify | result or clarification |
+| Respond | result/clarify payload | tactician + lean presentation | final assistant message |
+| Learn | runtime signals | firewall + anti-rote | append/skip/quarantine + eval |
 
 ## Flow Sitemap (Expand/Collapse)
 
