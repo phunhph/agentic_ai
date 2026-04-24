@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from v2.contracts import LessonOutcome
+from v2.learn.firewall import redact_runtime_sample
 
 LESSON_LOG_PATH = Path("storage/v2/lessons/lesson_log_v2.jsonl")
 
@@ -27,6 +28,7 @@ def _score_breakdown(outcome: LessonOutcome) -> dict[str, float]:
 def record_outcome(outcome: LessonOutcome) -> dict:
     LESSON_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
     payload = asdict(outcome)
+    payload = redact_runtime_sample(payload)
     payload["score_breakdown"] = _score_breakdown(outcome)
     payload["logged_at"] = datetime.now(UTC).isoformat()
     with LESSON_LOG_PATH.open("a", encoding="utf-8") as f:

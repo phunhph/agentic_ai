@@ -12,6 +12,9 @@ import sqlalchemy as sa
 from storage.database import engine
 from v2.contracts import ExecutionPlan, ExecutionResult
 from v2.execute.validator import validate_execution_plan
+from v2.metadata import MetadataProvider
+
+_PROVIDER = MetadataProvider()
 
 
 def _serialize_value(value: Any) -> Any:
@@ -146,7 +149,53 @@ def _build_condition(col: sa.Column, op: str, value: Any):
     return col == value
 
 
+def execute_update_plan(plan: ExecutionPlan) -> ExecutionResult:
+    metadata = sa.MetaData()
+    table = sa.Table(plan.root_table, metadata, autoload_with=engine)
+    
+    update_values = {}
+    for k, v in plan.update_data.items():
+        # Lean Metadata Discovery: Resolve BANT logic keys to physical columns
+        col_name = _PROVIDER.resolve_bant_column(plan.root_table, k) or k
+        if col_name in table.c:
+            update_values[col_name] = v
+            
+    if not update_values:
+        return ExecutionResult(data=[], success=False, execution_trace={"error": "no_valid_fields_to_update"})
+
+    # Build WHERE clause
+    conditions = []
+    for f in plan.where_filters:
+        if f.field.startswith(f"{plan.root_table}."):
+            col_name = f.field.split(".", 1)[1]
+            if col_name in table.c:
+                conditions.append(_build_condition(table.c[col_name], f.op, f.value))
+
+    if not conditions:
+        return ExecutionResult(data=[], success=False, execution_trace={"error": "missing_where_clause_for_update"})
+
+    stmt = sa.update(table).where(sa.and_(*conditions)).values(**update_values)
+    
+    with engine.connect() as conn:
+        res = conn.execute(stmt)
+        conn.commit()
+    
+    return ExecutionResult(
+        data=[{"updated_rows": res.rowcount}],
+        success=res.rowcount > 0,
+        execution_trace={
+            "plan": asdict(plan),
+            "sql_summary": str(stmt),
+            "updated_count": res.rowcount,
+            "raw_result": {"mode": "db_update"},
+        },
+    )
+
+
 def execute_plan(plan: ExecutionPlan) -> ExecutionResult:
+    if plan.update_data:
+        return execute_update_plan(plan)
+        
     validation = validate_execution_plan(plan)
     if not validation.ok:
         return ExecutionResult(

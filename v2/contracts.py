@@ -21,9 +21,11 @@ class IngestResult:
     intent: str
     entities: list[str]
     request_filters: list[RequestFilter] = field(default_factory=list)
+    update_data: dict[str, Any] = field(default_factory=dict)
     ambiguity_score: float = 0.0
     role: str = "DEFAULT"
     domain: str = "general"
+    persona_context: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -31,10 +33,12 @@ class ExecutionPlan:
     root_table: str
     join_path: list[dict[str, Any]] = field(default_factory=list)
     where_filters: list[RequestFilter] = field(default_factory=list)
+    update_data: dict[str, Any] = field(default_factory=dict)
     aggregate_ops: list[dict[str, Any]] = field(default_factory=list)
     limit: int = 0
     include_tables: list[str] = field(default_factory=list)
     keyword: str = ""
+    tactical_context: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass

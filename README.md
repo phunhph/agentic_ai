@@ -3,29 +3,29 @@
 `Agentic Core` là hệ thống AI vận hành nghiệp vụ theo mô hình `Perceive -> Reason -> Act -> Eval`, đã được nâng cấp với:
 
 - Dynamic metadata planner ưu tiên học từ kinh nghiệm trước.
-- Uncertainty manager (`auto_execute`, `ask_clarify`, `safe_block`).
+- Uncertainty manager (`auto_execute`, `ask_clarify`) + trust gate consistency.
 - Fast-path + cache để giảm độ trễ planner.
 - Matrix learning/eval tự động để theo dõi chất lượng và tiến hóa theo dữ liệu thật.
 
 ---
 
-## System Flow (Current)
+## System Flow (Current - v2 Runtime)
 
 ```mermaid
 graph LR
     U((User)) --> API[FastAPI]
-    API --> O[AgentOrchestrator]
-    O --> P[Perception]
-    P --> R[Dynamic Planner]
+    API --> P[Ingest Parser]
+    P --> R[Reasoner]
     R --> D{Decision State}
-    D -->|auto_execute| A[Action Tool]
     D -->|ask_clarify| C[Clarify Response]
-    D -->|safe_block| B[Safe Block]
-    A --> E[Evaluator]
-    E -->|retry| R
-    E -->|done| F[Final Payload]
+    D -->|auto_execute| PL[Plan Compiler]
+    PL --> V[Plan Validator + Trust Gate]
+    V -->|trusted| A[Execute Tool]
+    V -->|untrusted| C
+    A --> T[Persona Tactician]
+    T --> E[Learning Trust Firewall + Eval]
+    E --> F[Final Payload]
     C --> F
-    B --> F
     F --> U
 ```
 
@@ -33,19 +33,17 @@ graph LR
 
 ```mermaid
 graph TD
-    UQ[User Query] --> P1[Perception: normalize + intent + entities]
-    P1 --> P2[Planner: learning-first + metadata reasoning]
+    UQ[User Query] --> P1[Ingest: normalize + intent + entities + filters]
+    P1 --> P2[Reason + Plan]
     P2 --> D{Decision State}
     D -->|auto_execute| X1[Execute Tool]
     D -->|ask_clarify| X2[Ask Clarify]
-    D -->|safe_block| X3[Safe Block]
-    X1 --> V[Validate Result]
-    V --> C{Correct?}
-    C -->|yes| L1[Reinforce lesson/case]
-    C -->|no| L2[Penalize/Prune + store reject signals]
-    X2 --> L3[Wait clarified input]
-    X3 --> L3
-    L1 --> R[Update metrics report]
+    X1 --> V[Validate + Trust Check]
+    V --> C{Trusted?}
+    C -->|yes| L1[Record outcome + append trainset]
+    C -->|no| X2
+    X2 --> L2[Return clarify recommendation]
+    L1 --> R[Train/Eval matrix report]
     L2 --> R
 ```
 
@@ -53,10 +51,26 @@ graph TD
 
 `Lean flow` trong hệ thống này nghĩa là: **ít bước nhất nhưng vẫn đúng và an toàn**.
 
-- Không đủ tín hiệu -> `ask_clarify` (không query DB bừa).
-- Đủ tín hiệu -> chạy đúng 1 tool chính, hạn chế loop không cần thiết.
-- Có kết quả hợp lệ -> kết thúc sớm (short-circuit).
-- Sai/mismatch -> ghi tín hiệu lỗi để học lại thay vì thêm heuristic phức tạp ngay.
+Lean hiện tại gồm **2 lớp riêng biệt**:
+
+1. **Lean Decision (luồng quyết định):**
+   - Không đủ tín hiệu -> `ask_clarify` (không query DB bừa).
+   - Đủ tín hiệu + trust gate pass -> chạy đúng 1 tool chính.
+   - Có kết quả hợp lệ -> kết thúc sớm, không loop dư.
+   - Sai/mismatch -> ghi tín hiệu học lại, không chồng heuristic nóng.
+
+2. **Lean Personalization (luồng trình bày):**
+   - Không đổi logic DB/planner, chỉ đổi khung câu trả lời theo vai trò.
+   - `JUNIOR`: thêm hướng dẫn thao tác ngắn, từng bước.
+   - `SENIOR`: thêm framing chiến lược, ngắn gọn.
+   - `DEFAULT`: giữ trung tính.
+   - Code ở: `v2/service.py` -> `_apply_lean_personalization(...)`.
+   - Tactician payload ở: `v2/tactician/core.py` -> `build_tactician_payload(...)`.
+
+3. **Reasoning Integrity (tách lớp suy luận và trình bày):**
+   - `decision_state` + `execution_plan` được fingerprint riêng (`plan_fingerprint`).
+   - Lean/tactician chỉ được phép đổi lớp output text, không đổi core decision.
+   - Theo dõi tại `reasoning_integrity` trong payload runtime.
 
 Mục tiêu của lean flow:
 
@@ -81,66 +95,74 @@ Mục tiêu của lean flow:
 
 Các điểm hệ thống thực sự "học" theo runtime:
 
-1. **Recall tri thức cũ trước khi plan**
-   - `agent/orchestrator.py` gọi `find_similar_lessons(...)`.
-   - `dynamic_metadata/planner.py` nhận `knowledge_hits` để reuse nếu tương thích.
+1. **Recall tri thức trước khi execute**
+   - `v2/service.py` điều phối chuỗi `ingest -> reason -> plan -> execute`.
+   - Planner trace nằm trong `planner_trace_v2`.
 
-2. **Học từ kết quả action thành công/thất bại**
-   - `agent/orchestrator.py` gọi `mark_lessons_outcome(...)`.
-   - DB lesson score/usage được cập nhật ở `storage/repositories/knowledge_repository.py`.
+2. **Học từ kết quả thành công/thất bại**
+   - `v2/service.py` gọi `record_outcome(...)`.
+   - Runtime sample được append qua `append_trainset_sample(...)`.
 
-3. **Phạt tri thức sai**
-   - Khi entity/filter mismatch: `penalize_lessons(...)` + `prune_low_confidence_lessons(...)`.
-   - Tránh lesson kém chất lượng tiếp tục ảnh hưởng quyết định sau.
+3. **Gate kiểm soát độ tin cậy**
+   - `validate_execution_plan(...)` chặn sai schema.
+   - `_validate_reasoning_consistency(...)` chặn mismatch giữa ingest/reason/plan.
 
-4. **Học cấp matrix case**
-   - `upsert_case_from_run(...)` trong `dynamic_metadata/matrix_learning.py`.
-   - Tăng/giảm độ tin cậy case qua `usage_count`, `success_count`, `penalize_case(...)`.
+4. **Huấn luyện/eval matrix**
+   - `train_matrix_v2()` + `evaluate_matrix_v2()`.
+   - Artifacts ở `storage/v2/matrix/*`.
 
 5. **Đánh giá chất lượng học**
-   - `refresh_matrix_eval_report()` và `scripts/eval_dynamic_cases.py`.
-   - Xuất báo cáo ở `storage/dynamic_eval_report.json`.
+   - Snapshot/check nằm trong `learning_check` và `learning_update`.
+   - Báo cáo matrix nằm ở `storage/v2/matrix/matrix_v2_eval.json`.
+   - Báo cáo firewall nằm ở `storage/v2/firewall/trust_firewall_eval_v2.json`.
+
+6. **Chống học vẹt (Anti-rote)**
+   - Dedupe theo `signature` + outcome.
+   - Dedupe theo semantic template (`intent + root + query_template`) để bỏ các mẫu chỉ khác câu chữ.
+   - Redact dữ liệu literal (query/filter value) trước khi ghi trainset/log.
 
 ## Input -> Analysis -> Decision -> Verification (đặc tả rõ)
 
 1. **Input acceptance**
-   - Chuẩn hóa query và role/domain ở `agent/perception.py`.
-   - Trích xuất `intent`, `entities`, `request_contract`.
+   - Chuẩn hóa query và role/domain ở `v2/ingest/parser.py`.
+   - Trích xuất `intent`, `entities`, `request_filters`, `update_data`, `ambiguity_score`.
 
 2. **Analysis**
-   - Planner chạy theo thứ tự:
-     - learning-first reuse,
-     - intent fast-path,
-     - autonomous metadata scoring fallback.
-   - Sinh `trace` để audit quyết định.
+   - `v2/reason/core.py` tạo planner trace + chọn tool.
+   - `v2/plan/compiler.py` chuẩn hóa root/filter theo metadata.
 
 3. **Decision**
-   - Planner trả:
+   - Runtime trả:
      - `tool`, `args`
      - `decision_state`
-     - `decision_confidence`
-     - `decision_reason`
+     - `trust_gate` (validation + consistency)
 
 4. **Verification (đúng/sai)**
-   - So khớp kết quả với entity/filter và expectation.
-   - Nếu sai -> penalty/prune + reject signals.
-   - Nếu đúng -> reinforce score + cập nhật case.
+   - Trusted + execute success/fail đều được ghi outcome để học.
+   - Không trusted -> trả clarify theo đúng nguyên nhân (ambiguity/guardrail/thiếu entity).
 
-### Runtime behavior
+### Runtime behavior (v2)
 
-1. `Perception`: chuẩn hóa query, trích xuất intent/entity, request contract.
-2. `Reason`:
-   - Ưu tiên `knowledge_hits` nếu tương thích entity/structure.
-   - Nếu không, chạy metadata planner với:
-     - intent fast-path,
-     - autonomous scoring theo table alias + case memory,
-     - join path + choice constraints.
-3. `Uncertainty`:
-   - `auto_execute`: đi tiếp sang `Action`.
-   - `ask_clarify`: dừng DB call, trả câu hỏi làm rõ ngay cho user.
-   - `safe_block`: chặn trong strict mode khi thiếu bằng chứng đã học.
-4. `Action + Eval`: thực thi tool, đánh giá dữ liệu trả về, cập nhật learning.
-5. `Final`: trả `final_payload` gồm `final_result`, `planner_trace`, `selected_tool`, `db_call_executed`.
+1. `Ingest`: `v2/ingest/parser.py` trích xuất intent/entities/filters/update_data + ambiguity.
+2. `Reason`: `v2/reason/core.py` chọn tool và decision state (`auto_execute`/`ask_clarify`).
+3. `Plan`: `v2/plan/compiler.py` chuẩn hóa field/filter theo metadata.
+4. `Validate + Trust`: `v2/execute/validator.py` + consistency gate trong `v2/service.py`.
+5. `Execute`: `v2/execute/runtime.py` query/update DB.
+6. `Respond`: `v2/service.py` dựng response chuyên nghiệp + áp Persona Tactician + Lean Personalization.
+7. `Learn`: qua Trust Firewall (`allow/quarantine/reject`) rồi mới `record_outcome`, `append_trainset_sample`, `train_matrix_v2`, `evaluate_matrix_v2`.
+
+### Event lifecycle (Pub/Sub-style)
+
+- Ingress endpoint: `POST /api/v2/events/publish` trả ack nhanh và tạo lifecycle status.
+- Event status endpoint: `GET /api/v2/events/{event_id}`.
+- Lifecycle state map:
+  - `queued` -> `⏳`
+  - `analyzing` -> `📊`
+  - `processing` -> `🛠️`
+  - `done` -> `✅`
+  - `clarify` -> `❓`
+  - `error` -> `❌`
+- SLA điều chỉnh qua `EVENT_ACK_SLA_MS` (mặc định 1500ms).
 
 ---
 
@@ -159,7 +181,7 @@ Các điểm hệ thống thực sự "học" theo runtime:
 
 ## Evaluation Metrics (Matrix Report)
 
-File báo cáo: `storage/dynamic_eval_report.json`
+File báo cáo: `storage/v2/matrix/matrix_v2_eval.json`
 
 Các metric chính:
 
@@ -168,7 +190,7 @@ Các metric chính:
 - `choice_constraint_success`
 - `entity_match_rate`
 - `strict_block_rate`
-- `decision_state_rate` (`auto_execute` / `ask_clarify` / `safe_block`)
+- `decision_state_rate` (`auto_execute` / `ask_clarify`)
 - `decision_reason_distribution`
 - `avg_calibrated_evidence_floor`
 - `latency_ms` (`mean`, `p50`, `p95`)
@@ -194,6 +216,7 @@ Trong `infra/settings.py`:
 - `PLANNER_COMPLEXITY_BUDGET`
 - `MATRIX_CASE_MIN_SIMILARITY`
 - `MATRIX_CASE_PRIOR_WEIGHT`
+- `EVENT_ACK_SLA_MS`
 
 ---
 
@@ -206,3 +229,15 @@ python main.py
 ```
 
 Truy cập: `http://127.0.0.1:8000`
+
+## Regression check
+
+```bash
+python scripts/regression_v2_runtime.py
+```
+
+Bao gồm kiểm tra:
+- detail/follow-up flow
+- event lifecycle ack
+- tactician + firewall
+- reasoning vs lean integrity

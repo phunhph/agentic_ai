@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import json
+import re
 import time
-from dataclasses import asdict
 from pathlib import Path
 from threading import Lock
 
@@ -125,17 +125,30 @@ def update_session_context(session_id: str, ingest: IngestResult, execution_plan
     sid = str(session_id or "").strip()
     if not sid:
         return {}
+    def _mask_query(text: str) -> str:
+        out = re.sub(r"\b\d+\b", "<num>", str(text or "").strip())
+        out = re.sub(r"\"[^\"]+\"|'[^']+'", "<text>", out)
+        return out
+
+    def _redact_filters(rows: list) -> list[dict]:
+        out: list[dict] = []
+        for f in rows or []:
+            if not hasattr(f, "field"):
+                continue
+            out.append({"field": str(getattr(f, "field", "")).strip(), "op": str(getattr(f, "op", "")).strip(), "value": "<redacted>"})
+        return out
+
     context = {
         "ts": time.time(),
         "intent": str(ingest.intent or "").strip(),
         "entities": list(ingest.entities or []),
-        "request_filters": [asdict(f) for f in (ingest.request_filters or [])],
+        "request_filters": _redact_filters(list(ingest.request_filters or [])),
     }
     if isinstance(execution_plan, dict):
         context["root_table"] = str(execution_plan.get("root_table", "")).strip()
         context["join_path"] = execution_plan.get("join_path", []) if isinstance(execution_plan.get("join_path"), list) else []
-    context["last_query"] = str(ingest.raw_query or "").strip()
-    context["last_normalized_query"] = str(ingest.normalized_query or "").strip()
+    context["last_query"] = _mask_query(str(ingest.raw_query or "").strip())
+    context["last_normalized_query"] = _mask_query(str(ingest.normalized_query or "").strip())
     with _LOCK:
         _ensure_loaded_locked()
         _compact()

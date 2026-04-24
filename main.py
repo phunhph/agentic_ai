@@ -1,19 +1,23 @@
 import json
 from pathlib import Path
 
-from fastapi import FastAPI, Request, Form, HTTPException
+from fastapi import FastAPI, Request, Form, HTTPException, BackgroundTasks
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
-from infra.settings import APP_HOST, APP_PORT
+from infra.settings import APP_HOST, APP_PORT, get_env_int
 from v2.service import run_v2_pipeline
 from v2.ingest import ingest_query
+from v2.ingest.pubsub_ingress import publish_event
+from v2.ingest.pubsub_worker import process_event
 from v2.reason import reason_about_query
 from v2.plan import compile_execution_plan
 from v2.execute import validate_execution_plan
+from v2.lifecycle import LIFECYCLE_STORE
 from v2.memory import create_session_context, list_session_contexts
 
 app = FastAPI()
 templates = Jinja2Templates(directory="web/templates")
+EVENT_ACK_SLA_MS = get_env_int("EVENT_ACK_SLA_MS", 1500)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -152,6 +156,36 @@ async def run_v2(
         return {"ok": True, "result": result}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/v2/events/publish")
+async def publish_v2_event(
+    background_tasks: BackgroundTasks,
+    goal: str = Form(...),
+    role: str = Form("DEFAULT"),
+    session_id: str = Form(""),
+    lang: str = Form("auto"),
+    source: str = Form("pubsub"),
+):
+    payload = {
+        "goal": goal,
+        "role": role,
+        "session_id": session_id,
+        "lang": lang,
+        "source": source,
+    }
+    event = publish_event(payload, ack_sla_ms=EVENT_ACK_SLA_MS)
+    event_id = str(event.get("event_id", ""))
+    background_tasks.add_task(process_event, event_id, goal, role, session_id, lang)
+    return {"ok": True, "event": event}
+
+
+@app.get("/api/v2/events/{event_id}")
+async def get_v2_event(event_id: str):
+    state = LIFECYCLE_STORE.get(event_id)
+    if not state:
+        raise HTTPException(status_code=404, detail="event_not_found")
+    return {"ok": True, "event": state}
 
 
 @app.post("/api/v2/diagnose")

@@ -4,6 +4,8 @@ import json
 import re
 from pathlib import Path
 
+from v2.learn.firewall import redact_runtime_sample
+
 TRAINSET_PATH = Path("storage/v2/matrix/trainset_v2.jsonl")
 CASES_PATH = Path("storage/dynamic_cases.json")
 
@@ -59,6 +61,10 @@ def append_trainset_sample(sample: dict) -> dict:
     entities = sorted(set(str(e).strip().lower() for e in entities if str(e).strip()))
     query_template = re.sub(r"\b\d+\b", "<num>", normalized_query)
     query_template = re.sub(r"\"[^\"]+\"|'[^']+'", "<text>", query_template)
+    # Normalize high-variance phrases to semantic placeholders.
+    query_template = re.sub(r"\bdemo\s+[a-z]+\s*<num>\b", "<entity_name>", query_template)
+    query_template = re.sub(r"\b[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}\b", "<email>", query_template)
+    query_template = re.sub(r"\b\d{8,}\b", "<id>", query_template)
     signature = "|".join(
         [
             f"intent:{intent}",
@@ -97,10 +103,29 @@ def append_trainset_sample(sample: dict) -> dict:
                 "reason": "duplicate_signature_same_outcome",
                 "signature": signature,
             }
+    # Anti-rote semantic gate: if semantic template already learned for same
+    # intent+root and same outcome, skip to avoid memorizing surface wording.
+    same_semantic_rows = [
+        r
+        for r in existing_rows
+        if str(r.get("intent", "")).strip().lower() == intent
+        and str(r.get("root_table", "")).strip().lower() == root_table.lower()
+        and str(r.get("query_template", "")).strip().lower() == query_template
+    ]
+    for row in same_semantic_rows:
+        if bool(row.get("success_label", False)) == success_label:
+            return {
+                "status": "skipped",
+                "reason": "duplicate_semantic_template_same_outcome",
+                "signature": signature,
+                "query_template": query_template,
+            }
 
     learning_mode = "new_signature"
     if same_signature_rows:
         learning_mode = "contradiction_update"
+    elif same_semantic_rows:
+        learning_mode = "semantic_variant"
     elif any(str(r.get("intent", "")).strip().lower() == intent for r in existing_rows):
         learning_mode = "intent_expansion"
 
@@ -119,6 +144,18 @@ def append_trainset_sample(sample: dict) -> dict:
         "notes": str(sample.get("notes", "")).strip(),
         "learning_mode": learning_mode,
     }
+    payload = redact_runtime_sample(payload)
+    payload["query_template"] = query_template
+    payload["intent"] = intent
+    payload["root_table"] = root_table
+    payload["entities"] = entities
+    payload["join_plan"] = join_plan
+    payload["expected_shape"] = {"expected_tool": expected_tool}
+    payload["success_label"] = success_label
+    payload["signature"] = signature
+    payload["source"] = str(sample.get("source", "runtime_feedback")).strip() or "runtime_feedback"
+    payload["notes"] = str(sample.get("notes", "")).strip()
+    payload["learning_mode"] = learning_mode
     with TRAINSET_PATH.open("a", encoding="utf-8") as f:
         f.write(json.dumps(payload, ensure_ascii=False) + "\n")
     return {"status": "appended", **payload}

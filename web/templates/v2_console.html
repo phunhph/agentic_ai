@@ -100,6 +100,12 @@
                 <div id="finalResultView" class="text-xs bg-slate-950 border border-slate-800 rounded p-3 text-slate-200 min-h-[84px]">
                     Chua co ket qua.
                 </div>
+                <div id="finalLearningView" class="mt-2 text-xs bg-slate-950 border border-slate-800 rounded p-3 text-slate-300 min-h-[48px]">
+                    Learning update: none.
+                </div>
+                <div id="learningStatsView" class="mt-2 text-xs bg-slate-950 border border-slate-800 rounded p-3 text-slate-300 min-h-[64px]">
+                    Learning stats: none.
+                </div>
             </section>
         </div>
     </div>
@@ -131,6 +137,8 @@
         const layerExecute = document.getElementById('layerExecute');
         const layerLearn = document.getElementById('layerLearn');
         const finalResultView = document.getElementById('finalResultView');
+        const finalLearningView = document.getElementById('finalLearningView');
+        const learningStatsView = document.getElementById('learningStatsView');
         let lastDiagnostic = null;
         let lastAnalyzedKey = '';
         let activeRequests = 0;
@@ -266,6 +274,8 @@
             behaviorExplain.innerHTML = '';
             relearnExplain.innerHTML = '';
             finalResultView.textContent = 'Chua co ket qua.';
+            finalLearningView.textContent = 'Learning update: none.';
+            learningStatsView.textContent = 'Learning stats: none.';
         }
 
         function markInputDirty() {
@@ -283,61 +293,81 @@
         }
 
         function renderGraphNetwork(topNodes, topEdges) {
-            const nodes = (topNodes || []).slice(0, 6);
-            const edges = (topEdges || []).slice(0, 8);
+            const nodes = (topNodes || []).slice(0, 8);
+            const edges = (topEdges || []).slice(0, 10);
             if (!nodes.length) {
                 return '<div class="text-slate-500">No graph nodes to render.</div>';
             }
             const width = 560;
-            const height = 220;
-            const cx = width / 2;
-            const cy = height / 2;
-            const r = 78;
+            const height = 240;
+            
+            // Hierarchical Layout mapping
+            const getLayer = (id) => {
+                if (id.startsWith('intent:')) return 0;
+                if (id.startsWith('table:')) return 1;
+                if (id.startsWith('tool:')) return 2;
+                return 1;
+            };
+            const layers = [0, 0, 0];
+            nodes.forEach(n => layers[getLayer(n.id)]++);
+
+            const counters = [0, 0, 0];
             const points = nodes.map((n, i) => {
-                const angle = (Math.PI * 2 * i) / nodes.length;
+                const layer = getLayer(n.id);
+                const xStep = width / (layers[layer] + 1);
+                counters[layer]++;
                 return {
                     id: String(n.id || `node-${i}`),
                     support: Number(n.support || 0),
-                    x: Math.round(cx + r * Math.cos(angle)),
-                    y: Math.round(cy + r * Math.sin(angle)),
+                    x: Math.round(xStep * counters[layer]),
+                    y: 40 + (layer * 80),
+                    layer: layer
                 };
             });
+
             const pointMap = Object.fromEntries(points.map((p) => [p.id, p]));
             const svgEdges = edges
                 .map((e) => {
                     const from = pointMap[String(e.from || '')];
                     const to = pointMap[String(e.to || '')];
                     if (!from || !to) return '';
-                    const edgeTitle = `${String(e.from || '')} -> ${String(e.to || '')} | ${String(e.type || '')} | weight=${Number(e.weight || 0)}`;
-                    return `<line data-edge="${escapeHtml(edgeTitle)}" x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="#334155" stroke-width="1.5" />`;
+                    return `<g>
+                        <line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="#475569" stroke-width="1.5" stroke-dasharray="4" />
+                        <polygon points="${to.x},${to.y} ${to.x-4},${to.y-8} ${to.x+4},${to.y-8}" fill="#475569" transform="rotate(${Math.atan2(to.y-from.y, to.x-from.x)*180/Math.PI + 90}, ${to.x}, ${to.y})" />
+                    </g>`;
                 })
                 .join('');
+
+            const nodeColors = ['#38bdf8', '#c084fc', '#fbbf24']; // Blue (Intent), Purple (Table), Gold (Tool)
             const svgNodes = points
                 .map(
                     (p) => {
-                        const nodeTitle = `${p.id} | support=${p.support}`;
+                        const color = nodeColors[p.layer];
                         return `<g class="graph-node-dot" data-node-id="${escapeHtml(p.id)}" data-node-support="${p.support}" style="cursor:pointer">
-                        <circle cx="${p.x}" cy="${p.y}" r="16" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2"/>
-                        <text x="${p.x}" y="${p.y + 3}" text-anchor="middle" font-size="9" fill="#e2e8f0">${p.support}</text>
-                        <title>${escapeHtml(nodeTitle)}</title>
+                        <circle cx="${p.x}" cy="${p.y}" r="14" fill="#0f172a" stroke="${color}" stroke-width="1.5"/>
+                        <text x="${p.x}" y="${p.y + 35}" text-anchor="middle" font-size="9" fill="${color}" font-weight="bold">${escapeHtml(p.id.split(':')[1])}</text>
+                        <text x="${p.x}" y="${p.y + 3}" text-anchor="middle" font-size="8" fill="#e2e8f0">${p.support}</text>
                     </g>`;
                     }
                 )
                 .join('');
-            const labels = points
-                .map((p) => `<div class="px-2 py-1 bg-slate-950 border border-slate-800 rounded">${p.id}</div>`)
-                .join('');
+
             return `
-                <div class="bg-slate-950 border border-slate-800 rounded p-2 overflow-auto">
-                    <svg viewBox="0 0 ${width} ${height}" class="w-full min-w-[520px] h-56">
+                <div class="bg-slate-950 border border-slate-800 rounded p-4 overflow-auto">
+                    <svg viewBox="0 0 ${width} ${height}" class="w-full min-w-[520px] h-60">
+                        <defs>
+                            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur stdDeviation="2" result="blur" />
+                                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                            </filter>
+                        </defs>
                         ${svgEdges}
                         ${svgNodes}
                     </svg>
                 </div>
-                <div id="graphNodeInfo" class="mt-2 px-2 py-2 bg-slate-900 border border-slate-800 rounded text-[11px] text-slate-300">
-                    Hover hoac click vao node de xem y nghia.
+                <div id="graphNodeInfo" class="mt-2 px-3 py-2 bg-indigo-950/30 border border-indigo-500/30 rounded text-[11px] text-indigo-200">
+                    💡 <b>Tip:</b> Phân cấp tri thức: Intent (Xanh) -> Table (Tím) -> Tool (Vàng). 
                 </div>
-                <div class="flex flex-wrap gap-1 mt-2 text-[10px] text-slate-300">${labels}</div>
             `;
         }
 
@@ -610,7 +640,6 @@
             if (assistantResponse) {
                 finalResultView.innerHTML = `
                     <div class="whitespace-pre-wrap leading-relaxed">${assistantResponse}</div>
-                    ${result.learning_summary ? `<div class="mt-2 text-slate-300"><b>Cap nhat hoc tap:</b> ${result.learning_summary}</div>` : ''}
                     ${result.clarify_recommendation ? `<div class="mt-2 text-slate-300"><b>Khuyen nghi:</b> ${result.clarify_recommendation}</div>` : ''}
                 `;
             } else if (!finalRows.length) {
@@ -622,6 +651,30 @@
                     <pre class="text-[11px] bg-slate-900 border border-slate-800 rounded p-2 overflow-auto">${JSON.stringify(preview, null, 2)}</pre>
                 `;
             }
+            if (result.learning_summary) {
+                finalLearningView.innerHTML = `<b>Cap nhat hoc tap:</b> ${result.learning_summary}`;
+            } else {
+                finalLearningView.textContent = 'Learning update: none.';
+            }
+            const learningUpdate = result.learning_update || {};
+            const appended = learningUpdate.appended_sample || {};
+            const firewallEvent = learningUpdate.firewall_event || {};
+            const evidence = learningUpdate.evidence || {};
+            const appendStatus = String(appended.status || learningUpdate.learning_decision || '-').trim() || '-';
+            const appendReason = String(appended.reason || '-').trim() || '-';
+            const signature = String(appended.signature || '-').trim() || '-';
+            const fwDecision = String(firewallEvent.decision || '-').trim() || '-';
+            const evidenceScore = Number(evidence.score || 0);
+            const scorePct = Math.max(0, Math.min(100, Math.round(evidenceScore * 100)));
+            learningStatsView.innerHTML = `
+                <div><b>Learning stats (runtime)</b></div>
+                <div class="mt-1">- Status: <b>${escapeHtml(appendStatus)}</b></div>
+                <div>- Reason: <b>${escapeHtml(appendReason)}</b></div>
+                <div>- Firewall: <b>${escapeHtml(fwDecision)}</b></div>
+                <div>- Evidence score: <b>${scorePct}%</b></div>
+                <div class="truncate">- Signature: <span title="${escapeHtml(signature)}">${escapeHtml(signature)}</span></div>
+            `;
+            await refreshTrainingOverview();
             statusMsg.textContent = 'Execute xong. Da cap nhat ket qua hanh vi va relearn/check.';
             } finally {
                 endRequest();

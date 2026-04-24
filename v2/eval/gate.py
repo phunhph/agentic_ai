@@ -11,6 +11,7 @@ from infra.settings import (
 
 EVAL_PATH = Path("storage/v2/matrix/matrix_v2_eval.json")
 GATE_PATH = Path("storage/v2/gate/feasibility_gate.json")
+FIREWALL_EVAL_PATH = Path("storage/v2/firewall/trust_firewall_eval_v2.json")
 
 
 def evaluate_feasibility_gate() -> dict:
@@ -27,15 +28,28 @@ def evaluate_feasibility_gate() -> dict:
         metrics["join_correctness"] = float(raw.get("join_correctness", metrics["tool_plan_correctness"]))
         metrics["graph_coverage"] = float(raw.get("graph_coverage", 0.0))
 
+    firewall = {
+        "pass": True,
+        "rates": {"quarantine_rate": 0.0, "reject_rate": 0.0},
+    }
+    if FIREWALL_EVAL_PATH.exists():
+        fw_raw = json.loads(FIREWALL_EVAL_PATH.read_text(encoding="utf-8"))
+        firewall["pass"] = bool(fw_raw.get("pass", True))
+        rates = fw_raw.get("rates", {}) if isinstance(fw_raw.get("rates"), dict) else {}
+        firewall["rates"]["quarantine_rate"] = float(rates.get("quarantine_rate", 0.0) or 0.0)
+        firewall["rates"]["reject_rate"] = float(rates.get("reject_rate", 0.0) or 0.0)
+
     passed = (
         metrics["tool_plan_correctness"] >= V2_GATE_MIN_PLAN_CORRECTNESS
         and metrics["filter_fidelity"] >= V2_GATE_MIN_FILTER_FIDELITY
         and metrics["join_correctness"] >= V2_GATE_MIN_JOIN_CORRECTNESS
         and metrics["graph_coverage"] >= 0.8
+        and firewall["pass"]
     )
     result = {
         "passed": passed,
         "metrics": metrics,
+        "firewall": firewall,
         "thresholds": {
             "tool_plan_correctness": V2_GATE_MIN_PLAN_CORRECTNESS,
             "filter_fidelity": V2_GATE_MIN_FILTER_FIDELITY,
