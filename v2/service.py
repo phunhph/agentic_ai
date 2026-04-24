@@ -411,7 +411,13 @@ def _pick_presentable_fields(row: dict, root_table: str = "") -> list[tuple[str,
     merged = priority + secondary
     if not merged:
         merged = hidden
-    return merged[:4]
+    return merged[:6]
+
+
+def _is_detail_intent_query(query: str) -> bool:
+    lowered = str(query or "").lower()
+    detail_tokens = ["chi tiết", "chi tiet", "thông tin", "thong tin", "detail", "details"]
+    return any(token in lowered for token in detail_tokens)
 
 
 def _build_professional_response(query: str, rows: list[dict], execution_trace: dict, locale: str = "vi") -> str:
@@ -431,13 +437,15 @@ def _build_professional_response(query: str, rows: list[dict], execution_trace: 
     overview = _t(locale, "tactical_overview").format(count=len(rows))
     root_table = str((execution_trace.get("plan", {}) or {}).get("root_table", "")).replace("hbl_", "").strip()
     preview_lines: list[str] = []
+    detail_mode = _is_detail_intent_query(query)
+    max_fields = 5 if len(rows) == 1 and detail_mode else (4 if len(rows) == 1 else 2)
     for idx, row in enumerate(rows[:3], start=1):
         if not isinstance(row, dict):
             continue
         fields = _pick_presentable_fields(row, root_table=f"hbl_{root_table}" if root_table else "")
         if not fields:
             continue
-        label = " / ".join(f"{_humanize_field_key(k, locale)}: {_format_value(v)}" for k, v in fields[:2])
+        label = " / ".join(f"{_humanize_field_key(k, locale)}: {_format_value(v)}" for k, v in fields[:max_fields])
         preview_lines.append(f"- {idx}. {label}")
 
     if locale == "en":
@@ -445,14 +453,24 @@ def _build_professional_response(query: str, rows: list[dict], execution_trace: 
         hidden = max(0, len(rows) - len(preview_lines))
         hidden_line = f"\n- +{hidden} more rows available." if hidden > 0 else ""
         if len(rows) == 1:
-            return f"✅ **Found exactly one matching record.**\n\nKey details:\n{details}\n\nYou can ask for more specific fields if you want deeper inspection."
+            return (
+                "✅ **Found exactly one matching record.**\n\n"
+                f"Key details:\n{details}\n\n"
+                "You can continue with related data exploration (contacts/contracts/opportunities) "
+                "or request a focused field group for verification."
+            )
         return f"{overview}\n\nTop matches:\n{details}{hidden_line}\n\nSuggested next step: add one more filter to narrow to exact target."
 
     details = "\n".join(preview_lines) if preview_lines else "- Chưa tạo được tóm tắt ngắn cho bản ghi."
     hidden = max(0, len(rows) - len(preview_lines))
     hidden_line = f"\n- +{hidden} bản ghi khác chưa hiển thị." if hidden > 0 else ""
     if len(rows) == 1:
-        return f"✅ **Đã tìm thấy đúng 1 bản ghi phù hợp.**\n\nChi tiết chính:\n{details}\n\nBạn có thể yêu cầu thêm trường cụ thể nếu cần kiểm tra sâu hơn."
+        return (
+            "✅ **Đã tìm thấy đúng 1 bản ghi phù hợp.**\n\n"
+            f"Chi tiết chính:\n{details}\n\n"
+            "Bạn có thể khai thác tiếp dữ liệu liên quan (contact/contract/opportunity) "
+            "hoặc yêu cầu nhóm trường cần kiểm tra sâu."
+        )
     return f"{overview}\n\nKết quả nổi bật:\n{details}{hidden_line}\n\nGợi ý tiếp theo: thêm 1 điều kiện lọc để chốt đúng đối tượng cần xử lý."
 
 
@@ -474,24 +492,28 @@ def _apply_tactician_layer(text: str, tactician_payload: dict, locale: str = "vi
         return text
     next_steps = tactician_payload.get("recommended_next_steps", [])
     probe_questions = tactician_payload.get("probe_questions", [])
+    signals = tactician_payload.get("signals", {}) if isinstance(tactician_payload.get("signals"), dict) else {}
     if not isinstance(next_steps, list):
         next_steps = []
     if not isinstance(probe_questions, list):
         probe_questions = []
+    exact_match = bool(signals.get("exact_match", False))
 
     step_lines = [f"- {str(x).strip()}" for x in next_steps[:3] if str(x).strip()]
     probe_lines = [f"- {str(x).strip()}" for x in probe_questions[:2] if str(x).strip()]
     if locale == "en":
         out = text
         if step_lines:
-            out += "\n\nTactician next steps:\n" + "\n".join(step_lines)
+            title = "Tactician exploitation steps" if exact_match else "Tactician next steps"
+            out += f"\n\n{title}:\n" + "\n".join(step_lines)
         if probe_lines:
             out += "\n\nTactician probes:\n" + "\n".join(probe_lines)
         return out
 
     out = text
     if step_lines:
-        out += "\n\nGợi ý Extraction Tactician:\n" + "\n".join(step_lines)
+        title = "Gợi ý khai thác tiếp theo" if exact_match else "Gợi ý Extraction Tactician"
+        out += f"\n\n{title}:\n" + "\n".join(step_lines)
     if probe_lines:
         out += "\n\nCâu hỏi thăm dò:\n" + "\n".join(probe_lines)
     return out
@@ -832,6 +854,7 @@ def run_v2_pipeline(query: str, role: str = "DEFAULT", session_id: str = "", lan
     learning_update = {
         "appended_sample": appended_sample,
         "learning_decision": appended_sample.get("status", "unknown"),
+        "learning_phase": appended_sample.get("learning_phase", "phase_understanding_v2"),
         "evidence": evidence,
         "firewall_event": firewall_event,
         "firewall_eval": firewall_eval,

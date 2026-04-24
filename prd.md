@@ -12,6 +12,8 @@ date: '2026-04-11'
 lastEdited: '2026-04-11'
 editHistory:
   - date: '2026-04-24'
+    changes: 'Introduced learning phase_understanding_v2: semantic-signature gating (intent/root/entities/filters/join targets/tool + semantic template) to reduce rote memorization and promote execution-meaning learning.'
+  - date: '2026-04-24'
     changes: 'Added anti-rote learning constraints and reasoning-vs-lean integrity contract to prevent memorization drift and preserve execution consistency across personas.'
   - date: '2026-04-24'
     changes: 'Implemented full-system core upgrades: metadata-driven dynamic identity resolution, event lifecycle ack flow (<1.5s target), persona-driven tactician layer, and Trust Firewall gating for learning writes.'
@@ -219,3 +221,4 @@ For the current build stage, the key behavior is validated in the core runtime p
 - **NFR7 - Event Ack SLA (Implemented Core):** Event ingress must return first lifecycle acknowledgment within configured SLA target (default 1.5s) and emit lifecycle state transitions for observability.
 - **NFR8 - Anti-Rote Learning (Implemented Core):** The learning layer must reject duplicate semantic templates with same outcome to avoid rote memorization from surface wording changes.
 - **NFR9 - Reasoning/Presentation Separation (Implemented Core):** Persona/lean layers must not alter execution decision or plan; integrity is verified via runtime plan fingerprint checks.
+- **NFR10 - Understanding-First Learning Phase (Implemented Core):** Runtime learning writes must pass semantic-signature gate (`phase_understanding_v2`) so repeated surface variants with identical execution meaning are skipped.

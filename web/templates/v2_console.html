@@ -34,6 +34,8 @@
                 <label for="contextSelect" class="text-slate-300">Ngữ cảnh hội thoại</label>
                 <select id="contextSelect" class="min-w-[280px] bg-slate-950 border border-slate-800 rounded px-2 py-1"></select>
                 <button id="newContextBtn" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700">+ Tạo ngữ cảnh mới</button>
+                <button id="deleteContextBtn" class="px-2 py-1 rounded bg-rose-900/40 hover:bg-rose-800/50 border border-rose-700 text-rose-200">Xóa ngữ cảnh</button>
+                <button id="deleteAllContextsBtn" class="px-2 py-1 rounded bg-rose-900 hover:bg-rose-800 border border-rose-700 text-rose-100">Xóa tất cả</button>
             </div>
             <div class="grid grid-cols-12 gap-2">
                 <button id="diagnoseBtn" class="col-span-4 px-3 py-2 text-sm rounded bg-violet-700 hover:bg-violet-600">1) Analyze</button>
@@ -129,6 +131,8 @@
         const langSelect = document.getElementById('langSelect');
         const contextSelect = document.getElementById('contextSelect');
         const newContextBtn = document.getElementById('newContextBtn');
+        const deleteContextBtn = document.getElementById('deleteContextBtn');
+        const deleteAllContextsBtn = document.getElementById('deleteAllContextsBtn');
         const debugToggle = document.getElementById('debugToggle');
         const phaseAnalyze = document.getElementById('phaseAnalyze');
         const phaseExecute = document.getElementById('phaseExecute');
@@ -142,6 +146,8 @@
         let lastDiagnostic = null;
         let lastAnalyzedKey = '';
         let activeRequests = 0;
+        let latestGraphNodes = [];
+        let latestGraphEdges = [];
         let v2SessionId = (() => {
             const key = 'v2_console_session_id';
             // sessionStorage => each browser tab has independent conversation context.
@@ -198,6 +204,46 @@
             statusMsg.textContent = 'Đã tạo ngữ cảnh mới và chuyển sang hội thoại mới.';
         }
 
+        async function deleteCurrentContext() {
+            const sid = String(v2SessionId || '').trim();
+            if (!sid) {
+                statusMsg.textContent = 'Không có ngữ cảnh hợp lệ để xóa.';
+                return;
+            }
+            if (!confirm(`Bạn chắc chắn muốn xóa ngữ cảnh này?\n${sid}`)) {
+                return;
+            }
+            const res = await fetch(`/api/v2/contexts/${encodeURIComponent(sid)}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (!res.ok || !data?.ok) {
+                statusMsg.textContent = `Xóa ngữ cảnh thất bại: ${data?.detail || 'error'}`;
+                return;
+            }
+            // Immediately switch to a fresh context so user can continue.
+            const fresh = `v2-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+            v2SessionId = fresh;
+            sessionStorage.setItem('v2_console_session_id', fresh);
+            await createAndSwitchContext();
+            statusMsg.textContent = `Đã xóa ngữ cảnh: ${sid}`;
+        }
+
+        async function deleteAllContexts() {
+            if (!confirm('Bạn chắc chắn muốn xóa TẤT CẢ ngữ cảnh?')) {
+                return;
+            }
+            const res = await fetch('/api/v2/contexts', { method: 'DELETE' });
+            const data = await res.json();
+            if (!res.ok || !data?.ok) {
+                statusMsg.textContent = `Xóa tất cả thất bại: ${data?.detail || 'error'}`;
+                return;
+            }
+            const fresh = `v2-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+            v2SessionId = fresh;
+            sessionStorage.setItem('v2_console_session_id', fresh);
+            await createAndSwitchContext();
+            statusMsg.textContent = `Đã xóa tất cả ngữ cảnh (${Number(data?.deleted_count || 0)} context).`;
+        }
+
         function setActionButtonsDisabled(disabled) {
             diagnoseBtn.disabled = !!disabled;
             runBtn.disabled = !!disabled;
@@ -229,6 +275,18 @@
             if (score >= 0.9) return 'PASS';
             if (score >= 0.7) return 'WARN';
             return 'FAIL';
+        }
+
+        function scoreTone(score) {
+            if (score >= 0.9) return 'text-emerald-300 border-emerald-700/60 bg-emerald-900/20';
+            if (score >= 0.7) return 'text-amber-300 border-amber-700/60 bg-amber-900/20';
+            return 'text-rose-300 border-rose-700/60 bg-rose-900/20';
+        }
+
+        function badgeTone(tag) {
+            if (tag === 'PASS') return 'text-emerald-300 border-emerald-700/60 bg-emerald-900/20';
+            if (tag === 'WARN') return 'text-amber-300 border-amber-700/60 bg-amber-900/20';
+            return 'text-rose-300 border-rose-700/60 bg-rose-900/20';
         }
 
         function setPhaseState(el, phase, state) {
@@ -292,114 +350,434 @@
             statusMsg.textContent = 'Input da thay doi. Can Analyze lai de cap nhat hanh dong moi.';
         }
 
-        function renderGraphNetwork(topNodes, topEdges) {
-            const nodes = (topNodes || []).slice(0, 8);
-            const edges = (topEdges || []).slice(0, 10);
+        function renderGraphNetwork(topNodes, topEdges, scope = 'main') {
+            const sid = String(scope || 'main');
+            const nodes = (topNodes || []).slice(0, 18);
+            const edges = (topEdges || []).slice(0, 28);
             if (!nodes.length) {
                 return '<div class="text-slate-500">No graph nodes to render.</div>';
             }
-            const width = 560;
-            const height = 240;
-            
-            // Hierarchical Layout mapping
-            const getLayer = (id) => {
-                if (id.startsWith('intent:')) return 0;
-                if (id.startsWith('table:')) return 1;
-                if (id.startsWith('tool:')) return 2;
-                return 1;
-            };
-            const layers = [0, 0, 0];
-            nodes.forEach(n => layers[getLayer(n.id)]++);
+            const width = 860;
+            const height = 330;
+            const centerX = width / 2;
+            const centerY = height / 2;
 
-            const counters = [0, 0, 0];
+            const nodeType = (id) => {
+                const sid = String(id || '');
+                if (sid.startsWith('intent:')) return 'intent';
+                if (sid.startsWith('table:')) return 'table';
+                if (sid.startsWith('tool:')) return 'tool';
+                return 'unknown';
+            };
+            const typeColor = {
+                intent: '#22d3ee',
+                table: '#a78bfa',
+                tool: '#f59e0b',
+                unknown: '#94a3b8',
+            };
+            const typeRing = {
+                intent: '#0e7490',
+                table: '#6d28d9',
+                tool: '#b45309',
+                unknown: '#475569',
+            };
+            const typeTargetX = {
+                intent: centerX * 0.35,
+                table: centerX,
+                tool: centerX * 1.62,
+                unknown: centerX * 1.2,
+            };
+
             const points = nodes.map((n, i) => {
-                const layer = getLayer(n.id);
-                const xStep = width / (layers[layer] + 1);
-                counters[layer]++;
+                const id = String(n.id || `node-${i}`);
+                const t = nodeType(id);
+                const support = Number(n.support || 0);
+                const radius = 13 + Math.min(9, Math.sqrt(Math.max(0, support || 0)));
                 return {
-                    id: String(n.id || `node-${i}`),
-                    support: Number(n.support || 0),
-                    x: Math.round(xStep * counters[layer]),
-                    y: 40 + (layer * 80),
-                    layer: layer
+                    id,
+                    type: t,
+                    support,
+                    radius,
+                    x: 80 + (i % 6) * 120 + (Math.random() * 12),
+                    y: 60 + Math.floor(i / 6) * 95 + (Math.random() * 12),
+                    vx: 0,
+                    vy: 0,
                 };
             });
 
             const pointMap = Object.fromEntries(points.map((p) => [p.id, p]));
-            const svgEdges = edges
-                .map((e) => {
-                    const from = pointMap[String(e.from || '')];
-                    const to = pointMap[String(e.to || '')];
-                    if (!from || !to) return '';
-                    return `<g>
-                        <line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="#475569" stroke-width="1.5" stroke-dasharray="4" />
-                        <polygon points="${to.x},${to.y} ${to.x-4},${to.y-8} ${to.x+4},${to.y-8}" fill="#475569" transform="rotate(${Math.atan2(to.y-from.y, to.x-from.x)*180/Math.PI + 90}, ${to.x}, ${to.y})" />
-                    </g>`;
-                })
-                .join('');
+            const usableEdges = edges
+                .map((e) => ({
+                    from: String(e.from || ''),
+                    to: String(e.to || ''),
+                    support: Number(e.support || 0),
+                    rel: String(e.relation || e.type || ''),
+                }))
+                .filter((e) => pointMap[e.from] && pointMap[e.to]);
 
-            const nodeColors = ['#38bdf8', '#c084fc', '#fbbf24']; // Blue (Intent), Purple (Table), Gold (Tool)
-            const svgNodes = points
-                .map(
-                    (p) => {
-                        const color = nodeColors[p.layer];
-                        return `<g class="graph-node-dot" data-node-id="${escapeHtml(p.id)}" data-node-support="${p.support}" style="cursor:pointer">
-                        <circle cx="${p.x}" cy="${p.y}" r="14" fill="#0f172a" stroke="${color}" stroke-width="1.5"/>
-                        <text x="${p.x}" y="${p.y + 35}" text-anchor="middle" font-size="9" fill="${color}" font-weight="bold">${escapeHtml(p.id.split(':')[1])}</text>
-                        <text x="${p.x}" y="${p.y + 3}" text-anchor="middle" font-size="8" fill="#e2e8f0">${p.support}</text>
-                    </g>`;
+            for (let step = 0; step < 120; step++) {
+                for (let i = 0; i < points.length; i++) {
+                    const a = points[i];
+                    for (let j = i + 1; j < points.length; j++) {
+                        const b = points[j];
+                        const dx = a.x - b.x;
+                        const dy = a.y - b.y;
+                        const distSq = Math.max(40, (dx * dx) + (dy * dy));
+                        const repel = 3800 / distSq;
+                        const fx = (dx / Math.sqrt(distSq)) * repel;
+                        const fy = (dy / Math.sqrt(distSq)) * repel;
+                        a.vx += fx; a.vy += fy;
+                        b.vx -= fx; b.vy -= fy;
                     }
-                )
-                .join('');
+                }
+                usableEdges.forEach((e) => {
+                    const from = pointMap[e.from];
+                    const to = pointMap[e.to];
+                    const dx = to.x - from.x;
+                    const dy = to.y - from.y;
+                    const dist = Math.max(1, Math.sqrt((dx * dx) + (dy * dy)));
+                    const target = 120;
+                    const spring = (dist - target) * 0.0045;
+                    const fx = (dx / dist) * spring;
+                    const fy = (dy / dist) * spring;
+                    from.vx += fx; from.vy += fy;
+                    to.vx -= fx; to.vy -= fy;
+                });
+                points.forEach((p) => {
+                    const anchorPull = (typeTargetX[p.type] - p.x) * 0.004;
+                    p.vx += anchorPull;
+                    p.vy += (centerY - p.y) * 0.0017;
+                    p.vx *= 0.86;
+                    p.vy *= 0.86;
+                    p.x = Math.max(40, Math.min(width - 40, p.x + p.vx));
+                    p.y = Math.max(38, Math.min(height - 34, p.y + p.vy));
+                });
+            }
+
+            const svgEdges = usableEdges.map((e, idx) => {
+                const from = pointMap[e.from];
+                const to = pointMap[e.to];
+                const strokeW = 1 + Math.min(2.6, Math.max(0, e.support) * 0.1);
+                const mx = ((from.x + to.x) / 2).toFixed(1);
+                const my = ((from.y + to.y) / 2 - 5).toFixed(1);
+                const markerId = `graphArrow-${sid}-${idx}`;
+                const relText = escapeHtml(e.rel || '');
+                return `<g class="graph-edge" data-edge-from="${escapeHtml(e.from)}" data-edge-to="${escapeHtml(e.to)}" data-edge-rel="${escapeHtml(e.rel || '')}" data-edge-support="${String(e.support)}" style="cursor:pointer">
+                    <defs>
+                        <marker id="${markerId}" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                            <polygon points="0 0, 8 4, 0 8" fill="#64748b"></polygon>
+                        </marker>
+                    </defs>
+                    <line x1="${from.x.toFixed(1)}" y1="${from.y.toFixed(1)}" x2="${to.x.toFixed(1)}" y2="${to.y.toFixed(1)}"
+                        stroke="#64748b" stroke-opacity="0.78" stroke-width="${strokeW.toFixed(2)}" marker-end="url(#${markerId})"/>
+                    ${relText ? `<rect x="${mx - 24}" y="${my - 9}" width="48" height="13" rx="6" fill="#020617" opacity="0.8"></rect>
+                    <text x="${mx}" y="${my}" text-anchor="middle" font-size="8.5" fill="#94a3b8">${relText.slice(0, 9)}</text>` : ''}
+                </g>`;
+            }).join('');
+
+            const svgNodes = points.map((p) => {
+                const label = String(p.id).split(':')[1] || p.id;
+                const fill = typeColor[p.type];
+                const ring = typeRing[p.type];
+                return `<g class="graph-node-dot" data-node-id="${escapeHtml(p.id)}" data-node-type="${p.type}" data-node-support="${p.support}" style="cursor:pointer">
+                    <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${(p.radius + 3).toFixed(1)}" fill="${ring}" opacity="0.22"></circle>
+                    <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.radius.toFixed(1)}" fill="#020617" stroke="${fill}" stroke-width="1.7"></circle>
+                    <text x="${p.x.toFixed(1)}" y="${(p.y + 3).toFixed(1)}" text-anchor="middle" font-size="9" fill="#e2e8f0">${p.support}</text>
+                    <text x="${p.x.toFixed(1)}" y="${(p.y + p.radius + 13).toFixed(1)}" text-anchor="middle" font-size="9" fill="${fill}" font-weight="600">${escapeHtml(label).slice(0, 14)}</text>
+                </g>`;
+            }).join('');
 
             return `
-                <div class="bg-slate-950 border border-slate-800 rounded p-4 overflow-auto">
-                    <svg viewBox="0 0 ${width} ${height}" class="w-full min-w-[520px] h-60">
+                <div class="bg-slate-950 border border-slate-800 rounded p-4 overflow-hidden">
+                    <div class="flex items-center justify-between mb-2 text-[11px] text-slate-400">
+                        <div class="flex items-center gap-3">
+                            <span class="inline-flex items-center gap-1"><i class="inline-block w-2 h-2 rounded-full bg-cyan-400"></i>Intent</span>
+                            <span class="inline-flex items-center gap-1"><i class="inline-block w-2 h-2 rounded-full bg-violet-400"></i>Table</span>
+                            <span class="inline-flex items-center gap-1"><i class="inline-block w-2 h-2 rounded-full bg-amber-400"></i>Tool</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            ${sid === 'main' ? `<button id="graphOpenModal" class="px-2 py-0.5 rounded border border-cyan-700 text-cyan-300 hover:border-cyan-500">expand</button>` : ''}
+                            <button id="graphZoomOut-${sid}" class="px-2 py-0.5 rounded border border-slate-700 hover:border-slate-500">-</button>
+                            <button id="graphResetView-${sid}" class="px-2 py-0.5 rounded border border-slate-700 hover:border-slate-500">reset</button>
+                            <button id="graphZoomIn-${sid}" class="px-2 py-0.5 rounded border border-slate-700 hover:border-slate-500">+</button>
+                        </div>
+                    </div>
+                    <svg id="graphSvg-${sid}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" class="w-full ${sid === 'modal' ? 'h-[56vh]' : 'h-72'} select-none">
                         <defs>
                             <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
                                 <feGaussianBlur stdDeviation="2" result="blur" />
                                 <feComposite in="SourceGraphic" in2="blur" operator="over" />
                             </filter>
                         </defs>
-                        ${svgEdges}
-                        ${svgNodes}
+                        <g id="graphViewport-${sid}">
+                            <g id="graphLayerEdges-${sid}">${svgEdges}</g>
+                            <g id="graphLayerNodes-${sid}">${svgNodes}</g>
+                        </g>
                     </svg>
                 </div>
-                <div id="graphNodeInfo" class="mt-2 px-3 py-2 bg-indigo-950/30 border border-indigo-500/30 rounded text-[11px] text-indigo-200">
-                    💡 <b>Tip:</b> Phân cấp tri thức: Intent (Xanh) -> Table (Tím) -> Tool (Vàng). 
+                <div id="graphNodeInfo-${sid}" class="mt-2 px-3 py-2 bg-indigo-950/30 border border-indigo-500/30 rounded text-[11px] text-indigo-200">
+                    💡 <b>Tip:</b> Kéo để pan, cuộn để zoom, hover/click để xem chi tiết node.
                 </div>
+                <div id="graphDetail-${sid}" class="mt-2 hidden text-[11px] bg-slate-950 border border-slate-700 rounded p-3 text-slate-200"></div>
             `;
         }
 
-        function attachGraphInteractivity() {
-            const info = document.getElementById('graphNodeInfo');
+        function prettyNodeLabel(nodeId) {
+            const raw = String(nodeId || '');
+            if (!raw) return '-';
+            const [prefix, rest] = raw.split(':', 2);
+            if (!rest) return raw;
+            return `${prefix.toUpperCase()} / ${rest}`;
+        }
+
+        function renderGraphDetailPanel(scope, payload) {
+            const sid = String(scope || 'main');
+            const detailBox = document.getElementById(`graphDetail-${sid}`);
+            if (!detailBox) return;
+            if (!payload) {
+                detailBox.classList.add('hidden');
+                detailBox.innerHTML = '';
+                return;
+            }
+            detailBox.classList.remove('hidden');
+            if (payload.kind === 'node') {
+                const nodeId = String(payload.nodeId || '');
+                const node = latestGraphNodes.find((n) => String(n?.id || '') === nodeId) || {};
+                const nodeType = nodeId.startsWith('intent:') ? 'intent' : (nodeId.startsWith('table:') ? 'table' : (nodeId.startsWith('tool:') ? 'tool' : 'unknown'));
+                const outgoing = latestGraphEdges.filter((e) => String(e?.from || '') === nodeId);
+                const incoming = latestGraphEdges.filter((e) => String(e?.to || '') === nodeId);
+                const totalSupport = Number(node?.support || 0);
+                const neighborCount = new Set(
+                    outgoing.map((e) => String(e?.to || '')).concat(incoming.map((e) => String(e?.from || '')))
+                ).size;
+                const nodeMeaning =
+                    nodeType === 'intent' ? 'Đây là loại yêu cầu người dùng hay hỏi (ví dụ: retrieve/analyze).'
+                    : nodeType === 'table' ? 'Đây là bảng dữ liệu mà hệ thống thường chọn làm gốc truy vấn.'
+                    : nodeType === 'tool' ? 'Đây là công cụ thực thi mà planner hay chọn để chạy yêu cầu.'
+                    : 'Đây là node hỗ trợ, không thuộc 3 nhóm chính intent/table/tool.';
+                const impactText =
+                    totalSupport >= 40 ? 'Ảnh hưởng cao: node này xuất hiện rất thường xuyên, nếu lệch sẽ làm sai nhiều query.'
+                    : totalSupport >= 15 ? 'Ảnh hưởng trung bình: node này có tác động đáng kể đến độ đúng của planner.'
+                    : 'Ảnh hưởng thấp: node này hiếm gặp, ưu tiên sau khi đã tối ưu các node chính.';
+                const suggestText =
+                    nodeType === 'intent' ? 'Nên kiểm tra parser intent cho nhóm này và thêm case biến thể ngôn ngữ.'
+                    : nodeType === 'table' ? 'Nên kiểm tra root-table mapping + join path liên quan bảng này.'
+                    : nodeType === 'tool' ? 'Nên kiểm tra tiêu chí chọn tool và guardrail của tool này.'
+                    : 'Nên theo dõi thêm log để xác định vai trò node này trong luồng suy luận.';
+                const topOutgoing = outgoing
+                    .slice()
+                    .sort((a, b) => Number(b?.support || 0) - Number(a?.support || 0))
+                    .slice(0, 5)
+                    .map((e) => `<li>${escapeHtml(prettyNodeLabel(e?.to))} <span class="text-slate-400">(rel=${escapeHtml(String(e?.relation || e?.type || '-'))}, support=${Number(e?.support || 0)})</span></li>`)
+                    .join('');
+                const topIncoming = incoming
+                    .slice()
+                    .sort((a, b) => Number(b?.support || 0) - Number(a?.support || 0))
+                    .slice(0, 5)
+                    .map((e) => `<li>${escapeHtml(prettyNodeLabel(e?.from))} <span class="text-slate-400">(rel=${escapeHtml(String(e?.relation || e?.type || '-'))}, support=${Number(e?.support || 0)})</span></li>`)
+                    .join('');
+
+                detailBox.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="font-semibold text-cyan-300">Chi tiết Node</div>
+                        <button id="graphDetailClose-${sid}" class="px-2 py-0.5 rounded border border-slate-700 hover:border-slate-500 text-[10px]">Hide</button>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
+                        <div class="bg-slate-900 border border-slate-800 rounded px-2 py-1"><div class="text-slate-400">Node ID</div><div class="font-semibold break-all">${escapeHtml(nodeId)}</div></div>
+                        <div class="bg-slate-900 border border-slate-800 rounded px-2 py-1"><div class="text-slate-400">Node Type</div><div class="font-semibold">${escapeHtml(nodeType.toUpperCase())}</div></div>
+                        <div class="bg-slate-900 border border-slate-800 rounded px-2 py-1"><div class="text-slate-400">Support</div><div class="font-semibold">${totalSupport}</div></div>
+                        <div class="bg-slate-900 border border-slate-800 rounded px-2 py-1"><div class="text-slate-400">Outgoing</div><div class="font-semibold">${outgoing.length}</div></div>
+                        <div class="bg-slate-900 border border-slate-800 rounded px-2 py-1"><div class="text-slate-400">Incoming</div><div class="font-semibold">${incoming.length}</div></div>
+                    </div>
+                    <div class="mb-2 text-slate-300"><b>Nó là gì:</b> ${nodeMeaning}</div>
+                    <div class="mb-2 text-slate-300"><b>Ảnh hưởng:</b> ${impactText} (kết nối <b>${neighborCount}</b> node lân cận)</div>
+                    <div class="mb-2 text-slate-300"><b>Nên làm gì tiếp:</b> ${suggestText}</div>
+                    <details open class="mb-2">
+                        <summary class="cursor-pointer text-violet-300">Top quan hệ đi ra (from node này)</summary>
+                        <ul class="mt-1 pl-4 list-disc text-slate-200">${topOutgoing || '<li class="text-slate-500">Không có edge đi ra.</li>'}</ul>
+                    </details>
+                    <details open class="mb-2">
+                        <summary class="cursor-pointer text-amber-300">Top quan hệ đi vào (to node này)</summary>
+                        <ul class="mt-1 pl-4 list-disc text-slate-200">${topIncoming || '<li class="text-slate-500">Không có edge đi vào.</li>'}</ul>
+                    </details>
+                    <details>
+                        <summary class="cursor-pointer text-slate-400">Raw JSON của node</summary>
+                        <pre class="mt-1 bg-slate-900 border border-slate-800 rounded p-2 overflow-auto">${escapeHtml(JSON.stringify(node, null, 2))}</pre>
+                    </details>
+                `;
+                const closeBtn = document.getElementById(`graphDetailClose-${sid}`);
+                if (closeBtn) closeBtn.onclick = () => renderGraphDetailPanel(sid, null);
+                return;
+            }
+
+            if (payload.kind === 'edge') {
+                const from = String(payload.from || '');
+                const to = String(payload.to || '');
+                const rel = String(payload.rel || '');
+                const edge = latestGraphEdges.find((e) =>
+                    String(e?.from || '') === from &&
+                    String(e?.to || '') === to &&
+                    String(e?.relation || e?.type || '') === rel
+                ) || {};
+                const support = Number(edge?.support || payload.support || 0);
+                const relMeaning = rel === 'maps_to'
+                    ? 'Intent được map sang table này trong planner.'
+                    : rel === 'selects'
+                        ? 'Intent thường chọn tool này để thực thi.'
+                        : rel === 'served_by'
+                            ? 'Table này thường được xử lý bởi tool này.'
+                            : 'Quan hệ liên kết giữa 2 node trong knowledge graph.';
+                detailBox.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="font-semibold text-cyan-300">Chi tiết Edge</div>
+                        <button id="graphDetailClose-${sid}" class="px-2 py-0.5 rounded border border-slate-700 hover:border-slate-500 text-[10px]">Hide</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
+                        <div class="bg-slate-900 border border-slate-800 rounded px-2 py-1"><div class="text-slate-400">From</div><div class="font-semibold break-all">${escapeHtml(from)}</div></div>
+                        <div class="bg-slate-900 border border-slate-800 rounded px-2 py-1"><div class="text-slate-400">To</div><div class="font-semibold break-all">${escapeHtml(to)}</div></div>
+                        <div class="bg-slate-900 border border-slate-800 rounded px-2 py-1"><div class="text-slate-400">Relation / Support</div><div class="font-semibold">${escapeHtml(rel || '-')} / ${support}</div></div>
+                    </div>
+                    <div class="mb-2 text-slate-300"><b>Nó là gì:</b> ${relMeaning}</div>
+                    <div class="mb-2 text-slate-300"><b>Ảnh hưởng:</b> Support cao nghĩa là quan hệ <code>${escapeHtml(from)} -> ${escapeHtml(to)}</code> xuất hiện thường xuyên; nếu sai sẽ lặp lỗi theo pattern này.</div>
+                    <details>
+                        <summary class="cursor-pointer text-slate-400">Raw JSON của edge</summary>
+                        <pre class="mt-1 bg-slate-900 border border-slate-800 rounded p-2 overflow-auto">${escapeHtml(JSON.stringify(edge, null, 2))}</pre>
+                    </details>
+                `;
+                const closeBtn = document.getElementById(`graphDetailClose-${sid}`);
+                if (closeBtn) closeBtn.onclick = () => renderGraphDetailPanel(sid, null);
+            }
+        }
+
+        function attachGraphInteractivity(scope = 'main') {
+            const sid = String(scope || 'main');
+            const info = document.getElementById(`graphNodeInfo-${sid}`);
             if (!info) return;
-            const nodeEls = document.querySelectorAll('.graph-node-dot');
+            const svg = document.getElementById(`graphSvg-${sid}`);
+            const viewport = document.getElementById(`graphViewport-${sid}`);
+            if (!svg || !viewport) return;
+
+            const state = { scale: 1, tx: 0, ty: 0, pan: false, sx: 0, sy: 0 };
+            const applyTransform = () => {
+                viewport.setAttribute('transform', `translate(${state.tx.toFixed(1)},${state.ty.toFixed(1)}) scale(${state.scale.toFixed(3)})`);
+            };
+            applyTransform();
+
+            const zoomIn = document.getElementById(`graphZoomIn-${sid}`);
+            const zoomOut = document.getElementById(`graphZoomOut-${sid}`);
+            const reset = document.getElementById(`graphResetView-${sid}`);
+            if (zoomIn) zoomIn.onclick = () => { state.scale = Math.min(2.5, state.scale * 1.15); applyTransform(); };
+            if (zoomOut) zoomOut.onclick = () => { state.scale = Math.max(0.55, state.scale / 1.15); applyTransform(); };
+            if (reset) reset.onclick = () => { state.scale = 1; state.tx = 0; state.ty = 0; applyTransform(); };
+
+            svg.addEventListener('wheel', (evt) => {
+                evt.preventDefault();
+                const direction = evt.deltaY > 0 ? 0.92 : 1.08;
+                state.scale = Math.max(0.55, Math.min(2.8, state.scale * direction));
+                applyTransform();
+            }, { passive: false });
+            svg.addEventListener('mousedown', (evt) => {
+                if (evt.target.closest('.graph-node-dot')) return;
+                state.pan = true;
+                state.sx = evt.clientX - state.tx;
+                state.sy = evt.clientY - state.ty;
+            });
+            window.addEventListener('mouseup', () => { state.pan = false; });
+            window.addEventListener('mousemove', (evt) => {
+                if (!state.pan) return;
+                state.tx = evt.clientX - state.sx;
+                state.ty = evt.clientY - state.sy;
+                applyTransform();
+            });
+
+            const nodeEls = svg.querySelectorAll('.graph-node-dot');
             nodeEls.forEach((el) => {
                 const nodeId = el.getAttribute('data-node-id') || '';
                 const support = el.getAttribute('data-node-support') || '0';
+                const nodeType = el.getAttribute('data-node-type') || 'unknown';
                 const label =
                     nodeId.startsWith('intent:') ? 'Intent node' :
                     nodeId.startsWith('table:') ? 'Table node' :
                     nodeId.startsWith('tool:') ? 'Tool node' :
                     'Graph node';
-                const explain = `${label}: ${nodeId} | support=${support}`;
+                const explain = `${label}: ${nodeId} | support=${support} | group=${nodeType}`;
                 el.addEventListener('mouseenter', () => {
                     info.textContent = explain;
-                    const circle = el.querySelector('circle');
-                    if (circle) circle.setAttribute('stroke', '#22d3ee');
-                    if (circle) circle.setAttribute('stroke-width', '2');
+                    const circles = el.querySelectorAll('circle');
+                    circles.forEach((c, idx) => {
+                        if (idx === 1) c.setAttribute('stroke-width', '2.8');
+                    });
                 });
                 el.addEventListener('mouseleave', () => {
                     info.textContent = 'Hover hoac click vao node de xem y nghia.';
-                    const circle = el.querySelector('circle');
-                    if (circle) circle.setAttribute('stroke', '#38bdf8');
-                    if (circle) circle.setAttribute('stroke-width', '1.2');
+                    const circles = el.querySelectorAll('circle');
+                    circles.forEach((c, idx) => {
+                        if (idx === 1) c.setAttribute('stroke-width', '1.7');
+                    });
                 });
                 el.addEventListener('click', () => {
                     info.textContent = `Da chon: ${explain}`;
+                    renderGraphDetailPanel(sid, { kind: 'node', nodeId });
                 });
             });
+
+            const edgeEls = svg.querySelectorAll('.graph-edge');
+            edgeEls.forEach((el) => {
+                const from = el.getAttribute('data-edge-from') || '';
+                const to = el.getAttribute('data-edge-to') || '';
+                const rel = el.getAttribute('data-edge-rel') || '';
+                const support = el.getAttribute('data-edge-support') || '0';
+                const explain = `Edge: ${from} -> ${to} | rel=${rel || '-'} | support=${support}`;
+                el.addEventListener('mouseenter', () => {
+                    info.textContent = explain;
+                });
+                el.addEventListener('mouseleave', () => {
+                    info.textContent = 'Hover hoac click vao node de xem y nghia.';
+                });
+                el.addEventListener('click', () => {
+                    info.textContent = `Da chon: ${explain}`;
+                    renderGraphDetailPanel(sid, { kind: 'edge', from, to, rel, support: Number(support || 0) });
+                });
+            });
+        }
+
+        function ensureGraphModal() {
+            if (document.getElementById('graphModal')) return;
+            const wrapper = document.createElement('div');
+            wrapper.id = 'graphModal';
+            wrapper.className = 'fixed inset-0 z-50 hidden';
+            wrapper.innerHTML = `
+                <div id="graphModalBackdrop" class="absolute inset-0 bg-black/70"></div>
+                <div class="relative h-full w-full flex items-center justify-center p-5">
+                    <div class="w-full max-w-6xl max-h-[92vh] bg-slate-900 border border-slate-700 rounded-xl p-4 shadow-2xl overflow-y-auto">
+                        <div class="sticky top-0 z-10 bg-slate-900/95 backdrop-blur flex items-center justify-between mb-3 py-1">
+                            <h4 class="text-sm font-semibold">Graph Training - Expanded View</h4>
+                            <button id="graphModalClose" class="px-2 py-1 rounded border border-slate-600 hover:border-slate-400 text-xs">Close</button>
+                        </div>
+                        <div id="graphModalContent"></div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(wrapper);
+
+            const closeModal = () => wrapper.classList.add('hidden');
+            const closeBtn = document.getElementById('graphModalClose');
+            const backdrop = document.getElementById('graphModalBackdrop');
+            if (closeBtn) closeBtn.onclick = closeModal;
+            if (backdrop) backdrop.onclick = closeModal;
+            window.addEventListener('keydown', (evt) => {
+                if (evt.key === 'Escape') closeModal();
+            });
+        }
+
+        function openGraphModal() {
+            ensureGraphModal();
+            const modal = document.getElementById('graphModal');
+            const content = document.getElementById('graphModalContent');
+            if (!modal || !content) return;
+            content.innerHTML = renderGraphNetwork(latestGraphNodes, latestGraphEdges, 'modal');
+            attachGraphInteractivity('modal');
+            modal.classList.remove('hidden');
         }
 
         async function refreshTrainingOverview() {
@@ -420,31 +798,89 @@
                 </tr>
             `).join('');
 
+            const mTool = Number(matrixEval.tool_plan_correctness || 0);
+            const mFilter = Number(matrixEval.filter_fidelity || 0);
+            const mJoin = Number(matrixEval.join_correctness || 0);
+            const mDiversity = Number(matrixEval.training_diversity || 0);
+            const mGraphCov = Number(matrixEval.graph_coverage || 0);
+            const overallScore = (mTool + mFilter + mJoin + mDiversity + mGraphCov) / 5;
+            const overallTag = qualityTag(overallScore);
+
+            const metricRows = [
+                { key: 'Tool Plan Correctness', value: mTool, why: 'Độ đúng khi chọn tool theo intent/root.' },
+                { key: 'Filter Fidelity', value: mFilter, why: 'Độ giữ đúng điều kiện lọc từ câu user.' },
+                { key: 'Join Correctness', value: mJoin, why: 'Độ chính xác đường join giữa các bảng.' },
+                { key: 'Training Diversity', value: mDiversity, why: 'Mức đa dạng sample để tránh học vẹt.' },
+                { key: 'Graph Coverage', value: mGraphCov, why: 'Mức phủ liên kết tri thức cho Reason.' },
+            ];
+            const rootCauseText = metricRows
+                .filter((x) => qualityTag(x.value) !== 'PASS')
+                .slice(0, 3)
+                .map((x) => `<div>- ${x.key}: <b>${pct(x.value)}%</b> (${qualityTag(x.value)}). ${x.why}</div>`)
+                .join('') || '<div>- Không có điểm nghẽn lớn. Hệ thống đang ổn định.</div>';
+
+            const previewSamples = (data.trainset_preview?.samples || []);
+            const sampleCount = Number(data.trainset_preview?.sample_count || 0);
+            const unknownCount = previewSamples.filter((s) => String(s?.intent || '').trim().toLowerCase() === 'unknown').length;
+            const unknownRatio = sampleCount > 0 ? (unknownCount / sampleCount) : 0;
+            const files = data.files || {};
+            const latestAuto = data.runtime_training?.latest_auto_train_summary || {};
+            const retrainAt = String(files.matrix_eval_mtime || '').trim();
+            const latestRunAt = String(latestAuto.generated_at || '').trim();
+            const latestAppended = Number(latestAuto.learning?.appended || 0);
+            const latestSkipped = Number(latestAuto.learning?.skipped_or_blocked || 0);
+
             matrixTraining.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
+                    <div class="md:col-span-1 border rounded p-3 ${badgeTone(overallTag)}">
+                        <div class="text-[11px] opacity-80">Quality Gate</div>
+                        <div class="text-lg font-semibold">${overallTag}</div>
+                        <div class="text-[11px] mt-1">Overall score: ${pct(overallScore)}%</div>
+                    </div>
+                    <div class="md:col-span-2 bg-slate-950 border border-slate-800 rounded p-3">
+                        <div class="text-[11px] text-slate-400 mb-1">Vì sao đang fail/warn</div>
+                        <div class="text-[11px] text-slate-200 leading-5">${rootCauseText}</div>
+                    </div>
+                </div>
                 <div class="grid grid-cols-2 gap-2 mb-2">
                     <div class="bg-slate-950 border border-slate-800 rounded p-2"><div class="text-slate-400">Version</div><div class="font-semibold">${matrixArtifact.version || '-'}</div></div>
                     <div class="bg-slate-950 border border-slate-800 rounded p-2"><div class="text-slate-400">Train Samples</div><div class="font-semibold">${matrixArtifact.train_samples || 0}</div></div>
                 </div>
+                <div class="mb-2 bg-slate-950 border border-slate-800 rounded p-2 text-[11px] text-slate-300">
+                    <div><b>Last retrain:</b> ${retrainAt ? new Date(retrainAt).toLocaleString() : '-'}</div>
+                    <div><b>Latest auto-train run:</b> ${latestRunAt ? new Date(latestRunAt).toLocaleString() : '-'}</div>
+                    <div><b>Appended/Skipped (latest run):</b> ${latestAppended} / ${latestSkipped}</div>
+                </div>
                 <div class="space-y-2">
                     <div>
-                        <div class="flex justify-between text-xs mb-1"><span>Tool Plan Correctness</span><span>${pct(matrixEval.tool_plan_correctness)}%</span></div>
-                        <div class="w-full bg-slate-800 rounded h-2"><div class="h-2 rounded bg-emerald-500" style="width:${pct(matrixEval.tool_plan_correctness)}%"></div></div>
+                        <div class="flex justify-between text-xs mb-1"><span>Tool Plan Correctness</span><span class="px-1.5 py-0.5 rounded border ${scoreTone(mTool)}">${pct(mTool)}% · ${qualityTag(mTool)}</span></div>
+                        <div class="w-full bg-slate-800 rounded h-2"><div class="h-2 rounded bg-emerald-500" style="width:${pct(mTool)}%"></div></div>
                     </div>
                     <div>
-                        <div class="flex justify-between text-xs mb-1"><span>Filter Fidelity</span><span>${pct(matrixEval.filter_fidelity)}%</span></div>
-                        <div class="w-full bg-slate-800 rounded h-2"><div class="h-2 rounded bg-cyan-500" style="width:${pct(matrixEval.filter_fidelity)}%"></div></div>
+                        <div class="flex justify-between text-xs mb-1"><span>Filter Fidelity</span><span class="px-1.5 py-0.5 rounded border ${scoreTone(mFilter)}">${pct(mFilter)}% · ${qualityTag(mFilter)}</span></div>
+                        <div class="w-full bg-slate-800 rounded h-2"><div class="h-2 rounded bg-cyan-500" style="width:${pct(mFilter)}%"></div></div>
                     </div>
                     <div>
-                        <div class="flex justify-between text-xs mb-1"><span>Graph Coverage</span><span>${pct(matrixEval.graph_coverage)}%</span></div>
-                        <div class="w-full bg-slate-800 rounded h-2"><div class="h-2 rounded bg-violet-500" style="width:${pct(matrixEval.graph_coverage)}%"></div></div>
+                        <div class="flex justify-between text-xs mb-1"><span>Graph Coverage</span><span class="px-1.5 py-0.5 rounded border ${scoreTone(mGraphCov)}">${pct(mGraphCov)}% · ${qualityTag(mGraphCov)}</span></div>
+                        <div class="w-full bg-slate-800 rounded h-2"><div class="h-2 rounded bg-violet-500" style="width:${pct(mGraphCov)}%"></div></div>
                     </div>
                     <div>
-                        <div class="flex justify-between text-xs mb-1"><span>Join Correctness</span><span>${pct(matrixEval.join_correctness)}%</span></div>
-                        <div class="w-full bg-slate-800 rounded h-2"><div class="h-2 rounded bg-amber-500" style="width:${pct(matrixEval.join_correctness)}%"></div></div>
+                        <div class="flex justify-between text-xs mb-1"><span>Join Correctness</span><span class="px-1.5 py-0.5 rounded border ${scoreTone(mJoin)}">${pct(mJoin)}% · ${qualityTag(mJoin)}</span></div>
+                        <div class="w-full bg-slate-800 rounded h-2"><div class="h-2 rounded bg-amber-500" style="width:${pct(mJoin)}%"></div></div>
                     </div>
                     <div>
-                        <div class="flex justify-between text-xs mb-1"><span>Training Diversity</span><span>${pct(matrixEval.training_diversity)}%</span></div>
-                        <div class="w-full bg-slate-800 rounded h-2"><div class="h-2 rounded bg-pink-500" style="width:${pct(matrixEval.training_diversity)}%"></div></div>
+                        <div class="flex justify-between text-xs mb-1"><span>Training Diversity</span><span class="px-1.5 py-0.5 rounded border ${scoreTone(mDiversity)}">${pct(mDiversity)}% · ${qualityTag(mDiversity)}</span></div>
+                        <div class="w-full bg-slate-800 rounded h-2"><div class="h-2 rounded bg-pink-500" style="width:${pct(mDiversity)}%"></div></div>
+                    </div>
+                </div>
+                <div class="mt-3 grid grid-cols-2 gap-2">
+                    <div class="bg-slate-950 border border-slate-800 rounded p-2">
+                        <div class="text-slate-400 text-[11px]">Unknown Intent Ratio (preview)</div>
+                        <div class="font-semibold">${pct(unknownRatio)}%</div>
+                    </div>
+                    <div class="bg-slate-950 border border-slate-800 rounded p-2">
+                        <div class="text-slate-400 text-[11px]">Ready To Promote</div>
+                        <div class="font-semibold ${overallTag === 'PASS' ? 'text-emerald-300' : 'text-amber-300'}">${overallTag === 'PASS' ? 'YES' : 'NOT YET'}</div>
                     </div>
                 </div>
                 <div class="mt-3 bg-slate-950 border border-slate-800 rounded overflow-auto">
@@ -456,17 +892,31 @@
                     </table>
                 </div>
             `;
-            const toolScore = Number(matrixEval.tool_plan_correctness || 0);
-            const filterScore = Number(matrixEval.filter_fidelity || 0);
+            const toolScore = mTool;
+            const filterScore = mFilter;
+            const joinScore = mJoin;
+            const toolTag = qualityTag(toolScore);
+            const filterTag = qualityTag(filterScore);
+            const joinTag = qualityTag(joinScore);
+            const actionHints = [];
+            if (toolTag !== 'PASS') actionHints.push("Rà lại mapping intent -> tool trong parser/reason, đặc biệt các câu có từ viết tắt hoặc đa ý.");
+            if (filterTag !== 'PASS') actionHints.push("Rà logic trích filter (field/value) và ưu tiên filter định danh mạnh trước filter mơ hồ.");
+            if (joinTag !== 'PASS') actionHints.push("Rà metadata lookup path và ưu tiên path business-table trước path kỹ thuật để tránh lệch join.");
+            if (!actionHints.length) actionHints.push("Duy trì bộ case regression hiện tại và tiếp tục mở rộng biến thể câu hỏi khó.");
             matrixExplain.innerHTML = `
-                <div><b>Giải thích:</b> Matrix thể hiện khả năng chọn đúng tool và giữ đúng filter theo trainset.</div>
-                <div class="mt-1">- Tool Plan: <b>${pct(toolScore)}%</b> (${qualityTag(toolScore)})</div>
-                <div>- Filter Fidelity: <b>${pct(filterScore)}%</b> (${qualityTag(filterScore)})</div>
-                <div>- Ý nghĩa: nếu cả 2 chỉ số PASS thì planner có thể tin cậy ở bước ra quyết định hành vi.</div>
+                <div><b>Cách đọc nhanh (30 giây):</b></div>
+                <div class="mt-1">- <b>Tool Plan ${pct(toolScore)}% (${toolTag})</b>: hệ thống có chọn đúng công cụ xử lý câu hỏi hay không.</div>
+                <div>- <b>Filter Fidelity ${pct(filterScore)}% (${filterTag})</b>: điều kiện lọc có giữ đúng ý user hay bị lệch field/value.</div>
+                <div>- <b>Join Correctness ${pct(joinScore)}% (${joinTag})</b>: đường nối bảng có đúng quan hệ metadata để tránh trả sai/rỗng.</div>
+                <div class="mt-2"><b>Kết luận hiện tại:</b> ${overallTag === 'PASS' ? 'Có thể tin cậy để chạy rộng hơn.' : 'Chưa ổn định hoàn toàn, vẫn có rủi ro "đúng format nhưng sai ý".'}</div>
+                <div class="mt-2"><b>Việc nên làm tiếp:</b></div>
+                ${actionHints.map((x) => `<div>- ${x}</div>`).join('')}
             `;
 
             const topNodes = data.graph?.top_nodes || [];
             const topEdges = data.graph?.top_edges || [];
+            latestGraphNodes = topNodes;
+            latestGraphEdges = topEdges;
             graphTraining.innerHTML = `
                 <div class="grid grid-cols-2 gap-2">
                     <div class="bg-slate-950 border border-slate-800 rounded p-2"><div class="text-slate-400">Graph Version</div><div class="font-semibold">${graphMeta.version || '-'}</div></div>
@@ -474,13 +924,15 @@
                     <div class="bg-slate-950 border border-slate-800 rounded p-2"><div class="text-slate-400">Nodes</div><div class="font-semibold">${graphMeta.node_count || 0}</div></div>
                     <div class="bg-slate-950 border border-slate-800 rounded p-2"><div class="text-slate-400">Edges</div><div class="font-semibold">${graphMeta.edge_count || 0}</div></div>
                 </div>
-                ${renderGraphNetwork(topNodes, topEdges)}
+                ${renderGraphNetwork(topNodes, topEdges, 'main')}
                 <details class="mt-2 text-[11px]">
                     <summary class="cursor-pointer text-slate-400">View raw graph data</summary>
                     <pre class="mt-2 bg-slate-950 border border-slate-800 rounded p-2 overflow-auto">${JSON.stringify({ top_nodes: topNodes, top_edges: topEdges }, null, 2)}</pre>
                 </details>
             `;
-            attachGraphInteractivity();
+            attachGraphInteractivity('main');
+            const openBtn = document.getElementById('graphOpenModal');
+            if (openBtn) openBtn.onclick = () => openGraphModal();
             const cov = Number(graphEval.coverage || 0);
             graphExplain.innerHTML = `
                 <div><b>Giải thích:</b> Graph encode tri thức quan hệ <code>intent -> table -> tool</code>.</div>
@@ -695,6 +1147,8 @@
             statusMsg.textContent = `Đã chuyển sang ngữ cảnh: ${sid}`;
         });
         newContextBtn.addEventListener('click', createAndSwitchContext);
+        deleteContextBtn.addEventListener('click', deleteCurrentContext);
+        deleteAllContextsBtn.addEventListener('click', deleteAllContexts);
 
         setDebugMode(false);
         refreshTrainingOverview();

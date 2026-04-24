@@ -106,10 +106,14 @@ def _extract_named_targets(query: str) -> dict[str, str]:
             continue
         
         # Regex for "<alias> <value>"
-        p1 = rf"{re.escape(alias)}\s+([A-Za-z0-9][A-Za-z0-9 _\-.]{{2,80}})"
+        p1 = rf"{re.escape(alias)}\s+([^\n\r,;]{{2,80}})"
         m1 = re.search(p1, query, re.IGNORECASE)
         if m1:
             val = m1.group(1).strip()
+            # Normalize copula prefix: "account là Demo Account 1" -> "Demo Account 1"
+            val = re.sub(r"^(là|la|is|=)\s+", "", val, flags=re.IGNORECASE).strip()
+            # Update-like queries often append payload after ":"; keep only entity name.
+            val = val.split(":", 1)[0].strip()
             # Avoid picking up trailing list keywords or intent markers
             if not _is_generic_list_query(val):
                 val = re.split(r"\b(và|va|cùng|cung|with|liên quan|lien quan|co|có|thuoc|thuộc)\b", val, maxsplit=1)[0].strip()
@@ -117,12 +121,19 @@ def _extract_named_targets(query: str) -> dict[str, str]:
                     targets[table] = val
         
         # Regex for "<value> <alias>" (e.g. "FPT contact")
-        p2 = rf"([A-Za-z0-9][A-Za-z0-9 _\-.]{{2,80}})\s+{re.escape(alias)}"
+        p2 = rf"([^\n\r,;]{{2,80}})\s+{re.escape(alias)}"
         m2 = re.search(p2, query, re.IGNORECASE)
         if m2:
+            # Skip false positives like "Demo Account 1" where alias is part of value.
+            tail = query[m2.end() :].strip()
+            if tail and tail[0].isdigit():
+                continue
             val = m2.group(1).strip()
             # Avoid picking up intent markers or list keywords
             val = re.sub(r"\b(chi tiết|xem|lấy|show|get|list|danh sách|danh sach|danh s|liệt kê|liet ke)\b", "", val, flags=re.IGNORECASE).strip()
+            val = val.split(":", 1)[0].strip()
+            if re.search(r"\b(lọc|loc|chỉ|chi|lấy|lay|danh sách|danh sach|list|show|get|xem)\b", val, flags=re.IGNORECASE):
+                continue
             if len(val) >= 3:
                 targets[table] = val
 
@@ -293,6 +304,11 @@ def _apply_deterministic_overrides(
     named_targets = _extract_named_targets(query)
     entity_set = set(entities)
     new_filters = list(filters)
+    aggregate_phrase_markers = ["thống kê", "thong ke", "bao cao", "báo cáo", "số lượng", "so luong", "doanh thu", "revenue"]
+    aggregate_word_markers = ["count", "sum"]
+    is_aggregate_like = any(x in lowered for x in aggregate_phrase_markers) or any(
+        re.search(rf"\b{re.escape(x)}\b", lowered) for x in aggregate_word_markers
+    )
 
     # If user provides explicit object identity (e.g. Demo Account 8),
     # this is a high-signal request and should not be blocked by clarify.
@@ -313,6 +329,13 @@ def _apply_deterministic_overrides(
         if intent == "unknown":
             intent = "retrieve"
         ambiguity = min(ambiguity, 0.35)
+
+    # Aggregate/report requests should not be forced into name filters.
+    if is_aggregate_like:
+        if intent in {"unknown", "retrieve"}:
+            intent = "analyze"
+        new_filters = []
+        ambiguity = min(ambiguity, 0.25)
 
     return intent, sorted(entity_set), new_filters, ambiguity
 

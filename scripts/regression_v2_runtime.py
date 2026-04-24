@@ -22,6 +22,9 @@ def test_detail_query() -> None:
     r = run_v2_pipeline("chi tiết account Demo Account 1", session_id="rg-detail", lang="vi")
     assert_true(r.get("decision_state") == "auto_execute", "detail query should auto_execute")
     assert_true(len(r.get("result", [])) >= 1, "detail query should return at least 1 row")
+    resp = str(r.get("assistant_response", ""))
+    assert_true("Chi tiết chính" in resp, "detail query should return detailed section")
+    assert_true("Gợi ý khai thác tiếp theo" in resp, "single-record detail should suggest exploitation steps")
 
 
 def test_followup_context() -> None:
@@ -53,7 +56,9 @@ def test_tactician_and_firewall() -> None:
     tact = r.get("tactician_payload", {})
     fw = r.get("learning_update", {}).get("firewall_event", {})
     assert_true(bool(tact.get("recommended_next_steps")), "tactician should provide next steps")
+    assert_true(bool((tact.get("signals", {}) or {}).get("exact_match")), "tactician should mark exact_match for one-row detail")
     assert_true(str(fw.get("decision", "")) in {"allow", "quarantine", "reject"}, "firewall decision should be valid")
+    assert_true(str(r.get("learning_update", {}).get("learning_phase", "")) == "phase_understanding_v2", "learning phase should be understanding-first")
 
 
 def test_reasoning_vs_lean_integrity() -> None:
@@ -71,12 +76,26 @@ def test_reasoning_vs_lean_integrity() -> None:
     assert_true(bool(sr.get("reasoning_integrity", {}).get("response_layers", {}).get("lean_changes_only_output")), "senior lean should only change output layer")
 
 
+def test_aggregate_stats_query() -> None:
+    q = "thống kê số lượng account, contract, và opp cùng với doanh thu hiện tại"
+    r = run_v2_pipeline(q, session_id="rg-agg", lang="vi")
+    assert_true(r.get("decision_state") == "auto_execute", "aggregate query should auto_execute")
+    plan = r.get("execution_plan", {})
+    agg = plan.get("aggregate_ops", []) if isinstance(plan, dict) else []
+    assert_true(bool(agg), "aggregate query should compile aggregate ops")
+    rows = r.get("result", []) if isinstance(r.get("result"), list) else []
+    assert_true(len(rows) >= 1 and isinstance(rows[0], dict), "aggregate query should return metric row")
+    keys = set(rows[0].keys())
+    assert_true(any(k.endswith("_count") for k in keys), "aggregate result should include count metrics")
+
+
 def main() -> None:
     test_detail_query()
     test_followup_context()
     test_event_lifecycle_ack()
     test_tactician_and_firewall()
     test_reasoning_vs_lean_integrity()
+    test_aggregate_stats_query()
     print("Regression passed: v2 runtime core behaviors are healthy.")
 
 

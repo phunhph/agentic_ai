@@ -8,6 +8,7 @@ from v2.learn.firewall import redact_runtime_sample
 
 TRAINSET_PATH = Path("storage/v2/matrix/trainset_v2.jsonl")
 CASES_PATH = Path("storage/dynamic_cases.json")
+LEARNING_PHASE = "phase_understanding_v2"
 
 
 def bootstrap_trainset_from_cases() -> int:
@@ -65,6 +66,16 @@ def append_trainset_sample(sample: dict) -> dict:
     query_template = re.sub(r"\bdemo\s+[a-z]+\s*<num>\b", "<entity_name>", query_template)
     query_template = re.sub(r"\b[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}\b", "<email>", query_template)
     query_template = re.sub(r"\b\d{8,}\b", "<id>", query_template)
+    query_semantic_template = str(sample.get("query_semantic_template", "")).strip().lower()
+    if not query_semantic_template:
+        query_semantic_template = query_template
+    join_targets = sorted(
+        {
+            str(j.get("to_table", "")).strip().lower()
+            for j in join_plan
+            if isinstance(j, dict) and str(j.get("to_table", "")).strip()
+        }
+    )
     signature = "|".join(
         [
             f"intent:{intent}",
@@ -73,6 +84,17 @@ def append_trainset_sample(sample: dict) -> dict:
             f"filters:{','.join(filter_fields)}",
             f"joins:{len(join_plan)}",
             f"tool:{expected_tool.lower()}",
+        ]
+    )
+    semantic_signature = "|".join(
+        [
+            f"intent:{intent}",
+            f"root:{root_table.lower()}",
+            f"entities:{','.join(entities)}",
+            f"filters:{','.join(filter_fields)}",
+            f"join_targets:{','.join(join_targets)}",
+            f"tool:{expected_tool.lower()}",
+            f"semantic:{query_semantic_template}",
         ]
     )
 
@@ -120,18 +142,34 @@ def append_trainset_sample(sample: dict) -> dict:
                 "signature": signature,
                 "query_template": query_template,
             }
+    same_semantic_signature_rows = [
+        r
+        for r in existing_rows
+        if str(r.get("semantic_signature", "")).strip().lower() == semantic_signature
+    ]
+    for row in same_semantic_signature_rows:
+        if bool(row.get("success_label", False)) == success_label:
+            return {
+                "status": "skipped",
+                "reason": "duplicate_semantic_signature_same_outcome",
+                "signature": signature,
+                "semantic_signature": semantic_signature,
+            }
 
     learning_mode = "new_signature"
     if same_signature_rows:
         learning_mode = "contradiction_update"
     elif same_semantic_rows:
         learning_mode = "semantic_variant"
+    elif same_semantic_signature_rows:
+        learning_mode = "semantic_stable_noop"
     elif any(str(r.get("intent", "")).strip().lower() == intent for r in existing_rows):
         learning_mode = "intent_expansion"
 
     payload = {
         "normalized_query": normalized_query,
         "query_template": query_template,
+        "query_semantic_template": query_semantic_template,
         "intent": intent,
         "root_table": root_table,
         "entities": entities,
@@ -140,9 +178,11 @@ def append_trainset_sample(sample: dict) -> dict:
         "expected_shape": {"expected_tool": expected_tool},
         "success_label": success_label,
         "signature": signature,
+        "semantic_signature": semantic_signature,
         "source": str(sample.get("source", "runtime_feedback")).strip() or "runtime_feedback",
         "notes": str(sample.get("notes", "")).strip(),
         "learning_mode": learning_mode,
+        "learning_phase": LEARNING_PHASE,
     }
     payload = redact_runtime_sample(payload)
     payload["query_template"] = query_template
@@ -153,9 +193,11 @@ def append_trainset_sample(sample: dict) -> dict:
     payload["expected_shape"] = {"expected_tool": expected_tool}
     payload["success_label"] = success_label
     payload["signature"] = signature
+    payload["semantic_signature"] = semantic_signature
     payload["source"] = str(sample.get("source", "runtime_feedback")).strip() or "runtime_feedback"
     payload["notes"] = str(sample.get("notes", "")).strip()
     payload["learning_mode"] = learning_mode
+    payload["learning_phase"] = LEARNING_PHASE
     with TRAINSET_PATH.open("a", encoding="utf-8") as f:
         f.write(json.dumps(payload, ensure_ascii=False) + "\n")
     return {"status": "appended", **payload}

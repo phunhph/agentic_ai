@@ -1,9 +1,9 @@
 {
-  "version": "v2-graph-20260424042407",
-  "node_count": 16,
-  "edge_count": 31,
-  "coverage": 0.9938,
+  "version": "v2-graph-20260424080126",
+  "node_count": 17,
+  "edge_count": 33,
+  "coverage": 0.9941,
   "structure_score": 1.0,
   "relation_score": 1.0,
-  "density_score": 0.9688
+  "density_score": 0.9706
 }

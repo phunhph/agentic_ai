@@ -121,6 +121,29 @@ def create_session_context(session_id: str) -> dict:
         return {"session_id": sid, **context}
 
 
+def delete_session_context(session_id: str) -> bool:
+    sid = str(session_id or "").strip()
+    if not sid:
+        return False
+    with _LOCK:
+        _ensure_loaded_locked()
+        existed = sid in _SESSIONS
+        if existed:
+            _SESSIONS.pop(sid, None)
+            _persist_locked()
+        return existed
+
+
+def clear_all_session_contexts() -> int:
+    with _LOCK:
+        _ensure_loaded_locked()
+        count = len(_SESSIONS)
+        if count > 0:
+            _SESSIONS.clear()
+            _persist_locked()
+        return count
+
+
 def update_session_context(session_id: str, ingest: IngestResult, execution_plan: dict | None = None) -> dict:
     sid = str(session_id or "").strip()
     if not sid:

@@ -1,11 +1,11 @@
 {
-  "version": "v2-20260424042407",
-  "train_samples": 58,
-  "tool_plan_correctness": 0.4545,
-  "filter_fidelity": 0.6667,
-  "join_correctness": 0.7143,
-  "training_diversity": 0.8,
-  "graph_coverage": 0.9938,
-  "graph_node_count": 16,
-  "graph_edge_count": 31
+  "version": "v2-20260424080126",
+  "train_samples": 85,
+  "tool_plan_correctness": 0.5132,
+  "filter_fidelity": 0.6316,
+  "join_correctness": 0.7,
+  "training_diversity": 0.9,
+  "graph_coverage": 0.9941,
+  "graph_node_count": 17,
+  "graph_edge_count": 33
 }

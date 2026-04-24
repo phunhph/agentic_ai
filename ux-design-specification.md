@@ -194,7 +194,8 @@ Trải nghiệm định hình dự án (Defining Experience) chính là **"Drop 
    - không có dữ liệu: phản hồi mang tính xây dựng, không dùng thông báo hệ thống mơ hồ.
 8. **Learning Firewall:** chỉ cho phép ghi học tập khi pass firewall policy; nếu rủi ro cao thì quarantine/reject.
 9. **Anti-Rote Gate:** loại mẫu trùng semantic template + same outcome để tránh học vẹt.
-10. **Reasoning Integrity Check:** lưu fingerprint của execution plan để xác nhận persona/lean chỉ đổi output layer.
+10. **Understanding-First Phase (`phase_understanding_v2`):** loại mẫu trùng `semantic_signature` (intent/root/entities/filters/join targets/tool + semantic template) để học theo ý nghĩa thực thi.
+11. **Reasoning Integrity Check:** lưu fingerprint của execution plan để xác nhận persona/lean chỉ đổi output layer.
 
 ### User Mental Model
 

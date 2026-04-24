@@ -47,11 +47,13 @@ def evaluate_firewall(sample: dict[str, Any], ingest_layer: dict[str, Any], exec
     ambiguity = float(ingest_layer.get("ambiguity_score", 1.0) or 1.0)
     guardrail = execution_trace.get("guardrail", {}) if isinstance(execution_trace, dict) else {}
     guardrail_ok = bool(isinstance(guardrail, dict) and guardrail.get("ok", False))
+    has_semantic_template = bool(str(sample.get("query_semantic_template", "")).strip())
 
     signal_quality = 0.0
-    signal_quality += 0.35 if has_entities else 0.0
-    signal_quality += 0.35 if has_filters else 0.0
-    signal_quality += 0.3 if guardrail_ok else 0.0
+    signal_quality += 0.3 if has_entities else 0.0
+    signal_quality += 0.3 if has_filters else 0.0
+    signal_quality += 0.25 if guardrail_ok else 0.0
+    signal_quality += 0.15 if has_semantic_template else 0.0
     signal_quality = round(max(0.0, min(1.0, signal_quality)), 4)
 
     privacy_risk = 0.0
@@ -79,10 +81,12 @@ def evaluate_firewall(sample: dict[str, Any], ingest_layer: dict[str, Any], exec
             "signal_quality": signal_quality,
             "privacy_risk": privacy_risk,
             "poisoning_risk": poisoning_risk,
+            "semantic_signal": 1.0 if has_semantic_template else 0.0,
         },
         "decision": decision,
         "reasons": reasons,
         "policy": {"min_signal_quality": 0.45, "max_privacy_risk": 0.5, "max_poisoning_risk": 0.65},
+        "learning_phase": "phase_understanding_v2",
     }
 
 

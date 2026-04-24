@@ -192,9 +192,64 @@ def execute_update_plan(plan: ExecutionPlan) -> ExecutionResult:
     )
 
 
+def execute_aggregate_plan(plan: ExecutionPlan) -> ExecutionResult:
+    metadata = sa.MetaData()
+    metrics: dict[str, Any] = {}
+    executed_ops: list[dict[str, Any]] = []
+    with engine.connect() as conn:
+        for op in plan.aggregate_ops:
+            if not isinstance(op, dict):
+                continue
+            op_type = str(op.get("type", "")).strip().lower()
+            table_name = str(op.get("table", "")).strip()
+            alias = str(op.get("alias", "")).strip() or f"{table_name}_{op_type}"
+            if not table_name:
+                continue
+            try:
+                table = sa.Table(table_name, metadata, autoload_with=engine)
+            except Exception:
+                continue
+            try:
+                if op_type == "count":
+                    stmt = sa.select(sa.func.count()).select_from(table)
+                    value = conn.execute(stmt).scalar_one_or_none()
+                    metrics[alias] = int(value or 0)
+                    executed_ops.append({"type": "count", "table": table_name, "alias": alias})
+                elif op_type == "sum":
+                    field = str(op.get("field", "")).strip()
+                    if not field or field not in table.c:
+                        continue
+                    stmt = sa.select(sa.func.coalesce(sa.func.sum(table.c[field]), 0))
+                    value = conn.execute(stmt).scalar_one_or_none()
+                    try:
+                        metrics[alias] = float(value or 0)
+                    except (TypeError, ValueError):
+                        metrics[alias] = 0.0
+                    executed_ops.append({"type": "sum", "table": table_name, "field": field, "alias": alias})
+            except Exception:
+                continue
+
+    success = bool(metrics)
+    return ExecutionResult(
+        data=[metrics] if metrics else [],
+        success=success,
+        execution_trace={
+            "plan": asdict(plan),
+            "guardrail": {"ok": True, "errors": [], "warnings": []},
+            "sql_summary": "aggregate_runtime_execution",
+            "aggregate_metrics": metrics,
+            "aggregate_ops_executed": executed_ops,
+            "row_count": 1 if metrics else 0,
+            "raw_result": {"mode": "db_aggregate"},
+        },
+    )
+
+
 def execute_plan(plan: ExecutionPlan) -> ExecutionResult:
     if plan.update_data:
         return execute_update_plan(plan)
+    if plan.aggregate_ops:
+        return execute_aggregate_plan(plan)
         
     validation = validate_execution_plan(plan)
     if not validation.ok:

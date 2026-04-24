@@ -1,4 +1,5 @@
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi import FastAPI, Request, Form, HTTPException, BackgroundTasks
@@ -13,7 +14,7 @@ from v2.reason import reason_about_query
 from v2.plan import compile_execution_plan
 from v2.execute import validate_execution_plan
 from v2.lifecycle import LIFECYCLE_STORE
-from v2.memory import create_session_context, list_session_contexts
+from v2.memory import clear_all_session_contexts, create_session_context, delete_session_context, list_session_contexts
 
 app = FastAPI()
 templates = Jinja2Templates(directory="web/templates")
@@ -62,7 +63,33 @@ def _read_jsonl_samples(path: Path, limit: int = 10) -> list[dict]:
             continue
         if isinstance(row, dict):
             out.append(row)
-    return out[:limit]
+    # Show latest runtime samples first so dashboard reflects current learning,
+    # not old bootstrap rows that can bias toward unknown intents.
+    return list(reversed(out))[:limit]
+
+
+def _iso_mtime(path: Path) -> str:
+    if not path.exists():
+        return ""
+    try:
+        return datetime.fromtimestamp(path.stat().st_mtime, tz=UTC).isoformat()
+    except Exception:
+        return ""
+
+
+def _read_latest_auto_train_summary() -> dict:
+    logs_dir = Path("storage/v2/training/auto_train_logs")
+    if not logs_dir.exists():
+        return {}
+    summaries = sorted(logs_dir.glob("*_summary.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+    if not summaries:
+        return {}
+    latest = summaries[0]
+    try:
+        data = json.loads(latest.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
 
 
 def _compute_graph_compatibility(intent: str, root_table: str) -> dict:
@@ -110,9 +137,20 @@ async def v2_training_overview(sample_limit: int = 10):
     matrix_eval = _read_json_file(matrix_eval_path)
     graph_artifact = _read_json_file(graph_artifact_path)
     graph_eval = _read_json_file(graph_eval_path)
+    latest_auto_train = _read_latest_auto_train_summary()
 
     graph_nodes = graph_artifact.get("nodes", []) if isinstance(graph_artifact.get("nodes"), list) else []
     graph_edges = graph_artifact.get("edges", []) if isinstance(graph_artifact.get("edges"), list) else []
+    graph_nodes_sorted = sorted(
+        [n for n in graph_nodes if isinstance(n, dict)],
+        key=lambda n: float(n.get("support", 0) or 0),
+        reverse=True,
+    )
+    graph_edges_sorted = sorted(
+        [e for e in graph_edges if isinstance(e, dict)],
+        key=lambda e: float(e.get("support", 0) or 0),
+        reverse=True,
+    )
 
     return {
         "status": "ok",
@@ -122,6 +160,12 @@ async def v2_training_overview(sample_limit: int = 10):
             "matrix_eval_exists": matrix_eval_path.exists(),
             "graph_artifact_exists": graph_artifact_path.exists(),
             "graph_eval_exists": graph_eval_path.exists(),
+            "trainset_mtime": _iso_mtime(trainset_path),
+            "matrix_artifact_mtime": _iso_mtime(matrix_artifact_path),
+            "matrix_eval_mtime": _iso_mtime(matrix_eval_path),
+        },
+        "runtime_training": {
+            "latest_auto_train_summary": latest_auto_train,
         },
         "matrix": {
             "artifact": matrix_artifact,
@@ -134,8 +178,8 @@ async def v2_training_overview(sample_limit: int = 10):
                 "edge_count": graph_artifact.get("edge_count", 0),
             },
             "eval": graph_eval,
-            "top_nodes": graph_nodes[:10],
-            "top_edges": graph_edges[:10],
+            "top_nodes": graph_nodes_sorted[:10],
+            "top_edges": graph_edges_sorted[:10],
         },
         "trainset_preview": {
             "sample_count": len(train_samples),
@@ -245,6 +289,27 @@ async def create_v2_context(session_id: str = Form(...)):
     try:
         row = create_session_context(sid)
         return {"ok": True, "context": row}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.delete("/api/v2/contexts/{session_id}")
+async def delete_v2_context(session_id: str):
+    sid = str(session_id or "").strip()
+    if not sid:
+        raise HTTPException(status_code=400, detail="session_id is required")
+    try:
+        removed = delete_session_context(sid)
+        return {"ok": True, "deleted": bool(removed), "session_id": sid}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.delete("/api/v2/contexts")
+async def clear_v2_contexts():
+    try:
+        deleted_count = clear_all_session_contexts()
+        return {"ok": True, "deleted_count": int(deleted_count)}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
