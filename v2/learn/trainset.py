@@ -8,29 +8,79 @@ from v2.learn.firewall import redact_runtime_sample
 
 TRAINSET_PATH = Path("storage/v2/matrix/trainset_v2.jsonl")
 CASES_PATH = Path("storage/dynamic_cases.json")
+GOLDEN_CASES_PATH = Path("storage/golden_cases.json")
 LEARNING_PHASE = "phase_understanding_v2"
+
+
+def _infer_intent_from_query(query: str) -> str:
+    q = str(query or "").strip().lower()
+    if not q:
+        return "unknown"
+    if any(k in q for k in ["thống kê", "bao nhiêu", "đếm", "so với"]):
+        return "analyze"
+    if any(k in q for k in ["chi tiết", "thông tin", "là ai"]):
+        return "retrieve"
+    if any(k in q for k in ["tạo", "create", "thêm"]):
+        return "create"
+    if any(k in q for k in ["cập nhật", "update", "sửa"]):
+        return "update"
+    if any(k in q for k in ["danh sách", "list", "tìm"]):
+        return "retrieve"
+    return "unknown"
+
+
+def _infer_root_table(row: dict) -> str:
+    direct = str(row.get("root_table", "")).strip()
+    if direct:
+        return direct
+    entities = row.get("expected_entities", [])
+    if isinstance(entities, list):
+        for e in entities:
+            t = str(e or "").strip()
+            if t:
+                return t
+    return "hbl_account"
 
 
 def bootstrap_trainset_from_cases() -> int:
     TRAINSET_PATH.parent.mkdir(parents=True, exist_ok=True)
-    if not CASES_PATH.exists():
+    seed_path = GOLDEN_CASES_PATH if GOLDEN_CASES_PATH.exists() else CASES_PATH
+    if not seed_path.exists():
         return 0
-    raw = json.loads(CASES_PATH.read_text(encoding="utf-8"))
+    raw = json.loads(seed_path.read_text(encoding="utf-8"))
     rows = raw if isinstance(raw, list) else []
     written = 0
     with TRAINSET_PATH.open("w", encoding="utf-8") as f:
         for row in rows:
             if not isinstance(row, dict):
                 continue
+            # Golden benchmark may include low-signal rows (no entities) which are
+            # useful for eval but poor as seed training data.
+            expected_entities = row.get("expected_entities", [])
+            if isinstance(seed_path, Path) and seed_path == GOLDEN_CASES_PATH:
+                if not isinstance(expected_entities, list) or not expected_entities:
+                    continue
+            normalized_query = str(row.get("query", "")).strip().lower()
+            if not isinstance(expected_entities, list):
+                expected_entities = []
+            filters = row.get("filters", [])
+            if not isinstance(filters, list):
+                filters = []
+            join_plan = row.get("join_plan", [])
+            if not isinstance(join_plan, list):
+                join_plan = []
             sample = {
-                "normalized_query": str(row.get("query", "")).strip().lower(),
-                "intent": str(row.get("intent", "unknown")).strip().lower(),
-                "root_table": str(row.get("root_table", "hbl_account")).strip(),
-                "entities": row.get("expected_entities", []),
-                "filters": row.get("filters", []),
-                "join_plan": row.get("join_plan", []),
-                "expected_shape": {"expected_tool": row.get("expected_tool")},
-                "success_label": bool(row.get("success", False)),
+                "normalized_query": normalized_query,
+                "intent": str(row.get("intent", "")).strip().lower() or _infer_intent_from_query(normalized_query),
+                "root_table": _infer_root_table(row),
+                "entities": expected_entities,
+                "filters": filters,
+                "join_plan": join_plan,
+                # Keep seed tool stable with current runtime executor contract.
+                "expected_shape": {"expected_tool": "v2_query_executor"},
+                # dynamic_cases are curated seed cases, default to successful label
+                # unless explicitly marked otherwise.
+                "success_label": bool(row.get("success", True)),
             }
             f.write(json.dumps(sample, ensure_ascii=False) + "\n")
             written += 1

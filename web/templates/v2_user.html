@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+    <div class="max-w-6xl mx-auto p-3 sm:p-6 space-y-4">
+        <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-xl sm:text-2xl font-bold">Agentic Assistant</h1>
+                <p class="text-slate-400 text-xs sm:text-sm">Tra cứu dữ liệu nhanh, hiển thị dễ đọc cho người dùng cuối.</p>
+            </div>
+            <div class="flex gap-2">
+                <a href="/v2" class="text-xs sm:text-sm px-3 py-2 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700">Trace Console</a>
+            </div>
+        </header>
+
+        <section class="bg-slate-900 border border-slate-800 rounded-xl p-3 sm:p-4 space-y-3">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+                <div class="md:col-span-3">
+                    <label for="goalInput" class="text-xs text-slate-300 block mb-1">Bạn cần hệ thống làm gì?</label>
+                    <textarea id="goalInput" class="w-full h-24 bg-slate-950 border border-slate-800 rounded p-3 text-sm" placeholder="Ví dụ: Liệt kê account theo market Japan, hiển thị đầy đủ"></textarea>
+                </div>
+                <div class="space-y-2">
+                    <div>
+                        <label for="langSelect" class="text-xs text-slate-300 block mb-1">Ngôn ngữ</label>
+                        <select id="langSelect" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-2 text-sm">
+                            <option value="auto">Auto</option>
+                            <option value="vi" selected>Tiếng Việt</option>
+                            <option value="en">English</option>
+                        </select>
+                    </div>
+                    <button id="askBtn" class="w-full px-3 py-2 text-sm rounded bg-blue-700 hover:bg-blue-600">Gửi yêu cầu</button>
+                    <button id="clearBtn" class="w-full px-3 py-2 text-sm rounded bg-slate-800 hover:bg-slate-700 border border-slate-700">Xóa màn hình</button>
+                </div>
+            </div>
+            <p id="statusMsg" class="text-xs text-slate-400">Sẵn sàng.</p>
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-4">
+                <h2 class="text-sm font-semibold mb-3">Kết quả</h2>
+                <div id="answerText" class="text-sm leading-relaxed whitespace-pre-wrap text-slate-100">Chưa có kết quả.</div>
+                <div id="hintText" class="mt-3 text-xs text-slate-400"></div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-2">
+                <h2 class="text-sm font-semibold">Tóm tắt chạy</h2>
+                <div id="metaBox" class="text-xs text-slate-300 space-y-1">
+                    <div>- Session: chưa có</div>
+                    <div>- Số bản ghi: 0</div>
+                    <div>- Guardrail: -</div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        const askBtn = document.getElementById('askBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const goalInput = document.getElementById('goalInput');
+        const langSelect = document.getElementById('langSelect');
+        const statusMsg = document.getElementById('statusMsg');
+        const answerText = document.getElementById('answerText');
+        const hintText = document.getElementById('hintText');
+        const metaBox = document.getElementById('metaBox');
+
+        let sessionId = (() => {
+            const key = 'v2_user_session_id';
+            const old = sessionStorage.getItem(key);
+            if (old && old.trim()) return old;
+            const sid = `v2-user-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+            sessionStorage.setItem(key, sid);
+            return sid;
+        })();
+
+        function escapeHtml(text) {
+            return String(text || '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+
+        function setLoading(loading) {
+            askBtn.disabled = loading;
+            askBtn.textContent = loading ? 'Đang xử lý...' : 'Gửi yêu cầu';
+        }
+
+        function clearOutputs() {
+            answerText.textContent = 'Chưa có kết quả.';
+            hintText.textContent = '';
+            metaBox.innerHTML = `
+                <div>- Session: ${escapeHtml(sessionId)}</div>
+                <div>- Số bản ghi: 0</div>
+                <div>- Guardrail: -</div>
+            `;
+            statusMsg.textContent = 'Đã xóa màn hình.';
+        }
+
+        askBtn.addEventListener('click', async () => {
+            const goal = goalInput.value.trim();
+            if (!goal) {
+                statusMsg.textContent = 'Vui lòng nhập yêu cầu.';
+                return;
+            }
+            setLoading(true);
+            statusMsg.textContent = 'Đang xử lý yêu cầu...';
+            try {
+                const form = new FormData();
+                form.append('goal', goal);
+                form.append('role', 'DEFAULT');
+                form.append('session_id', sessionId);
+                form.append('lang', langSelect.value || 'auto');
+
+                const res = await fetch('/api/v2/run', { method: 'POST', body: form });
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data?.detail || 'Run failed');
+                }
+                const result = data?.result || {};
+                const rows = Array.isArray(result?.result) ? result.result : [];
+                const assistant = String(result?.assistant_response || '').trim();
+                const clarify = String(result?.clarify_recommendation || '').trim();
+                const guardrailOk = Boolean(result?.execution_trace?.guardrail?.ok);
+                const rowCount = Number(result?.execution_trace?.row_count ?? rows.length);
+
+                answerText.textContent = assistant || (rows.length ? 'Đã có dữ liệu trả về.' : 'Không có dữ liệu phù hợp.');
+                hintText.textContent = clarify || '';
+                metaBox.innerHTML = `
+                    <div>- Session: ${escapeHtml(sessionId)}</div>
+                    <div>- Số bản ghi: ${rowCount}</div>
+                    <div>- Guardrail: ${guardrailOk ? 'PASS' : 'CHECK'}</div>
+                `;
+
+                statusMsg.textContent = 'Xử lý xong.';
+            } catch (err) {
+                statusMsg.textContent = `Lỗi: ${String(err?.message || err)}`;
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        clearBtn.addEventListener('click', clearOutputs);
+        clearOutputs();
+    </script>
+</body>
+</html>

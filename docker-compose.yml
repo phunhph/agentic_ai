@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    container_name: agentic-app
+    ports:
+      - "8000:8000"
+    environment:
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/agentic_store
+      DATAVERSE_TENANT_ID: ${DATAVERSE_TENANT_ID:-}
+      DATAVERSE_CLIENT_ID: ${DATAVERSE_CLIENT_ID:-}
+      DATAVERSE_CLIENT_SECRET: ${DATAVERSE_CLIENT_SECRET:-}
+      DATAVERSE_ENV_URL: ${DATAVERSE_ENV_URL:-}
+    depends_on:
+      - db
+    volumes:
+      - ./:/app
+    restart: unless-stopped
+
+  db:
+    image: postgres:16
+    container_name: agentic-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: agentic_store
+    ports:
+      - "5432:5432"
+    volumes:
+      - agentic_pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  agentic_pgdata:

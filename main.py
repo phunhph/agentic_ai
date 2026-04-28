@@ -1,4 +1,6 @@
 import json
+import subprocess
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -23,6 +25,24 @@ EVENT_ACK_SLA_MS = get_env_int("EVENT_ACK_SLA_MS", 1500)
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="v2_user.html",
+        context={"request": request},
+    )
+
+
+@app.get("/v2/user", response_class=HTMLResponse)
+async def v2_user(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="v2_user.html",
+        context={"request": request},
+    )
+
+
+@app.get("/v2/trace", response_class=HTMLResponse)
+async def v2_trace(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="v2_console.html",
@@ -88,6 +108,17 @@ def _read_latest_auto_train_summary() -> dict:
     try:
         data = json.loads(latest.read_text(encoding="utf-8"))
         return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def _read_parser_health_stats() -> dict:
+    path = Path("storage/v2/ingest/parser_stats_v2.json")
+    if not path.exists():
+        return {}
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        return raw if isinstance(raw, dict) else {}
     except Exception:
         return {}
 
@@ -185,6 +216,16 @@ async def v2_training_overview(sample_limit: int = 10):
             "sample_count": len(train_samples),
             "samples": train_samples,
         },
+    }
+
+
+@app.get("/api/v2/parser/health")
+async def v2_parser_health():
+    stats = _read_parser_health_stats()
+    return {
+        "ok": True,
+        "parser_health": stats,
+        "warning": bool(stats.get("warning", False)),
     }
 
 
@@ -314,10 +355,88 @@ async def clear_v2_contexts():
         raise HTTPException(status_code=400, detail=str(e))
 
 
+def _run_dataverse_sync_from_cli(argv: list[str]) -> bool:
+    """
+    CLI bridge:
+    - python main.py sync dataverse --mode bootstrap [--table-limit 20]
+    - python main.py sync dataverse --mode full
+    - python main.py sync dataverse --mode incremental
+    """
+    if len(argv) < 4:
+        return False
+    if argv[1] != "sync" or argv[2] != "dataverse":
+        return False
+
+    mode = "bootstrap"
+    table_limit = ""
+    update_db_json = False
+    table_prefix = ""
+    tables = ""
+
+    i = 3
+    while i < len(argv):
+        token = argv[i]
+        if token == "--mode" and i + 1 < len(argv):
+            mode = argv[i + 1].strip()
+            i += 2
+            continue
+        if token == "--table-limit" and i + 1 < len(argv):
+            table_limit = argv[i + 1].strip()
+            i += 2
+            continue
+        if token == "--table-prefix" and i + 1 < len(argv):
+            table_prefix = argv[i + 1].strip()
+            i += 2
+            continue
+        if token == "--tables" and i + 1 < len(argv):
+            tables = argv[i + 1].strip()
+            i += 2
+            continue
+        if token == "--update-db-json":
+            update_db_json = True
+            i += 1
+            continue
+        i += 1
+
+    if mode == "bootstrap":
+        cmd = [sys.executable, "v3/scripts/bootstrap_dataverse.py"]
+        if table_limit:
+            cmd += ["--table-limit", table_limit]
+        if table_prefix:
+            cmd += ["--table-prefix", table_prefix]
+        if tables:
+            cmd += ["--tables", tables]
+        if update_db_json:
+            cmd.append("--update-db-json")
+    elif mode in {"full", "incremental"}:
+        cmd = [sys.executable, "v3/scripts/sync_dataverse_data.py", "--mode", mode]
+        if table_limit:
+            cmd += ["--table-limit", table_limit]
+        if tables:
+            cmd += ["--tables", tables]
+    elif mode == "materialize":
+        cmd = [sys.executable, "v3/scripts/materialize_v2_runtime.py"]
+        if tables:
+            cmd += ["--tables", tables]
+    elif mode == "refresh-train":
+        cmd = [sys.executable, "v3/scripts/refresh_and_train_runtime.py"]
+        if tables:
+            cmd += ["--tables", tables]
+    else:
+        raise ValueError("Unsupported mode. Use bootstrap/full/incremental/materialize/refresh-train")
+
+    result = subprocess.run(cmd, check=False)
+    if result.returncode != 0:
+        raise RuntimeError(f"Dataverse sync failed with exit code {result.returncode}")
+    return True
+
+
 if __name__ == "__main__":
     import uvicorn
 
     try:
+        if _run_dataverse_sync_from_cli(sys.argv):
+            raise SystemExit(0)
         uvicorn.run(app, host=APP_HOST, port=APP_PORT)
     except KeyboardInterrupt:
         print("\nServer stopped by Ctrl+C")

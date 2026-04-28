@@ -7,8 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen">
-    <div class="max-w-7xl mx-auto p-6 space-y-4">
-        <div class="flex items-center justify-between">
+    <div class="max-w-7xl mx-auto p-3 sm:p-6 space-y-4">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h1 class="text-2xl font-bold">V2 Full Flow Console</h1>
                 <p class="text-slate-400 text-sm">Train Matrix -> Train Graph -> Reason Compatibility -> Action -> Behavior Result -> Relearn & Check</p>
@@ -22,7 +22,7 @@
             <h2 class="text-sm font-semibold">Input</h2>
             <p class="text-xs text-slate-400">Chi can nhap yeu cau. He thong tu suy luan hanh dong, validate guardrail, sau do moi execute.</p>
             <textarea id="goalInput" class="w-full h-24 bg-slate-950 border border-slate-800 rounded p-3 text-sm" placeholder="Nhập thông tin cần xử lý..."></textarea>
-            <div class="flex items-center gap-2 text-xs">
+            <div class="flex flex-wrap items-center gap-2 text-xs">
                 <label for="langSelect" class="text-slate-300">Ngôn ngữ phản hồi</label>
                 <select id="langSelect" class="bg-slate-950 border border-slate-800 rounded px-2 py-1">
                     <option value="auto">Auto</option>
@@ -30,20 +30,20 @@
                     <option value="en">English</option>
                 </select>
             </div>
-            <div class="flex items-center gap-2 text-xs">
+            <div class="flex flex-wrap items-center gap-2 text-xs">
                 <label for="contextSelect" class="text-slate-300">Ngữ cảnh hội thoại</label>
-                <select id="contextSelect" class="min-w-[280px] bg-slate-950 border border-slate-800 rounded px-2 py-1"></select>
+                <select id="contextSelect" class="w-full sm:w-auto sm:min-w-[280px] bg-slate-950 border border-slate-800 rounded px-2 py-1"></select>
                 <button id="newContextBtn" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700">+ Tạo ngữ cảnh mới</button>
                 <button id="deleteContextBtn" class="px-2 py-1 rounded bg-rose-900/40 hover:bg-rose-800/50 border border-rose-700 text-rose-200">Xóa ngữ cảnh</button>
                 <button id="deleteAllContextsBtn" class="px-2 py-1 rounded bg-rose-900 hover:bg-rose-800 border border-rose-700 text-rose-100">Xóa tất cả</button>
             </div>
-            <div class="grid grid-cols-12 gap-2">
-                <button id="diagnoseBtn" class="col-span-4 px-3 py-2 text-sm rounded bg-violet-700 hover:bg-violet-600">1) Analyze</button>
-                <button id="runBtn" class="col-span-8 px-3 py-2 text-sm rounded bg-blue-700 hover:bg-blue-600">2) Execute</button>
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+                <button id="diagnoseBtn" class="sm:col-span-4 px-3 py-2 text-sm rounded bg-violet-700 hover:bg-violet-600">1) Analyze</button>
+                <button id="runBtn" class="sm:col-span-8 px-3 py-2 text-sm rounded bg-blue-700 hover:bg-blue-600">2) Execute</button>
             </div>
-            <div class="grid grid-cols-12 gap-2 items-center">
-                <p id="statusMsg" class="col-span-8 text-xs text-slate-300"></p>
-                <div class="col-span-4 flex items-center justify-end gap-2 text-[11px]">
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+                <p id="statusMsg" class="sm:col-span-8 text-xs text-slate-300"></p>
+                <div class="sm:col-span-4 flex flex-wrap items-center sm:justify-end gap-2 text-[11px]">
                     <label class="px-2 py-1 rounded bg-slate-800 border border-slate-700 flex items-center gap-2 cursor-pointer">
                         <input id="debugToggle" type="checkbox" class="accent-cyan-400">
                         <span>Debug JSON</span>
@@ -52,7 +52,7 @@
                     <span id="phaseExecute" class="px-2 py-1 rounded bg-slate-800 border border-slate-700">Execute: idle</span>
                 </div>
             </div>
-            <div class="grid grid-cols-4 gap-2 text-[11px]">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-[11px]">
                 <div id="layerIngest" class="px-2 py-1 rounded bg-slate-800 border border-slate-700">1) Tiep nhan: idle</div>
                 <div id="layerReason" class="px-2 py-1 rounded bg-slate-800 border border-slate-700">2) Suy luan: idle</div>
                 <div id="layerExecute" class="px-2 py-1 rounded bg-slate-800 border border-slate-700">3) Thuc thi: idle</div>
@@ -99,7 +99,7 @@
             </section>
             <section class="bg-slate-900 border border-slate-800 rounded-xl p-4 lg:col-span-2">
                 <h3 class="text-sm font-semibold mb-3">Final Result (cho user)</h3>
-                <div id="finalResultView" class="text-xs bg-slate-950 border border-slate-800 rounded p-3 text-slate-200 min-h-[84px]">
+                <div id="finalResultView" class="text-xs bg-slate-950 border border-slate-800 rounded p-3 text-slate-200 min-h-[84px] overflow-x-auto">
                     Chua co ket qua.
                 </div>
                 <div id="finalLearningView" class="mt-2 text-xs bg-slate-950 border border-slate-800 rounded p-3 text-slate-300 min-h-[48px]">

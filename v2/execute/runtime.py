@@ -210,22 +210,43 @@ def execute_aggregate_plan(plan: ExecutionPlan) -> ExecutionResult:
             except Exception:
                 continue
             try:
+                stmt_filters = []
+                for plan_filter in plan.where_filters:
+                    field = str(plan_filter.field or "").strip()
+                    if field.startswith(f"{table_name}."):
+                        col = _resolve_filter_column(plan.root_table, field, {table_name: table})
+                        stmt_filters.append(_build_condition(col, plan_filter.op, plan_filter.value))
+                for op_filter in op.get("filters", []) or []:
+                    if not isinstance(op_filter, dict):
+                        continue
+                    field = str(op_filter.get("field", "")).strip()
+                    op_name = str(op_filter.get("op", "")).strip().lower()
+                    if not field.startswith(f"{table_name}."):
+                        continue
+                    col = _resolve_filter_column(plan.root_table, field, {table_name: table})
+                    stmt_filters.append(_build_condition(col, op_name, op_filter.get("value")))
                 if op_type == "count":
                     stmt = sa.select(sa.func.count()).select_from(table)
+                    if stmt_filters:
+                        stmt = stmt.where(sa.and_(*stmt_filters))
                     value = conn.execute(stmt).scalar_one_or_none()
                     metrics[alias] = int(value or 0)
-                    executed_ops.append({"type": "count", "table": table_name, "alias": alias})
+                    executed_ops.append({"type": "count", "table": table_name, "alias": alias, "filters": len(stmt_filters)})
                 elif op_type == "sum":
                     field = str(op.get("field", "")).strip()
                     if not field or field not in table.c:
                         continue
                     stmt = sa.select(sa.func.coalesce(sa.func.sum(table.c[field]), 0))
+                    if stmt_filters:
+                        stmt = stmt.where(sa.and_(*stmt_filters))
                     value = conn.execute(stmt).scalar_one_or_none()
                     try:
                         metrics[alias] = float(value or 0)
                     except (TypeError, ValueError):
                         metrics[alias] = 0.0
-                    executed_ops.append({"type": "sum", "table": table_name, "field": field, "alias": alias})
+                    executed_ops.append(
+                        {"type": "sum", "table": table_name, "field": field, "alias": alias, "filters": len(stmt_filters)}
+                    )
             except Exception:
                 continue
 

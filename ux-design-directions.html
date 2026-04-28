@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UX Design Directions - Google Chat Cards V2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .chat-card {
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            background: white;
+            max-width: 400px;
+            font-family: 'Roboto', Arial, sans-serif;
+            color: #202124;
+            box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15);
+        }
+        .card-header {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+        }
+        .card-body {
+            padding: 16px;
+        }
+        .divider {
+            height: 1px;
+            background-color: #e8eaed;
+            margin: 0;
+        }
+        .btn-primary {
+            color: #1a73e8;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+        }
+        .btn-outline {
+            color: #5f6368;
+            border: 1px solid #dadce0;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+            transition: background-color 0.2s;
+        }
+        .btn-outline:hover {
+            background-color: #f1f3f4;
+        }
+        .top-label {
+            font-size: 11px;
+            letter-spacing: 0.8px;
+            color: #5f6368;
+            text-transform: uppercase;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-gray-800">LiteNextgenCRM - Design Directions</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <!-- Direction 1 -->
+            <div>
+                <h2 class="text-xl font-bold mb-2">Direction 1: Data-Dense Grid</h2>
+                <p class="text-sm text-gray-600 mb-4">Tối ưu hóa không gian, hiển thị nhiều dữ liệu trên 1 màn hình. Thích hợp cho cập nhật dữ liệu cốt lõi (BANT).</p>
+                
+                <div class="chat-card mx-auto">
+                    <div class="card-header bg-blue-50 rounded-t-lg border-b border-gray-200">
+                        <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center mr-4 font-bold text-lg">A</div>
+                        <div>
+                            <div class="font-bold text-[16px]">Acme Corp</div>
+                            <div class="text-[12px] text-gray-500">Opportunity Updated</div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <div class="top-label">BUDGET (B)</div>
+                                <div class="text-[14px]"><b>$50,000</b></div>
+                            </div>
+                            <div>
+                                <div class="top-label">AUTHORITY (A)</div>
+                                <div class="text-[14px]">VP of Sales</div>
+                            </div>
+                            <div>
+                                <div class="top-label">NEED (N)</div>
+                                <div class="text-[14px]">SaaS Upgrade</div>
+                            </div>
+                            <div>
+                                <div class="top-label">TIMELINE (T)</div>
+                                <div class="text-[14px]">Q3 2026</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="p-4 flex gap-2 justify-end">
+                        <div class="btn-outline text-sm">Hoàn tác</div>
+                        <div class="btn-primary text-sm bg-blue-50">Xem chi tiết</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Direction 2 -->
+            <div>
+                <h2 class="text-xl font-bold mb-2">Direction 2: Fallback (Action First)</h2>
+                <p class="text-sm text-gray-600 mb-4">Dùng cho luồng Gatekeeper khi AI mù mờ (Confidence thấp). Nút bấm định tuyến làm trung tâm.</p>
+                
+                <div class="chat-card mx-auto">
+                    <div class="card-header bg-yellow-50 rounded-t-lg border-b border-yellow-100">
+                        <div class="text-2xl mr-3">❓</div>
+                        <div>
+                            <div class="font-bold text-[16px]">Cần làm rõ khách hàng</div>
+                            <div class="text-[12px] text-gray-500">Confidence: 0.65</div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-[14px] mb-4">Tôi tìm thấy 2 khách hàng trùng tên "Acme". Bạn muốn cập nhật cho bên nào?</p>
+                        <div class="flex flex-col gap-2">
+                            <div class="btn-outline border-blue-600 text-blue-600 text-center text-sm w-full font-bold">Acme Corp (Global)</div>
+                            <div class="btn-outline border-blue-600 text-blue-600 text-center text-sm w-full font-bold">Acme Inc (Vietnam)</div>
+                            <div class="text-center mt-2">
+                                <span class="text-sm text-red-500 cursor-pointer hover:underline font-bold">Hủy cập nhật</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Direction 3 -->
+            <div>
+                <h2 class="text-xl font-bold mb-2">Direction 3: Linear Timeline</h2>
+                <p class="text-sm text-gray-600 mb-4">Hiển thị lịch sử cập nhật theo trục dọc (1 cột), nhấn mạnh vào diễn biến thời gian thay vì thông số.</p>
+                
+                <div class="chat-card mx-auto">
+                    <div class="card-header rounded-t-lg border-b border-gray-200">
+                        <div class="w-10 h-10 rounded-full bg-green-100 text-green-700 flex items-center justify-center mr-4 text-xl">✅</div>
+                        <div>
+                            <div class="font-bold text-[16px]">Pipeline Moved</div>
+                            <div class="text-[12px] text-gray-500">Acme Corp</div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="flex flex-col gap-4 mb-4">
+                            <div>
+                                <div class="top-label">PREVIOUS STAGE</div>
+                                <div class="text-[14px] text-gray-500 line-through">Discovery</div>
+                            </div>
+                            <div>
+                                <div class="top-label">NEW STAGE</div>
+                                <div class="text-[14px]"><b>Negotiation</b></div>
+                            </div>
+                            <div>
+                                <div class="top-label">ACTOR</div>
+                                <div class="text-[14px]">gianglt</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="p-4 flex gap-2 justify-end">
+                        <div class="btn-outline text-sm text-red-500 border-red-200">Undo Action</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

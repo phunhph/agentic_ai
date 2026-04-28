@@ -1,0 +1,17 @@
+{
+  "summary": {
+    "total_operations": 1,
+    "safe_operations": 0,
+    "manual_operations": 1
+  },
+  "operations": [
+    {
+      "operation": "drop_table",
+      "safe_auto_apply": false,
+      "table": "choice_option",
+      "details": {},
+      "sql_hint": "DROP TABLE IF EXISTS choice_option;"
+    }
+  ],
+  "safe_operation_types": []
+}

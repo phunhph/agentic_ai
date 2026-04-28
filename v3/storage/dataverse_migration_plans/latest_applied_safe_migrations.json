@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-04-28T02:51:45.067377+00:00",
+  "migration_plan": "v3/storage/dataverse_migration_plans/latest_migration_plan.json",
+  "dry_run": false,
+  "safe_operation_count": 0,
+  "manual_operation_count": 1,
+  "applied_operations": [],
+  "pending_manual_operations": [
+    {
+      "operation": "drop_table",
+      "safe_auto_apply": false,
+      "table": "choice_option",
+      "details": {},
+      "sql_hint": "DROP TABLE IF EXISTS choice_option;"
+    }
+  ]
+}

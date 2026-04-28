@@ -1,0 +1,2954 @@
+{
+  "version": 5,
+  "tables": [
+    {
+      "name": "choice_option",
+      "primary_key": "choice_optionid",
+      "fields": [
+        {
+          "name": "choice_optionid",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "choice_group",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "choice_code",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "choice_label",
+          "type": "text",
+          "nullable": false
+        }
+      ]
+    },
+    {
+      "name": "hbl_account",
+      "primary_key": "hbl_accountid",
+      "fields": [
+        {
+          "name": "cr987_account_am_sales",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "cr987_account_am_salesname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "cr987_account_am_salesyominame",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "cr987_account_bd",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "cr987_account_bdname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "cr987_account_bdyominame",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "createdby",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "createdbyname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "createdbyyominame",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "createdon",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "createdonbehalfby",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "createdonbehalfbyname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "createdonbehalfbyyominame",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "hbl_accounr_nda_sign_date",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_action_class",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_action_classname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_annual_it_budget",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_basic_info_quality",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_bu",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_buname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_company_relationship",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_create_2_first_contract",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_create_2_nda",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_customer_research_link",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_development_ratio",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_first_contract",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_fiscal_year",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_hb",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_hblab_official_visit",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_hbname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_is_watching",
+          "type": "bool",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_is_watchingname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_linkedin",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_name",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "hbl_account_official_visit",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_physical_address",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_special_domain",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_tcv",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_total_contacts",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_website",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_account_year_found",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_accountid",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "hbl_developmentcenters",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_developmentcentersname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "importsequencenumber",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_am_sales_temp",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_bd_temp",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_bu",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_buname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_country",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_countryname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_create_by_origin_text",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_create_on_origin",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_hb",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_hbname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_industry",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_industryname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_investigated_info",
+          "type": "richtext",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_list_opps_old",
+          "type": "richtext",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_market",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_marketname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_plan_activity",
+          "type": "richtext",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_potential",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_potentialname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_recent_it_events",
+          "type": "richtext",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_revenue",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_revenuename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_size",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_sizename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_type",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_typename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_account_validator",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "modifiedby",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "modifiedbyname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "modifiedbyyominame",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "modifiedon",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "modifiedonbehalfby",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "modifiedonbehalfbyname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "modifiedonbehalfbyyominame",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "overriddencreatedon",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "ownerid",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "owneridname",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "owneridtype",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "owneridyominame",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "owningbusinessunit",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "owningbusinessunitname",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "owningteam",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "owninguser",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "statecode",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "statecodename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "statuscode",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "statuscodename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "timezoneruleversionnumber",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "utcconversiontimezonecode",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "versionnumber",
+          "type": "int",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "hbl_contact",
+      "primary_key": "hbl_contactid",
+      "fields": [
+        {
+          "name": "createdby",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "createdbyname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "createdbyyominame",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "createdon",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "createdonbehalfby",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "createdonbehalfbyname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "createdonbehalfbyyominame",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "hbl_contacht_last_engaged_time",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_1st_mtg_time",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_account",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_accountname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_attachment",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_birthday",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_contact_info_quality",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_eat_coffee_out_side",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_educational_content_sharing",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_email",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_favor",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_investigated_info",
+          "type": "richtext",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_last_change_objective",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_linkedin",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_name",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "hbl_contact_next_action_date",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_personalized_interactions",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_phone",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_ref_request",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_score_relationship",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_social_engagement",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_temperature_customer",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_title",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contact_website",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contactid",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "hbl_heartbeatlastupdate",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "importsequencenumber",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact__potential",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact__potentialname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_action_type",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_action_typename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_annual_revenue",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_annual_revenuename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_assignee",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_assignee_temp",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_assigneename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_assigneeyominame",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_channel",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_channelname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_create_by_origin_text",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_create_on_origin",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_department",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_domain",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_domainname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_industry",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_industryname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_interactions",
+          "type": "richtext",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_market",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_marketname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_note_message",
+          "type": "richtext",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_objective",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_objectivename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_position",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_size",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_sizename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_source",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_sourcename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_summary_working_history",
+          "type": "richtext",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_type",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_typename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_validator",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "modifiedby",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "modifiedbyname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "modifiedbyyominame",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "modifiedon",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "modifiedonbehalfby",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "modifiedonbehalfbyname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "modifiedonbehalfbyyominame",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "overriddencreatedon",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "ownerid",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "owneridname",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "owneridtype",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "owneridyominame",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "owningbusinessunit",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "owningbusinessunitname",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "owningteam",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "owninguser",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "statecode",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "statecodename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "statuscode",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "statuscodename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "timezoneruleversionnumber",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "utcconversiontimezonecode",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "versionnumber",
+          "type": "int",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "hbl_contract",
+      "primary_key": "hbl_contractid",
+      "fields": [
+        {
+          "name": "createdby",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "createdbyname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "createdbyyominame",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "createdon",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "createdonbehalfby",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "createdonbehalfbyname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "createdonbehalfbyyominame",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "hbl_contract_account",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_action_date",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_apr",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_aug",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_contract_drive",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_dec",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_end_date",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_feb",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_first_contract",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_interactions",
+          "type": "richtext",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_invoice_interaction",
+          "type": "richtext",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_invoices_drive",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_jan",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_jul",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_jun",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_mar",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_may",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_name",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "hbl_contract_nov",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_oct",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_opp_interaction",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_opportunity",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_opportunityname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_owner",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_q1",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_q2",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_q3",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_q4",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_request_type",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_request_typename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_sep",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_start_date",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_status",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_statusname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contract_tcv",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_contractid",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "hblab_contract_color_hex",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "importsequencenumber",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_acc_actual",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "mc_contact_acc_actualname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contract_assignee",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "mc_contract_assigneename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contract_assigneeyominame",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contract_contract_month",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contract_contract_monthname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contract_contract_year",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "mc_contract_contract_yearname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contract_country",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contract_countryname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contract_create_by_origin",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contract_create_on_origin",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "mc_contract_invoiced_months",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contract_invoiced_monthsname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contract_market",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contract_marketname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contract_meeting_category",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contract_paid_months",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contract_paid_monthsname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contract_validator",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_contract_year",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "modifiedby",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "modifiedbyname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "modifiedbyyominame",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "modifiedon",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "modifiedonbehalfby",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "modifiedonbehalfbyname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "modifiedonbehalfbyyominame",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "overriddencreatedon",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "ownerid",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "owneridname",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "owneridtype",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "owneridyominame",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "owningbusinessunit",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "owningbusinessunitname",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "owningteam",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "owninguser",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "statecode",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "statecodename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "statuscode",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "statuscodename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "timezoneruleversionnumber",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "utcconversiontimezonecode",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "versionnumber",
+          "type": "int",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "hbl_opportunities",
+      "primary_key": "hbl_opportunitiesid",
+      "fields": [
+        {
+          "name": "createdby",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "createdbyname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "createdbyyominame",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "createdon",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "createdonbehalfby",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "createdonbehalfbyname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "createdonbehalfbyyominame",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "hbl_opportumities_win_factor",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportumities_win_factorname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_account",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_accountname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_action_class",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_action_classname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_age_opportunity",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_bant_authority",
+          "type": "richtext",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_bant_budget",
+          "type": "richtext",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_bant_lod_score",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_bant_need",
+          "type": "richtext",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_bant_time",
+          "type": "richtext",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_deadline",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_delivery",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_deliveryname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_distributed_value",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_end_time_est",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_estimated_value",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_failed_factor",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_failed_factorname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_first_contract",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_interactions",
+          "type": "richtext",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_name",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "hbl_opportunities_request_type",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_request_typename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_start_time_est",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_status",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_statusname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_weighted_rev",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunities_win_rate",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "hbl_opportunitiesid",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "hbl_opportunitiest_next_time_action",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "importsequencenumber",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "mc_opp__acc_actual",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "mc_opp__acc_actualname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_opp_market",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_opp_marketname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_opportunities_account_country",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_opportunities_account_countryname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_opportunities_account_type",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_opportunities_account_typename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_opportunities_certainty",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_opportunities_certaintyname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_opportunities_contact_create_on_origin",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "mc_opportunities_create_by_origin",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_opportunities_opp_id",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_opportunities_owner",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "mc_opportunities_owner_temp",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_opportunities_ownername",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_opportunities_owneryominame",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_opportunities_presales",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_opportunities_validator",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "modifiedby",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "modifiedbyname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "modifiedbyyominame",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "modifiedon",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "modifiedonbehalfby",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "modifiedonbehalfbyname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "modifiedonbehalfbyyominame",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "overriddencreatedon",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "ownerid",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "owneridname",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "owneridtype",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "owneridyominame",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "owningbusinessunit",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "owningbusinessunitname",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "owningteam",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "owninguser",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "statecode",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "statecodename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "statuscode",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "statuscodename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "timezoneruleversionnumber",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "utcconversiontimezonecode",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "versionnumber",
+          "type": "int",
+          "nullable": true
+        }
+      ]
+    },
+    {
+      "name": "systemuser",
+      "primary_key": "systemuserid",
+      "fields": [
+        {
+          "name": "accessmode",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "accessmodename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "activedirectoryguid",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "address1_addressid",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "address1_addresstypecode",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address1_addresstypecodename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address1_city",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address1_composite",
+          "type": "richtext",
+          "nullable": true
+        },
+        {
+          "name": "address1_country",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address1_county",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address1_fax",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address1_latitude",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "address1_line1",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address1_line2",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address1_line3",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address1_longitude",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "address1_name",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address1_postalcode",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address1_postofficebox",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address1_shippingmethodcode",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address1_shippingmethodcodename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address1_stateorprovince",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address1_telephone1",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address1_telephone2",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address1_telephone3",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address1_upszone",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address1_utcoffset",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "address2_addressid",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "address2_addresstypecode",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address2_addresstypecodename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address2_city",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address2_composite",
+          "type": "richtext",
+          "nullable": true
+        },
+        {
+          "name": "address2_country",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address2_county",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address2_fax",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address2_latitude",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "address2_line1",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address2_line2",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address2_line3",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address2_longitude",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "address2_name",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address2_postalcode",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address2_postofficebox",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address2_shippingmethodcode",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address2_shippingmethodcodename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address2_stateorprovince",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address2_telephone1",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address2_telephone2",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address2_telephone3",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address2_upszone",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address2_utcoffset",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "applicationid",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "applicationiduri",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "azureactivedirectoryobjectid",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "azuredeletedon",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "azurestate",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "azurestatename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "businessunitid",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "businessunitidname",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "calendarid",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "caltype",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "caltypename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "createdby",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "createdbyname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "createdbyyominame",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "createdon",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "createdonbehalfby",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "createdonbehalfbyname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "createdonbehalfbyyominame",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "defaultfilterspopulated",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "name": "defaultmailbox",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "defaultmailboxname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "defaultodbfoldername",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "deletedstate",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "deletedstatename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "disabledreason",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "displayinserviceviews",
+          "type": "bool",
+          "nullable": true
+        },
+        {
+          "name": "displayinserviceviewsname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "domainname",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "emailrouteraccessapproval",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "emailrouteraccessapprovalname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "employeeid",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "entityimage",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "entityimage_timestamp",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "entityimage_url",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "entityimageid",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "exchangerate",
+          "type": "decimal",
+          "nullable": true
+        },
+        {
+          "name": "firstname",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "fullname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "governmentid",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "homephone",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "identityid",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "importsequencenumber",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "incomingemaildeliverymethod",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "incomingemaildeliverymethodname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "internalemailaddress",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "invitestatuscode",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "invitestatuscodename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "isactivedirectoryuser",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "name": "isallowedbyipfirewall",
+          "type": "bool",
+          "nullable": true
+        },
+        {
+          "name": "isallowedbyipfirewallname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "isdisabled",
+          "type": "bool",
+          "nullable": true
+        },
+        {
+          "name": "isdisabledname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "isemailaddressapprovedbyo365admin",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "name": "isintegrationuser",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "name": "isintegrationusername",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "islicensed",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "name": "islicensedname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "issyncwithdirectory",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "name": "jobtitle",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "lastname",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "latestupdatetime",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "mc_user_market",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mc_user_marketname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "middlename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mobilealertemail",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mobileofflineprofileid",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "mobileofflineprofileidname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "mobilephone",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "modifiedby",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "modifiedbyname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "modifiedbyyominame",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "modifiedon",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "modifiedonbehalfby",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "modifiedonbehalfbyname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "modifiedonbehalfbyyominame",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "nickname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "organizationid",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "organizationidname",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "outgoingemaildeliverymethod",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "outgoingemaildeliverymethodname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "overriddencreatedon",
+          "type": "datetime",
+          "nullable": true
+        },
+        {
+          "name": "parentsystemuserid",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "parentsystemuseridname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "parentsystemuseridyominame",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "passporthi",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "passportlo",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "personalemailaddress",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "photourl",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "positionid",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "positionidname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "preferredaddresscode",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "preferredaddresscodename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "preferredemailcode",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "preferredemailcodename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "preferredphonecode",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "preferredphonecodename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "processid",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "queueid",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "queueidname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "salutation",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "setupuser",
+          "type": "bool",
+          "nullable": false
+        },
+        {
+          "name": "setupusername",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "sharepointemailaddress",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "skills",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "stageid",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "systemmanagedusertype",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "systemmanagedusertypename",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "systemuserid",
+          "type": "uuid",
+          "nullable": false
+        },
+        {
+          "name": "territoryid",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "territoryidname",
+          "type": "text",
+          "nullable": false
+        },
+        {
+          "name": "timezoneruleversionnumber",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "transactioncurrencyid",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "transactioncurrencyidname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "traversedpath",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "userlicensetype",
+          "type": "int",
+          "nullable": false
+        },
+        {
+          "name": "userpuid",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "utcconversiontimezonecode",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "versionnumber",
+          "type": "int",
+          "nullable": true
+        },
+        {
+          "name": "windowsliveid",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "yammeremailaddress",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "yammeruserid",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "yomifirstname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "yomifullname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "yomilastname",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "yomimiddlename",
+          "type": "text",
+          "nullable": true
+        }
+      ]
+    }
+  ],
+  "relations": {
+    "lookup": [
+      {
+        "from_table": "hbl_contact",
+        "from_field": "hbl_contact_accountid",
+        "to_table": "hbl_account",
+        "to_field": "hbl_accountid"
+      },
+      {
+        "from_table": "hbl_contact",
+        "from_field": "mc_contact_assigneeid",
+        "to_table": "systemuser",
+        "to_field": "systemuserid"
+      },
+      {
+        "from_table": "hbl_opportunities",
+        "from_field": "hbl_opportunities_accountid",
+        "to_table": "hbl_account",
+        "to_field": "hbl_accountid"
+      },
+      {
+        "from_table": "hbl_opportunities",
+        "from_field": "mc_opportunities_ownerid",
+        "to_table": "systemuser",
+        "to_field": "systemuserid"
+      },
+      {
+        "from_table": "hbl_contract",
+        "from_field": "hbl_contract_opportunityid",
+        "to_table": "hbl_opportunities",
+        "to_field": "hbl_opportunitiesid"
+      },
+      {
+        "from_table": "hbl_contract",
+        "from_field": "mc_contract_assigneeid",
+        "to_table": "systemuser",
+        "to_field": "systemuserid"
+      },
+      {
+        "from_table": "hbl_account",
+        "from_field": "cr987_account_am_salesid",
+        "to_table": "systemuser",
+        "to_field": "systemuserid"
+      },
+      {
+        "from_table": "hbl_account",
+        "from_field": "cr987_account_bdid",
+        "to_table": "systemuser",
+        "to_field": "systemuserid"
+      }
+    ],
+    "choice": [
+      {
+        "left_table": "hbl_account",
+        "right_table": "choice_option",
+        "join_table": "hbl_account_industry_choice",
+        "left_fk": "hbl_accountid",
+        "right_fk": "choice_optionid",
+        "right_group": "hbl_cust_choice_industry"
+      },
+      {
+        "left_table": "hbl_account",
+        "right_table": "choice_option",
+        "join_table": "hbl_account_country_choice",
+        "left_fk": "hbl_accountid",
+        "right_fk": "choice_optionid",
+        "right_group": "hbl_cust_choice_country"
+      },
+      {
+        "left_table": "hbl_account",
+        "right_table": "choice_option",
+        "join_table": "hbl_account_revenue_choice",
+        "left_fk": "hbl_accountid",
+        "right_fk": "choice_optionid",
+        "right_group": "hbl_cust_choice_revenue"
+      },
+      {
+        "left_table": "hbl_contact",
+        "right_table": "choice_option",
+        "join_table": "hbl_contact_source_choice_map",
+        "left_fk": "hbl_contactid",
+        "right_fk": "choice_optionid",
+        "right_group": "mc_contact_source_choice"
+      },
+      {
+        "left_table": "hbl_opportunities",
+        "right_table": "choice_option",
+        "join_table": "hbl_opportunities_status_choice_map",
+        "left_fk": "hbl_opportunitiesid",
+        "right_fk": "choice_optionid",
+        "right_group": "hbl_opportunities_status_choice"
+      },
+      {
+        "left_table": "hbl_contract",
+        "right_table": "choice_option",
+        "join_table": "hbl_contract_status_choice_map",
+        "left_fk": "hbl_contractid",
+        "right_fk": "choice_optionid",
+        "right_group": "hbl_contract_status_choice"
+      },
+      {
+        "left_table": "hbl_contract",
+        "right_table": "choice_option",
+        "join_table": "hbl_contract_invoiced_month_choice_map",
+        "left_fk": "hbl_contractid",
+        "right_fk": "choice_optionid",
+        "right_group": "mc_monthchoice"
+      },
+      {
+        "left_table": "hbl_contract",
+        "right_table": "choice_option",
+        "join_table": "hbl_contract_paid_month_choice_map",
+        "left_fk": "hbl_contractid",
+        "right_fk": "choice_optionid",
+        "right_group": "mc_monthchoice"
+      },
+      {
+        "left_table": "hbl_contract",
+        "right_table": "choice_option",
+        "join_table": "hbl_contract_contract_month_choice_map",
+        "left_fk": "hbl_contractid",
+        "right_fk": "choice_optionid",
+        "right_group": "mc_monthchoice"
+      }
+    ]
+  },
+  "choice_options": {
+    "hbl_cust_choice_industry": [
+      {
+        "code": "135150001",
+        "label": "SI"
+      },
+      {
+        "code": "135150002",
+        "label": "Managed Services"
+      },
+      {
+        "code": "135150003",
+        "label": "Finance"
+      }
+    ],
+    "hbl_cust_choice_country": [
+      {
+        "code": "135150000",
+        "label": "Singapore"
+      },
+      {
+        "code": "135150001",
+        "label": "Australia"
+      },
+      {
+        "code": "135150011",
+        "label": "Vietnam"
+      }
+    ],
+    "hbl_cust_choice_revenue": [
+      {
+        "code": "135150000",
+        "label": "<10M"
+      },
+      {
+        "code": "135150001",
+        "label": "10-50M"
+      },
+      {
+        "code": "135150006",
+        "label": ">1B"
+      }
+    ],
+    "mc_contact_source_choice": [
+      {
+        "code": "758130000",
+        "label": "Linkedin"
+      },
+      {
+        "code": "758130001",
+        "label": "Email/Apollo"
+      }
+    ],
+    "hbl_opportunities_status_choice": [
+      {
+        "code": "135150000",
+        "label": "Following"
+      },
+      {
+        "code": "135150003",
+        "label": "Won deal, Running"
+      }
+    ],
+    "hbl_contract_status_choice": [
+      {
+        "code": "135150000",
+        "label": "Adapting"
+      },
+      {
+        "code": "135150006",
+        "label": "Finished"
+      }
+    ],
+    "mc_monthchoice": [
+      {
+        "code": "1",
+        "label": "1"
+      },
+      {
+        "code": "2",
+        "label": "2"
+      },
+      {
+        "code": "12",
+        "label": "12"
+      }
+    ]
+  },
+  "meta": {
+    "last_schema_sync_at": "2026-04-28T02:51:45.221379+00:00",
+    "schema_source": "dataverse_snapshot"
+  }
+}

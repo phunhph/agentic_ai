@@ -1,0 +1,37 @@
+{
+  "summary": {
+    "new_tables": 0,
+    "removed_tables": 1,
+    "changed_tables": 0
+  },
+  "new_tables": [],
+  "removed_tables": [
+    {
+      "name": "choice_option",
+      "primary_key": "choice_optionid",
+      "fields": {
+        "choice_optionid": {
+          "name": "choice_optionid",
+          "type": "uuid",
+          "nullable": false
+        },
+        "choice_group": {
+          "name": "choice_group",
+          "type": "text",
+          "nullable": false
+        },
+        "choice_code": {
+          "name": "choice_code",
+          "type": "text",
+          "nullable": false
+        },
+        "choice_label": {
+          "name": "choice_label",
+          "type": "text",
+          "nullable": false
+        }
+      }
+    }
+  ],
+  "changed_tables": []
+}

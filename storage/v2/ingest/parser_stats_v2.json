@@ -1,0 +1,7 @@
+{
+  "runs": 388,
+  "deterministic_applied_runs": 97,
+  "deterministic_rate": 0.25,
+  "warning_threshold": 0.2,
+  "warning": true
+}

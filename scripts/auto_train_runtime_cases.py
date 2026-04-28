@@ -3,11 +3,13 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import concurrent.futures
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 import random
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -130,7 +132,129 @@ def build_scenarios() -> list[Scenario]:
                 "xem chi tiết opp Demo Opportunity 1",
             ],
         ),
+        Scenario(
+            name="choice_filter_requests",
+            role="DEFAULT",
+            lang="vi",
+            difficulty="hard",
+            queries=[
+                "lọc account theo market Japan",
+                "lọc account theo action class 135150003",
+                "thống kê account theo status active",
+            ],
+        ),
+        Scenario(
+            name="owner_filter_requests",
+            role="DEFAULT",
+            lang="vi",
+            difficulty="hard",
+            queries=[
+                "lọc contact theo assignee",
+                "lọc contract theo assignee",
+                "lọc opportunity theo owner",
+            ],
+        ),
+        Scenario(
+            name="linked_table_navigation",
+            role="SENIOR",
+            lang="vi",
+            difficulty="hard",
+            queries=[
+                "lấy contact liên quan account Demo Account 1",
+                "từ contact đó lấy contract liên quan",
+                "chi tiết contract đầu tiên",
+            ],
+        ),
     ]
+
+
+def _normalize_space_query(text: str) -> str:
+    q = str(text or "").strip()
+    q = re.sub(r"\s+", " ", q)
+    return q
+
+
+def _is_noise_space_query(text: str) -> bool:
+    q = _normalize_space_query(text).lower()
+    if not q:
+        return True
+    if q.startswith("[không có nội dung text"):
+        return True
+    # Ignore broad room/test orchestration messages.
+    blocked_contains = [
+        "@all",
+        "nhờ ace",
+        "lấy use case",
+        "muốn làm gì cũng được",
+        "test thôi",
+        "không aplly vào db thật",
+        "mention nó vào",
+        "vẫn đang gà lắm",
+        "thôi được rồi",
+        "đệt",
+    ]
+    return any(x in q for x in blocked_contains)
+
+
+def _strip_agent_mentions(text: str) -> str:
+    q = _normalize_space_query(text)
+    q = re.sub(r"@salentassist\b", "", q, flags=re.IGNORECASE)
+    q = re.sub(r"\s+", " ", q).strip()
+    return q
+
+
+def load_space_message_queries(path: Path, limit: int = 80) -> list[str]:
+    if not path.exists():
+        return []
+    try:
+        rows = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+    if not isinstance(rows, list):
+        return []
+
+    out: list[str] = []
+    seen: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        raw = row.get("text", "")
+        if _is_noise_space_query(str(raw)):
+            continue
+        clean = _strip_agent_mentions(str(raw))
+        clean = _normalize_space_query(clean)
+        if not clean or len(clean) < 4:
+            continue
+        key = clean.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(clean)
+        if len(out) >= max(1, int(limit)):
+            break
+    return out
+
+
+def build_space_message_scenarios(path: Path, query_limit: int = 80, chunk_size: int = 3) -> list[Scenario]:
+    queries = load_space_message_queries(path=path, limit=query_limit)
+    if not queries:
+        return []
+    chunks: list[Scenario] = []
+    size = max(1, int(chunk_size))
+    for i in range(0, len(queries), size):
+        block = queries[i:i + size]
+        if not block:
+            continue
+        chunks.append(
+            Scenario(
+                name=f"space_messages_real_case_{(i // size) + 1}",
+                role="DEFAULT",
+                lang="vi",
+                difficulty="hard",
+                queries=block,
+            )
+        )
+    return chunks
 
 
 def build_generated_scenarios(max_generated: int = 6) -> list[Scenario]:
@@ -233,6 +357,21 @@ def summarize_record(result: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _run_pipeline_with_timeout(query: str, role: str, session_id: str, lang: str, timeout_seconds: int) -> dict[str, Any]:
+    ex = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+    try:
+        fut = ex.submit(run_v2_pipeline, query, role=role, session_id=session_id, lang=lang)
+        return fut.result(timeout=max(1, int(timeout_seconds)))
+    except concurrent.futures.TimeoutError as exc:
+        fut.cancel()
+        # Do not wait for blocked worker thread on timeout.
+        ex.shutdown(wait=False, cancel_futures=True)
+        raise TimeoutError(f"pipeline_timeout_after_{max(1, int(timeout_seconds))}s") from exc
+    finally:
+        # Normal path: release executor resources.
+        ex.shutdown(wait=False, cancel_futures=True)
+
+
 def _variants_for_query(query: str) -> list[str]:
     q = str(query or "").strip()
     if not q:
@@ -255,14 +394,30 @@ def _variants_for_query(query: str) -> list[str]:
 def run(
     rounds: int,
     max_scenarios: int | None = None,
+    scenario_offset: int = 0,
     variant_factor: int = 2,
     seed: int = 42,
     auto_generate: bool = True,
     auto_retry_failures: bool = True,
+    timeout_seconds: int = 20,
+    space_cases_file: Path | None = None,
+    space_case_limit: int = 80,
 ) -> tuple[Path, Path]:
     scenarios = build_scenarios()
     generated_count = 0
     mined_failure_count = 0
+    space_scenarios_count = 0
+    space_queries_count = 0
+    if space_cases_file is not None:
+        space_scenarios = build_space_message_scenarios(
+            path=space_cases_file,
+            query_limit=max(1, int(space_case_limit)),
+            chunk_size=3,
+        )
+        if space_scenarios:
+            scenarios.extend(space_scenarios)
+            space_scenarios_count = len(space_scenarios)
+            space_queries_count = sum(len(s.queries) for s in space_scenarios)
     if auto_generate:
         generated = build_generated_scenarios(max_generated=6)
         scenarios.extend(generated)
@@ -280,6 +435,9 @@ def run(
                 )
             )
             mined_failure_count = len(failure_queries)
+    offset = max(0, int(scenario_offset))
+    if offset > 0:
+        scenarios = scenarios[offset:]
     if max_scenarios is not None:
         scenarios = scenarios[: max(0, max_scenarios)]
     random.seed(seed)
@@ -312,11 +470,12 @@ def run(
                         difficulty_counts[scenario.difficulty] = difficulty_counts.get(scenario.difficulty, 0) + 1
                         ts = datetime.now(UTC).isoformat()
                         try:
-                            result = run_v2_pipeline(
+                            result = _run_pipeline_with_timeout(
                                 qv,
                                 role=scenario.role,
                                 session_id=session_id,
                                 lang=scenario.lang,
+                                timeout_seconds=timeout_seconds,
                             )
                             summary = summarize_record(result)
                             decision_state = str(summary.get("decision_state", ""))
@@ -373,6 +532,8 @@ def run(
         "rounds": rounds,
         "scenario_count": len(scenarios),
         "generated_scenarios": generated_count,
+        "space_message_scenarios": space_scenarios_count,
+        "space_message_queries": space_queries_count,
         "mined_failure_queries": mined_failure_count,
         "query_runs": total,
         "variant_factor": variant_factor,
@@ -397,8 +558,22 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Auto-run runtime cases for learning and supervision logs.")
     parser.add_argument("--rounds", type=int, default=2, help="How many rounds to run through all scenarios.")
     parser.add_argument("--max-scenarios", type=int, default=None, help="Optional limit for scenario count.")
+    parser.add_argument("--scenario-offset", type=int, default=0, help="Offset in scenario list for chunked runs.")
     parser.add_argument("--variant-factor", type=int, default=2, help="How many linguistic variants per base query.")
     parser.add_argument("--seed", type=int, default=42, help="Random seed for variant sampling.")
+    parser.add_argument("--timeout-seconds", type=int, default=20, help="Timeout per runtime query.")
+    parser.add_argument(
+        "--space-cases-file",
+        type=str,
+        default="space_messages.json",
+        help="Path to real chat use-cases file (JSON list of messages).",
+    )
+    parser.add_argument(
+        "--space-case-limit",
+        type=int,
+        default=80,
+        help="Maximum unique real-chat queries to import from space cases file.",
+    )
     parser.add_argument("--no-auto-generate", action="store_true", help="Disable auto-generated scenarios from metadata aliases.")
     parser.add_argument("--no-auto-retry-failures", action="store_true", help="Disable retrying mined failure queries from recent logs.")
     args = parser.parse_args()
@@ -410,10 +585,14 @@ def main() -> None:
     log_path, summary_path = run(
         rounds=rounds,
         max_scenarios=max_scenarios,
+        scenario_offset=max(0, int(args.scenario_offset)),
         variant_factor=variant_factor,
         seed=seed,
         auto_generate=not bool(args.no_auto_generate),
         auto_retry_failures=not bool(args.no_auto_retry_failures),
+        timeout_seconds=max(10, int(args.timeout_seconds)),
+        space_cases_file=(ROOT / str(args.space_cases_file)).resolve(),
+        space_case_limit=max(1, int(args.space_case_limit)),
     )
     print(f"Auto-train run complete.\n- Log: {log_path}\n- Summary: {summary_path}")
 

@@ -1,0 +1,445 @@
+{
+  "total_cases": 50,
+  "evaluated_cases": 50,
+  "skipped_cases": 0,
+  "passed_cases": 0,
+  "pass_rate": 0.0,
+  "details": [
+    {
+      "query": "Thanks for adding NextGen CRM! I am now quietly listening for CRM updates.",
+      "tags": [
+        "list"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "chi tiết về account MIMS là gì",
+      "tags": [
+        "detail"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": [
+        "hbl_account"
+      ]
+    },
+    {
+      "query": "cơ hội trong tuần này cần làm",
+      "tags": [
+        "compass"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "hãy tìm kiếm và sắp xếp theo ngày tháng phải action ấy",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "sắp xếp theo thứ tự gần nhất chứ k phải xa nhất",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "thế tháng 4/2026 có opps nào cần phải làm không?",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "có account nào tôi cần phải chăm sóc hôm nay không?",
+      "tags": [
+        "compass"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": [
+        "hbl_account"
+      ]
+    },
+    {
+      "query": "kiểm tra next action date ấy",
+      "tags": [
+        "compass"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "ý tôi là hãy xem contact nào có next action date trong 1 tuần tới thì mang ra đây",
+      "tags": [
+        "compass"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": [
+        "hbl_contact"
+      ]
+    },
+    {
+      "query": "có khách hàng nào là mega",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "ý tôi là trong số các khách hàng phải chăm sóc thì có khách hàng nào thuộc rank mega",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "nhiều quá, khách tuần này thôi, xếp theo thứ tự ngày cần chăm sóc, cho tôi tên người và interaction mà tôi đã làm với người đó",
+      "tags": [
+        "compass"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "tôi chỉ muốn biết khách mega mà tuần này tôi phải xử lý",
+      "tags": [
+        "compass"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "vẫn đang gà lắm",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "ngày hôm nay tôi lên làm gì hả bot",
+      "tags": [
+        "compass"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "quý vừa rồi ngành IT có sự kiện gì đáng chú ý để đăng post linkedin không?",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "todo của tôi với Milan Jovanovic là gì, bao giờ",
+      "tags": [
+        "detail",
+        "compass",
+        "owner_scope"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "Vậy chắc chưa có rồi, nhập cho tôi lên CRM đi, linkedin của ông đó là https://www.linkedin.com/in/milan-jovanovic-digital-leader/",
+      "tags": [
+        "owner_scope"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "Coorpix AG",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "Tạo tài khoản luôn",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "account nào quan trọng nhất Cindy Duong cần xử lý trong hôm nay",
+      "tags": [
+        "compass"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": [
+        "hbl_account"
+      ]
+    },
+    {
+      "query": "account của Duong Cindy",
+      "tags": [
+        "owner_scope"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": [
+        "hbl_account"
+      ]
+    },
+    {
+      "query": "Trên CRM đang có user nào",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": [
+        "systemuser"
+      ]
+    },
+    {
+      "query": "thế có những tên nào",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "account nào quan trọng nhất Duong Cindy cần xử lý trong hôm nay",
+      "tags": [
+        "compass"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": [
+        "hbl_account"
+      ]
+    },
+    {
+      "query": "trên CRM có những sales nào",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": [
+        "systemuser"
+      ]
+    },
+    {
+      "query": "các contract đang chạy của Dory",
+      "tags": [
+        "owner_scope"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": [
+        "hbl_contract"
+      ]
+    },
+    {
+      "query": "Thống kê Số lead mới được tạo ra, op mới được tạo ra trong tháng 3, và so với tháng 2, tháng 1",
+      "tags": [
+        "aggregate"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "why tháng 3 chỉ có 1 lead mới, kiểm tra lại nhé",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "Vậy Dory đang có bao nhiêu contact",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": [
+        "hbl_contact"
+      ]
+    },
+    {
+      "query": "đếm số account mới nhập lên trong tháng 3",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": [
+        "hbl_account"
+      ]
+    },
+    {
+      "query": "Bạn có thấy rằng mình nên cải thiện hơn về việc hiểu dữ liệu không thế",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "tháng 3 năm 2026 nhé",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "dựa vào lịch sử tương tác và thông tin khách hàng, hãy cho tôi biết khách hàng nào của Duong Cindy có khả năng có opportunities và deal cao nhất",
+      "tags": [
+        "detail",
+        "owner_scope"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": [
+        "hbl_opportunities"
+      ]
+    },
+    {
+      "query": "Salman Gilani là ai trong CRM",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "Thống kê Số lead mới được tạo ra, op mới được tạo ra trong tháng 3, và so với tháng 2, tháng 1 năm 2026",
+      "tags": [
+        "aggregate"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "Tìm cho tôi những người tên Steve trong CRM",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "thống kê các Opportunity (lần sau sẽ viêt tắt là Ops) mà tôi là Presales",
+      "tags": [
+        "aggregate"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": [
+        "hbl_opportunities",
+        "systemuser"
+      ]
+    },
+    {
+      "query": "Steve Culhane, CTO tại RedondoBeach có liên quan đến sales nào",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": [
+        "systemuser"
+      ]
+    },
+    {
+      "query": "ơ, bạn đang chat với tôi thì phải biết account của tôi chứ",
+      "tags": [
+        "owner_scope"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": [
+        "hbl_account"
+      ]
+    },
+    {
+      "query": "bạn không tự lấy được à bot",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "contact nào Duong Cindy cần xử lý trong hôm nay",
+      "tags": [
+        "compass"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": [
+        "hbl_contact"
+      ]
+    },
+    {
+      "query": "thôi được rồi, bạn nên bảo lại người tạo ra bạn nhé",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "tôi là Khởi, hay có tên là Kelvin",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "tìm thấy tôi trong crm không",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "contact nào Duong Cindy cần xử lý trong tuần này",
+      "tags": [
+        "compass"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": [
+        "hbl_contact"
+      ]
+    },
+    {
+      "query": "Nguyễn Văn Khởi, Kelvin Nguyen, Khởi đầu bò",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "check xem đổi qua local chưa",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "Op khả năng cao nhất, thường là có các tiêu chi BANT rõ ràng. Có số lần tương tác nhiều, khách hàng responsive, và thời gian tạo cho đến hiện tại ngắn. Hãy học nhé, và thử kiểm tra",
+      "tags": [],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": []
+    },
+    {
+      "query": "hãy cho tôi biết khách hàng nào của Duong Cindy có khả năng có opportunities và deal cao nhất",
+      "tags": [
+        "owner_scope"
+      ],
+      "status": "error",
+      "error": "ingest_timeout_after_6s",
+      "expected_entities": [
+        "hbl_opportunities"
+      ]
+    }
+  ]
+}

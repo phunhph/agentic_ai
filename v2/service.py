@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import time
 from dataclasses import asdict
 from pathlib import Path
 
@@ -26,6 +27,21 @@ from v2.reason import reason_about_query
 from v2.tactician import build_tactician_payload
 
 _PROVIDER = MetadataProvider()
+_EVAL_CACHE: dict = {"ts": 0.0, "value": {}}
+_EVAL_CACHE_TTL_SECONDS = 30.0
+_CHOICE_LABEL_CACHE: dict[str, dict[str, str]] | None = None
+
+
+def _get_matrix_eval_cached(force: bool = False) -> dict:
+    now = time.time()
+    ts = float(_EVAL_CACHE.get("ts", 0.0) or 0.0)
+    has_fresh = (now - ts) <= _EVAL_CACHE_TTL_SECONDS
+    if (not force) and has_fresh and isinstance(_EVAL_CACHE.get("value"), dict):
+        return dict(_EVAL_CACHE.get("value") or {})
+    value = evaluate_matrix_v2()
+    _EVAL_CACHE["ts"] = now
+    _EVAL_CACHE["value"] = value if isinstance(value, dict) else {}
+    return dict(_EVAL_CACHE["value"])
 
 
 def _build_runtime_learning_sample(
@@ -315,6 +331,71 @@ def _load_lookup_relations() -> list[dict]:
     return out
 
 
+def _load_choice_label_map() -> dict[str, dict[str, str]]:
+    global _CHOICE_LABEL_CACHE
+    if _CHOICE_LABEL_CACHE is not None:
+        return _CHOICE_LABEL_CACHE
+    path = Path("db.json")
+    out: dict[str, dict[str, str]] = {}
+    if not path.exists():
+        _CHOICE_LABEL_CACHE = out
+        return out
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        _CHOICE_LABEL_CACHE = out
+        return out
+    choice_options = raw.get("choice_options", {}) if isinstance(raw.get("choice_options"), dict) else {}
+    for group, items in choice_options.items():
+        if not isinstance(items, list):
+            continue
+        key = str(group).strip()
+        if not key:
+            continue
+        mapper: dict[str, str] = {}
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            code = str(item.get("code", "")).strip()
+            label = str(item.get("label", "")).strip()
+            if code and label:
+                mapper[code] = label
+        out[key] = mapper
+    _CHOICE_LABEL_CACHE = out
+    return out
+
+
+def _choice_label_for(root_table: str, field: str, value: object) -> str | None:
+    if value in (None, ""):
+        return None
+    m = _load_choice_label_map().get(f"{root_table}.{field}", {})
+    if not m:
+        return None
+    return m.get(str(value))
+
+
+def _decorate_choice_labels(rows: list[dict], root_table: str) -> list[dict]:
+    if not rows or not root_table:
+        return rows
+    out: list[dict] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            out.append(row)
+            continue
+        decorated = dict(row)
+        for k, v in row.items():
+            if not isinstance(k, str):
+                continue
+            lk = k.lower()
+            if lk.endswith(("_label", "_choices", "_choice", "_is_multi")):
+                continue
+            mapped = _choice_label_for(root_table, k, v)
+            if mapped and f"{k}_label" not in decorated:
+                decorated[f"{k}_label"] = mapped
+        out.append(decorated)
+    return out
+
+
 def _is_uuid_like(value) -> bool:
     if not isinstance(value, str):
         return False
@@ -392,9 +473,13 @@ def _pick_presentable_fields(row: dict, root_table: str = "") -> list[tuple[str,
     secondary: list[tuple[str, object]] = []
     hidden: list[tuple[str, object]] = []
     primary_name_key = f"{root_table}_name" if root_table else ""
+    strong_identity_keys = {"fullname", "domainname", "internalemailaddress", "firstname", "lastname"}
     for k, v in items:
         lk = str(k).lower()
         if primary_name_key and lk == primary_name_key:
+            priority.insert(0, (k, v))
+            continue
+        if root_table == "systemuser" and lk in strong_identity_keys:
             priority.insert(0, (k, v))
             continue
         if lk.endswith("_label"):
@@ -414,14 +499,140 @@ def _pick_presentable_fields(row: dict, root_table: str = "") -> list[tuple[str,
     return merged[:6]
 
 
+def _pick_detail_data_fields(row: dict, root_table: str = "") -> list[tuple[str, object]]:
+    """
+    Detail mode: return full data fields (not short preview).
+    Rule requested by user: prioritize fields containing "_" as business data signals.
+    """
+    if not isinstance(row, dict):
+        return []
+    items = list(row.items())
+    prioritized: list[tuple[str, object]] = []
+    fallback: list[tuple[str, object]] = []
+
+    primary_name_key = f"{root_table}_name" if root_table else ""
+    strong_identity_keys = {"fullname", "domainname", "internalemailaddress", "firstname", "lastname"}
+    for k, v in items:
+        key = str(k)
+        lk = key.lower()
+        if lk in {"id"} or lk.startswith("@"):
+            continue
+        if primary_name_key and lk == primary_name_key:
+            prioritized.insert(0, (k, v))
+            continue
+        if root_table == "systemuser" and lk in strong_identity_keys:
+            prioritized.insert(0, (k, v))
+            continue
+        if "__" in key:
+            continue
+        # Skip noisy helpers in full-detail mode
+        if lk.endswith("_choices") or lk.endswith("_choice") or lk.endswith("_is_multi"):
+            continue
+        # Keep data-like fields first: convention has underscore in business fields
+        if "_" in key:
+            prioritized.append((k, v))
+        else:
+            fallback.append((k, v))
+
+    # Full detail should not be truncated.
+    merged = prioritized + fallback
+    return merged
+
+
 def _is_detail_intent_query(query: str) -> bool:
     lowered = str(query or "").lower()
     detail_tokens = ["chi tiết", "chi tiet", "thông tin", "thong tin", "detail", "details"]
     return any(token in lowered for token in detail_tokens)
 
 
+def _is_aggregate_metrics_row(row: dict) -> bool:
+    if not isinstance(row, dict) or not row:
+        return False
+    keys = [str(k).lower() for k in row.keys()]
+    # Strict aggregate detection: mostly metric keys, not regular entity rows.
+    metric_like = [
+        k
+        for k in keys
+        if (
+            k.endswith("_count")
+            or "_count_" in k
+            or k.endswith("_sum")
+            or "_sum_" in k
+            or k.endswith("_avg")
+            or k.endswith("_min")
+            or k.endswith("_max")
+            or k.startswith("metric_")
+        )
+    ]
+    if not metric_like:
+        return False
+    if len(keys) <= 10 and len(metric_like) >= max(1, len(keys) // 2):
+        return True
+    return False
+
+
+def _render_markdown_table(rows: list[dict], columns: list[str], locale: str = "vi") -> str:
+    if not rows or not columns:
+        return ""
+    headers = [_humanize_field_key(c, locale) for c in columns]
+    head = "| " + " | ".join(headers) + " |"
+    sep = "|" + "|".join(["---"] * len(columns)) + "|"
+    body: list[str] = []
+    for row in rows:
+        vals = [_format_value(row.get(c, "")) if isinstance(row, dict) else "" for c in columns]
+        body.append("| " + " | ".join(vals) + " |")
+    return "\n".join([head, sep] + body)
+
+
+def _pick_list_columns(rows: list[dict], root_table: str = "") -> list[str]:
+    if not rows or not isinstance(rows[0], dict):
+        return []
+    first = rows[0]
+    # Prioritize readable/business fields first.
+    preferred = _pick_presentable_fields(first, root_table=f"hbl_{root_table}" if root_table else "")
+    cols = [k for k, _ in preferred if isinstance(k, str)]
+    cols = [c for c in cols if not str(c).lower().endswith(("_choices", "_choice", "_is_multi"))]
+    # Keep table compact by default.
+    return cols[:4]
+
+
+def _format_compact_record(fields: list[tuple[str, object]], locale: str = "vi", max_fields: int = 3) -> str:
+    visible = [(k, v) for k, v in fields if v not in (None, "", [])][: max(1, max_fields)]
+    if not visible:
+        return "No visible fields" if locale == "en" else "Khong co truong hien thi"
+    return " | ".join(f"{_humanize_field_key(k, locale)}: {_format_value(v)}" for k, v in visible)
+
+
+def _format_detail_block(fields: list[tuple[str, object]], locale: str = "vi", max_fields: int = 8) -> str:
+    visible = [(k, v) for k, v in fields if v not in (None, "", [])][: max(1, max_fields)]
+    if not visible:
+        return "- No visible fields." if locale == "en" else "- Chua co truong du lieu de hien thi."
+    return "\n".join(f"- {_humanize_field_key(k, locale)}: {_format_value(v)}" for k, v in visible)
+
+
+def _wants_full_output(query: str) -> bool:
+    lowered = str(query or "").lower()
+    full_tokens = [
+        "toàn bộ",
+        "toan bo",
+        "đầy đủ",
+        "day du",
+        "full",
+        "all",
+        "show all",
+        "hiển thị hết",
+        "hien thi het",
+        "không rút gọn",
+        "khong rut gon",
+    ]
+    return any(token in lowered for token in full_tokens)
+
+
 def _build_professional_response(query: str, rows: list[dict], execution_trace: dict, locale: str = "vi") -> str:
     plan = execution_trace.get("plan", {})
+    tactical_context = plan.get("tactical_context", {}) if isinstance(plan, dict) else {}
+    intent_frame = tactical_context.get("intent_frame", {}) if isinstance(tactical_context, dict) else {}
+    reasoning_mode = str(intent_frame.get("reasoning_mode", "")).strip()
     if plan and plan.get("update_data"):
         if execution_trace.get("updated_count", 0) > 0:
             return _t(locale, "update_success")
@@ -429,6 +640,14 @@ def _build_professional_response(query: str, rows: list[dict], execution_trace: 
 
     if not rows:
         root_table = str((execution_trace.get("plan", {}) or {}).get("root_table", "entity")).replace("hbl_", "")
+        if reasoning_mode == "identity_lookup":
+            if locale == "en":
+                return "No exact identity match was found. Please provide the exact user/account/contact identifier."
+            return "Khong tim thay dinh danh chinh xac. Hay cung cap dung ten, email hoac ma dinh danh."
+        if reasoning_mode == "compass_query":
+            if locale == "en":
+                return "The system could not determine actionable items for the requested time scope from the current data model."
+            return "He thong chua xac dinh duoc tieu chi can xu ly trong khoang thoi gian ban yeu cau tu du lieu hien co."
         recommendation = _t(locale, "no_data_recommendation").format(root=root_table)
         if locale == "en":
             return f"⚠️ **No matching results.** {recommendation}\n\nTry narrowing by a specific name/code or date range."
@@ -436,87 +655,65 @@ def _build_professional_response(query: str, rows: list[dict], execution_trace: 
 
     overview = _t(locale, "tactical_overview").format(count=len(rows))
     root_table = str((execution_trace.get("plan", {}) or {}).get("root_table", "")).replace("hbl_", "").strip()
+    root_table_full = f"hbl_{root_table}" if root_table else ""
+    rows = _decorate_choice_labels(rows, root_table_full)
     preview_lines: list[str] = []
     detail_mode = _is_detail_intent_query(query)
+    full_output = True
     max_fields = 5 if len(rows) == 1 and detail_mode else (4 if len(rows) == 1 else 2)
-    for idx, row in enumerate(rows[:3], start=1):
+    preview_rows = rows
+
+    # Aggregate/report mode: show metrics as concise bullets, not markdown tables.
+    if len(rows) == 1 and isinstance(rows[0], dict) and _is_aggregate_metrics_row(rows[0]):
+        metric_lines = []
+        for k, v in rows[0].items():
+            if v in (None, "", []):
+                continue
+            metric_lines.append(f"- {_humanize_field_key(k, locale)}: {_format_value(v)}")
+        metrics = "\n".join(metric_lines) if metric_lines else ("- No metrics." if locale == "en" else "- Khong co chi so.")
+        if locale == "en":
+            return f"{overview}\n\nReport metrics:\n{metrics}"
+        return f"{overview}\n\nBao cao thong ke:\n{metrics}"
+
+    for idx, row in enumerate(preview_rows, start=1):
         if not isinstance(row, dict):
             continue
-        fields = _pick_presentable_fields(row, root_table=f"hbl_{root_table}" if root_table else "")
-        if not fields:
-            continue
-        label = " / ".join(f"{_humanize_field_key(k, locale)}: {_format_value(v)}" for k, v in fields[:max_fields])
+        if len(rows) == 1 and detail_mode:
+            fields = _pick_detail_data_fields(row, root_table=root_table_full)
+            if not fields:
+                continue
+            label = "\n" + _format_detail_block(fields, locale=locale, max_fields=8)
+        else:
+            fields = _pick_presentable_fields(row, root_table=root_table_full)
+            if not fields:
+                continue
+            label = _format_compact_record(fields, locale=locale, max_fields=max_fields)
         preview_lines.append(f"- {idx}. {label}")
 
     if locale == "en":
         details = "\n".join(preview_lines) if preview_lines else "- No concise preview available."
-        hidden = max(0, len(rows) - len(preview_lines))
-        hidden_line = f"\n- +{hidden} more rows available." if hidden > 0 else ""
         if len(rows) == 1:
             return (
                 "✅ **Found exactly one matching record.**\n\n"
-                f"Key details:\n{details}\n\n"
-                "You can continue with related data exploration (contacts/contracts/opportunities) "
-                "or request a focused field group for verification."
+                f"Key details:\n{details}"
             )
-        return f"{overview}\n\nTop matches:\n{details}{hidden_line}\n\nSuggested next step: add one more filter to narrow to exact target."
+        return f"{overview}\n\nAll matching rows:\n{details}"
 
     details = "\n".join(preview_lines) if preview_lines else "- Chưa tạo được tóm tắt ngắn cho bản ghi."
-    hidden = max(0, len(rows) - len(preview_lines))
-    hidden_line = f"\n- +{hidden} bản ghi khác chưa hiển thị." if hidden > 0 else ""
     if len(rows) == 1:
         return (
             "✅ **Đã tìm thấy đúng 1 bản ghi phù hợp.**\n\n"
-            f"Chi tiết chính:\n{details}\n\n"
-            "Bạn có thể khai thác tiếp dữ liệu liên quan (contact/contract/opportunity) "
-            "hoặc yêu cầu nhóm trường cần kiểm tra sâu."
+            f"Chi tiết chính:\n{details}"
         )
-    return f"{overview}\n\nKết quả nổi bật:\n{details}{hidden_line}\n\nGợi ý tiếp theo: thêm 1 điều kiện lọc để chốt đúng đối tượng cần xử lý."
+    return f"{overview}\n\nToàn bộ bản ghi khớp:\n{details}"
 
 
 def _apply_lean_personalization(text: str, role: str, locale: str = "vi") -> str:
-    role_key = str(role or "DEFAULT").strip().upper()
-    if role_key == "JUNIOR":
-        if locale == "en":
-            return "💡 **Quick guidance**\n1) Confirm the exact target record.\n2) Add one concrete filter.\n3) Re-run.\n\n" + text
-        return "💡 **Hướng dẫn nhanh**\n1) Xác nhận đúng đối tượng.\n2) Thêm 1 điều kiện lọc cụ thể.\n3) Chạy lại truy vấn.\n\n" + text
-    if role_key == "SENIOR":
-        if locale == "en":
-            return "🚀 **Strategic lens**\nPrioritize signal quality (entity + high-confidence filter) before expanding scope.\n\n" + text
-        return "🚀 **Góc nhìn chiến lược**\nƯu tiên chất lượng tín hiệu (đúng entity + filter chắc chắn) trước khi mở rộng phạm vi.\n\n" + text
     return text
 
 
 def _apply_tactician_layer(text: str, tactician_payload: dict, locale: str = "vi") -> str:
-    if not isinstance(tactician_payload, dict):
-        return text
-    next_steps = tactician_payload.get("recommended_next_steps", [])
-    probe_questions = tactician_payload.get("probe_questions", [])
-    signals = tactician_payload.get("signals", {}) if isinstance(tactician_payload.get("signals"), dict) else {}
-    if not isinstance(next_steps, list):
-        next_steps = []
-    if not isinstance(probe_questions, list):
-        probe_questions = []
-    exact_match = bool(signals.get("exact_match", False))
-
-    step_lines = [f"- {str(x).strip()}" for x in next_steps[:3] if str(x).strip()]
-    probe_lines = [f"- {str(x).strip()}" for x in probe_questions[:2] if str(x).strip()]
-    if locale == "en":
-        out = text
-        if step_lines:
-            title = "Tactician exploitation steps" if exact_match else "Tactician next steps"
-            out += f"\n\n{title}:\n" + "\n".join(step_lines)
-        if probe_lines:
-            out += "\n\nTactician probes:\n" + "\n".join(probe_lines)
-        return out
-
-    out = text
-    if step_lines:
-        title = "Gợi ý khai thác tiếp theo" if exact_match else "Gợi ý Extraction Tactician"
-        out += f"\n\n{title}:\n" + "\n".join(step_lines)
-    if probe_lines:
-        out += "\n\nCâu hỏi thăm dò:\n" + "\n".join(probe_lines)
-    return out
+    return text
 
 
 def _build_learning_summary(learning_update: dict, locale: str = "vi") -> str:
@@ -612,7 +809,29 @@ def _is_generic_list_like(query: str) -> bool:
 
 def _is_follow_up_query(query: str) -> bool:
     lowered = str(query or "").lower()
-    follow_tokens = ["chỉ", "chi ", "tiếp", "them", "thêm", "với điều kiện", "with condition", "lọc", "filter", "liên quan", "related"]
+    follow_tokens = [
+        "chỉ",
+        "chỉ ",
+        "tiếp",
+        "them",
+        "thêm",
+        "với điều kiện",
+        "with condition",
+        "lọc",
+        "filter",
+        "liên quan",
+        "related",
+        "thế",
+        "the ",
+        "còn",
+        "con ",
+        "cái đó",
+        "cai do",
+        "những tên nào",
+        "nhung ten nao",
+        "sắp xếp",
+        "sap xep",
+    ]
     return any(t in lowered for t in follow_tokens)
 
 
@@ -625,10 +844,42 @@ def _apply_context_to_ingest(ingest, session_context: dict) -> tuple[object, dic
     used_filters = False
     used_intent = False
     reordered_entities = False
+    carry_reason = "none"
+    lowered_query = str(ingest.raw_query or "").lower()
+    strong_mode_tokens = [
+        "thống kê",
+        "thong ke",
+        "chi tiết",
+        "chi tiet",
+        "todo",
+        "next action",
+        "hôm nay",
+        "hom nay",
+        "tuần này",
+        "tuan nay",
+        "tháng này",
+        "thang nay",
+    ]
+    strong_mode_present = any(token in lowered_query for token in strong_mode_tokens)
+    follow_up_mode = _is_follow_up_query(ingest.raw_query)
 
-    if not ingest.entities and prev_entities:
+    if not ingest.entities and prev_entities and follow_up_mode and not strong_mode_present:
         ingest.entities = [str(x).strip() for x in prev_entities if str(x).strip()]
         used_entities = bool(ingest.entities)
+        if used_entities:
+            carry_reason = "followup_reused_entities"
+    elif (
+        ingest.entities
+        and prev_entities
+        and follow_up_mode
+        and not strong_mode_present
+        and ingest.ambiguity_score >= 0.6
+        and not any(e in prev_entities for e in ingest.entities)
+    ):
+        ingest.entities = [str(x).strip() for x in prev_entities if str(x).strip()]
+        used_entities = bool(ingest.entities)
+        if used_entities:
+            carry_reason = "followup_overrode_ambiguous_entities"
     elif ingest.entities and prev_entities and any(e in prev_entities for e in ingest.entities):
         used_entities = True # Acknowledge continuity
     prev_root = str(session_context.get("root_table", "")).strip()
@@ -636,13 +887,16 @@ def _apply_context_to_ingest(ingest, session_context: dict) -> tuple[object, dic
         prev_root
         and ingest.entities
         and prev_root in ingest.entities
-        and _is_follow_up_query(ingest.raw_query)
+        and follow_up_mode
     ):
         ingest.entities = [prev_root] + [e for e in ingest.entities if e != prev_root]
         reordered_entities = True
         used_entities = True
+        carry_reason = "followup_reordered_to_prev_root"
 
-    should_carry_filters = _is_follow_up_query(ingest.raw_query) and not _is_generic_list_like(ingest.raw_query)
+    should_carry_filters = follow_up_mode and not _is_generic_list_like(ingest.raw_query) and not any(
+        token in lowered_query for token in ["những tên nào", "nhung ten nao", "liệt kê", "liet ke", "danh sách", "danh sach", "sắp xếp", "sap xep"]
+    )
     if not ingest.request_filters and prev_filters and should_carry_filters:
         restored = []
         for f in prev_filters:
@@ -655,15 +909,36 @@ def _apply_context_to_ingest(ingest, session_context: dict) -> tuple[object, dic
                 restored.append(RequestFilter(field=field, op=op, value=value))
         ingest.request_filters = restored
         used_filters = bool(restored)
+        if used_filters:
+            carry_reason = "followup_reused_filters"
     elif not ingest.request_filters and _is_generic_list_like(ingest.raw_query):
         # Generic list requests should not inherit old restrictive filters.
         ingest.request_filters = []
 
-    if str(ingest.intent).strip().lower() == "unknown":
+    if str(ingest.intent).strip().lower() == "unknown" and not strong_mode_present:
         prev_intent = str(session_context.get("intent", "")).strip().lower()
         if prev_intent and prev_intent != "unknown":
             ingest.intent = prev_intent
             used_intent = True
+            if carry_reason == "none":
+                carry_reason = "followup_reused_intent"
+
+    if isinstance(getattr(ingest, "persona_context", None), dict):
+        frame = ingest.persona_context.get("intent_frame")
+        if isinstance(frame, dict):
+            filter_tables = {
+                str(f.field).split(".", 1)[0]
+                for f in getattr(ingest, "request_filters", []) or []
+                if hasattr(f, "field") and "." in str(f.field)
+            }
+            work_intent = frame.get("work_intent", {}) if isinstance(frame.get("work_intent"), dict) else {}
+            if work_intent.get("needs_action") or work_intent.get("running_scope"):
+                frame["reasoning_mode"] = "compass_query"
+            elif filter_tables and ingest.entities and any(t != ingest.entities[0] for t in filter_tables):
+                frame["reasoning_mode"] = "scoped_retrieval"
+            elif _is_generic_list_like(ingest.raw_query):
+                frame["reasoning_mode"] = "generic_retrieval"
+            ingest.persona_context["intent_frame"] = frame
 
     if used_entities and ingest.ambiguity_score > 0.3:
         ingest.ambiguity_score = round(max(0.15, ingest.ambiguity_score - 0.35), 4)
@@ -672,6 +947,7 @@ def _apply_context_to_ingest(ingest, session_context: dict) -> tuple[object, dic
 
     return ingest, {
         "used": bool(used_entities or used_filters or used_intent),
+        "carry_reason": carry_reason,
         "used_entities": used_entities,
         "used_filters": used_filters,
         "used_intent": used_intent,
@@ -835,7 +1111,9 @@ def run_v2_pipeline(query: str, role: str = "DEFAULT", session_id: str = "", lan
         learned = record_outcome(outcome)
     else:
         learned = {"score_breakdown": {}, "firewall_decision": firewall_event.get("decision")}
-    before_eval = evaluate_matrix_v2()
+    # Avoid evaluating matrix repeatedly on every single request.
+    # Keep a short-lived cache for responsiveness while preserving safety checks.
+    before_eval = _get_matrix_eval_cached(force=False)
     # Understanding-first training: only promote samples that represent
     # successful, trusted execution behavior to avoid teaching wrong patterns.
     can_promote_sample = bool(
@@ -868,10 +1146,10 @@ def run_v2_pipeline(query: str, role: str = "DEFAULT", session_id: str = "", lan
         }
     if appended_sample.get("status") == "appended":
         train_artifact = train_matrix_v2()
-        eval_report = evaluate_matrix_v2()
+        eval_report = _get_matrix_eval_cached(force=True)
     else:
         train_artifact = {"version": "unchanged", "reason": appended_sample.get("reason", "skipped")}
-        eval_report = evaluate_matrix_v2()
+        eval_report = dict(before_eval)
     learning_update = {
         "appended_sample": appended_sample,
         "learning_decision": appended_sample.get("status", "unknown"),
@@ -932,6 +1210,14 @@ def run_v2_pipeline(query: str, role: str = "DEFAULT", session_id: str = "", lan
 
     learning_summary = _build_learning_summary(learning_update, locale=locale)
     saved_context = update_session_context(session_id, ingest, execution_plan=asdict(plan))
+    parser_diag = ingest.persona_context.get("parser_diagnostics", {}) if isinstance(ingest.persona_context, dict) else {}
+    parser_stats = ingest.persona_context.get("parser_stats", {}) if isinstance(ingest.persona_context, dict) else {}
+    parser_warning = ""
+    if isinstance(parser_stats, dict) and bool(parser_stats.get("warning", False)):
+        parser_warning = (
+            "Deterministic override rate is high (>20%). System may be over-rule-based; "
+            "consider reducing hard heuristics for more agentic behavior."
+        )
 
     return {
         "decision_state": "auto_execute",
@@ -953,6 +1239,11 @@ def run_v2_pipeline(query: str, role: str = "DEFAULT", session_id: str = "", lan
         "learning_update": learning_update,
         "learning_check": learning_check,
         "learning_summary": learning_summary,
+        "parser_health": {
+            "diagnostics": parser_diag if isinstance(parser_diag, dict) else {},
+            "stats": parser_stats if isinstance(parser_stats, dict) else {},
+            "warning": parser_warning,
+        },
         "clarify_recommendation": recommendation,
         "conversation_context": {
             "session_id": session_id,

@@ -1,0 +1,4332 @@
+{
+  "source": "dataverse",
+  "exported_at": "2026-04-28T02:51:44.557399+00:00",
+  "table_count": 5,
+  "tables": [
+    {
+      "name": "hbl_account",
+      "schema_name": "hbl_account",
+      "entity_set_name": "hbl_accounts",
+      "primary_key": "hbl_accountid",
+      "primary_name": "hbl_account_name",
+      "fields": [
+        {
+          "name": "cr987_account_am_sales",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "cr987_account_am_salesname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 200,
+          "precision": null
+        },
+        {
+          "name": "cr987_account_am_salesyominame",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 200,
+          "precision": null
+        },
+        {
+          "name": "cr987_account_bd",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "cr987_account_bdname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 200,
+          "precision": null
+        },
+        {
+          "name": "cr987_account_bdyominame",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 200,
+          "precision": null
+        },
+        {
+          "name": "createdby",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "createdbyname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "createdbyyominame",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "createdon",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "createdonbehalfby",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "createdonbehalfbyname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "createdonbehalfbyyominame",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "hbl_accounr_nda_sign_date",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_account_action_class",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_account_action_classname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_account_annual_it_budget",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 0
+        },
+        {
+          "name": "hbl_account_basic_info_quality",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_account_bu",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_account_buname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 850,
+          "precision": null
+        },
+        {
+          "name": "hbl_account_company_relationship",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_account_create_2_first_contract",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 0
+        },
+        {
+          "name": "hbl_account_create_2_nda",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 0
+        },
+        {
+          "name": "hbl_account_customer_research_link",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 1000,
+          "precision": null
+        },
+        {
+          "name": "hbl_account_development_ratio",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_account_first_contract",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_account_fiscal_year",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 0
+        },
+        {
+          "name": "hbl_account_hb",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_account_hblab_official_visit",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 0
+        },
+        {
+          "name": "hbl_account_hbname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 850,
+          "precision": null
+        },
+        {
+          "name": "hbl_account_is_watching",
+          "attribute_type": "Boolean",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_account_is_watchingname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_account_linkedin",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 1000,
+          "precision": null
+        },
+        {
+          "name": "hbl_account_name",
+          "attribute_type": "String",
+          "required_level": "ApplicationRequired",
+          "is_valid_for_read": true,
+          "max_length": 850,
+          "precision": null
+        },
+        {
+          "name": "hbl_account_official_visit",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 0
+        },
+        {
+          "name": "hbl_account_physical_address",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 1000,
+          "precision": null
+        },
+        {
+          "name": "hbl_account_special_domain",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 4000,
+          "precision": null
+        },
+        {
+          "name": "hbl_account_tcv",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_account_total_contacts",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_account_website",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 1000,
+          "precision": null
+        },
+        {
+          "name": "hbl_account_year_found",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 0
+        },
+        {
+          "name": "hbl_accountid",
+          "attribute_type": "Uniqueidentifier",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_developmentcenters",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_developmentcentersname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "importsequencenumber",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_account_am_sales_temp",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "mc_account_bd_temp",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "mc_account_bu",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_account_buname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_account_country",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_account_countryname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_account_create_by_origin_text",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "mc_account_create_on_origin",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_account_hb",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_account_hbname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_account_industry",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_account_industryname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_account_investigated_info",
+          "attribute_type": "Memo",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 500000,
+          "precision": null
+        },
+        {
+          "name": "mc_account_list_opps_old",
+          "attribute_type": "Memo",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 500000,
+          "precision": null
+        },
+        {
+          "name": "mc_account_market",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_account_marketname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_account_plan_activity",
+          "attribute_type": "Memo",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 500000,
+          "precision": null
+        },
+        {
+          "name": "mc_account_potential",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_account_potentialname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_account_recent_it_events",
+          "attribute_type": "Memo",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 500000,
+          "precision": null
+        },
+        {
+          "name": "mc_account_revenue",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_account_revenuename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_account_size",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_account_sizename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_account_type",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_account_typename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_account_validator",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 4000,
+          "precision": null
+        },
+        {
+          "name": "modifiedby",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "modifiedbyname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "modifiedbyyominame",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "modifiedon",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "modifiedonbehalfby",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "modifiedonbehalfbyname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "modifiedonbehalfbyyominame",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "overriddencreatedon",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "ownerid",
+          "attribute_type": "Owner",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "owneridname",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "owneridtype",
+          "attribute_type": "EntityName",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "owneridyominame",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "owningbusinessunit",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "owningbusinessunitname",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "owningteam",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "owninguser",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "statecode",
+          "attribute_type": "State",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "statecodename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "statuscode",
+          "attribute_type": "Status",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "statuscodename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "timezoneruleversionnumber",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "utcconversiontimezonecode",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "versionnumber",
+          "attribute_type": "BigInt",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        }
+      ]
+    },
+    {
+      "name": "hbl_contact",
+      "schema_name": "hbl_contact",
+      "entity_set_name": "hbl_contacts",
+      "primary_key": "hbl_contactid",
+      "primary_name": "hbl_contact_name",
+      "fields": [
+        {
+          "name": "createdby",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "createdbyname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "createdbyyominame",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "createdon",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "createdonbehalfby",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "createdonbehalfbyname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "createdonbehalfbyyominame",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "hbl_contacht_last_engaged_time",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_contact_1st_mtg_time",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_contact_account",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_contact_accountname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 850,
+          "precision": null
+        },
+        {
+          "name": "hbl_contact_attachment",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "hbl_contact_birthday",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_contact_contact_info_quality",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_contact_eat_coffee_out_side",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contact_educational_content_sharing",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contact_email",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "hbl_contact_favor",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contact_investigated_info",
+          "attribute_type": "Memo",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 500000,
+          "precision": null
+        },
+        {
+          "name": "hbl_contact_last_change_objective",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_contact_linkedin",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 4000,
+          "precision": null
+        },
+        {
+          "name": "hbl_contact_name",
+          "attribute_type": "String",
+          "required_level": "ApplicationRequired",
+          "is_valid_for_read": true,
+          "max_length": 850,
+          "precision": null
+        },
+        {
+          "name": "hbl_contact_next_action_date",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_contact_personalized_interactions",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contact_phone",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "hbl_contact_ref_request",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contact_score_relationship",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_contact_social_engagement",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contact_temperature_customer",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_contact_title",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 1000,
+          "precision": null
+        },
+        {
+          "name": "hbl_contact_website",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 4000,
+          "precision": null
+        },
+        {
+          "name": "hbl_contactid",
+          "attribute_type": "Uniqueidentifier",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_heartbeatlastupdate",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "importsequencenumber",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact__potential",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact__potentialname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_action_type",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_action_typename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_annual_revenue",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_annual_revenuename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_assignee",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_assignee_temp",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_assigneename",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 200,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_assigneeyominame",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 200,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_channel",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_channelname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_create_by_origin_text",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_create_on_origin",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_department",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_domain",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_domainname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_industry",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_industryname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_interactions",
+          "attribute_type": "Memo",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 500000,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_market",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_marketname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_note_message",
+          "attribute_type": "Memo",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 1048576,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_objective",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_objectivename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_position",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_size",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_sizename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_source",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_sourcename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_summary_working_history",
+          "attribute_type": "Memo",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 500000,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_type",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_typename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_validator",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 4000,
+          "precision": null
+        },
+        {
+          "name": "modifiedby",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "modifiedbyname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "modifiedbyyominame",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "modifiedon",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "modifiedonbehalfby",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "modifiedonbehalfbyname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "modifiedonbehalfbyyominame",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "overriddencreatedon",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "ownerid",
+          "attribute_type": "Owner",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "owneridname",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "owneridtype",
+          "attribute_type": "EntityName",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "owneridyominame",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "owningbusinessunit",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "owningbusinessunitname",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "owningteam",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "owninguser",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "statecode",
+          "attribute_type": "State",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "statecodename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "statuscode",
+          "attribute_type": "Status",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "statuscodename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "timezoneruleversionnumber",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "utcconversiontimezonecode",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "versionnumber",
+          "attribute_type": "BigInt",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        }
+      ]
+    },
+    {
+      "name": "hbl_contract",
+      "schema_name": "hbl_contract",
+      "entity_set_name": "hbl_contracts",
+      "primary_key": "hbl_contractid",
+      "primary_name": "hbl_contract_name",
+      "fields": [
+        {
+          "name": "createdby",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "createdbyname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "createdbyyominame",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "createdon",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "createdonbehalfby",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "createdonbehalfbyname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "createdonbehalfbyyominame",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "hbl_contract_account",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 4000,
+          "precision": null
+        },
+        {
+          "name": "hbl_contract_action_date",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_contract_apr",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contract_aug",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contract_contract_drive",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "hbl_contract_dec",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contract_end_date",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_contract_feb",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contract_first_contract",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_contract_interactions",
+          "attribute_type": "Memo",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 500000,
+          "precision": null
+        },
+        {
+          "name": "hbl_contract_invoice_interaction",
+          "attribute_type": "Memo",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 500000,
+          "precision": null
+        },
+        {
+          "name": "hbl_contract_invoices_drive",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "hbl_contract_jan",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contract_jul",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contract_jun",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contract_mar",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contract_may",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contract_name",
+          "attribute_type": "String",
+          "required_level": "ApplicationRequired",
+          "is_valid_for_read": true,
+          "max_length": 850,
+          "precision": null
+        },
+        {
+          "name": "hbl_contract_nov",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contract_oct",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contract_opp_interaction",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 4000,
+          "precision": null
+        },
+        {
+          "name": "hbl_contract_opportunity",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_contract_opportunityname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 850,
+          "precision": null
+        },
+        {
+          "name": "hbl_contract_owner",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 4000,
+          "precision": null
+        },
+        {
+          "name": "hbl_contract_q1",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contract_q2",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contract_q3",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contract_q4",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contract_request_type",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_contract_request_typename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_contract_sep",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contract_start_date",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_contract_status",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_contract_statusname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_contract_tcv",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_contractid",
+          "attribute_type": "Uniqueidentifier",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hblab_contract_color_hex",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 4000,
+          "precision": null
+        },
+        {
+          "name": "importsequencenumber",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_acc_actual",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contact_acc_actualname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 850,
+          "precision": null
+        },
+        {
+          "name": "mc_contract_assignee",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contract_assigneename",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 200,
+          "precision": null
+        },
+        {
+          "name": "mc_contract_assigneeyominame",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 200,
+          "precision": null
+        },
+        {
+          "name": "mc_contract_contract_month",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contract_contract_monthname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contract_contract_year",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contract_contract_yearname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 850,
+          "precision": null
+        },
+        {
+          "name": "mc_contract_country",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contract_countryname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contract_create_by_origin",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "mc_contract_create_on_origin",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contract_invoiced_months",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contract_invoiced_monthsname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contract_market",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contract_marketname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contract_meeting_category",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "mc_contract_paid_months",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contract_paid_monthsname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_contract_validator",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 4000,
+          "precision": null
+        },
+        {
+          "name": "mc_contract_year",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 0
+        },
+        {
+          "name": "modifiedby",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "modifiedbyname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "modifiedbyyominame",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "modifiedon",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "modifiedonbehalfby",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "modifiedonbehalfbyname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "modifiedonbehalfbyyominame",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "overriddencreatedon",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "ownerid",
+          "attribute_type": "Owner",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "owneridname",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "owneridtype",
+          "attribute_type": "EntityName",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "owneridyominame",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "owningbusinessunit",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "owningbusinessunitname",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "owningteam",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "owninguser",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "statecode",
+          "attribute_type": "State",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "statecodename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "statuscode",
+          "attribute_type": "Status",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "statuscodename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "timezoneruleversionnumber",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "utcconversiontimezonecode",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "versionnumber",
+          "attribute_type": "BigInt",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        }
+      ]
+    },
+    {
+      "name": "hbl_opportunities",
+      "schema_name": "hbl_opportunities",
+      "entity_set_name": "hbl_opportunitieses",
+      "primary_key": "hbl_opportunitiesid",
+      "primary_name": "hbl_opportunities_name",
+      "fields": [
+        {
+          "name": "createdby",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "createdbyname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "createdbyyominame",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "createdon",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "createdonbehalfby",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "createdonbehalfbyname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "createdonbehalfbyyominame",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportumities_win_factor",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportumities_win_factorname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_account",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_accountname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 850,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_action_class",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_action_classname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_age_opportunity",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_opportunities_bant_authority",
+          "attribute_type": "Memo",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 500000,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_bant_budget",
+          "attribute_type": "Memo",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 500000,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_bant_lod_score",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_opportunities_bant_need",
+          "attribute_type": "Memo",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 500000,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_bant_time",
+          "attribute_type": "Memo",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 500000,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_deadline",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_delivery",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_deliveryname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_distributed_value",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_opportunities_end_time_est",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_estimated_value",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 0
+        },
+        {
+          "name": "hbl_opportunities_failed_factor",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_failed_factorname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_first_contract",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_interactions",
+          "attribute_type": "Memo",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 500000,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_name",
+          "attribute_type": "String",
+          "required_level": "ApplicationRequired",
+          "is_valid_for_read": true,
+          "max_length": 850,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_request_type",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_request_typename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_start_time_est",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_status",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_statusname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunities_weighted_rev",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 0
+        },
+        {
+          "name": "hbl_opportunities_win_rate",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 2
+        },
+        {
+          "name": "hbl_opportunitiesid",
+          "attribute_type": "Uniqueidentifier",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "hbl_opportunitiest_next_time_action",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "importsequencenumber",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_opp__acc_actual",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_opp__acc_actualname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 850,
+          "precision": null
+        },
+        {
+          "name": "mc_opp_market",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_opp_marketname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_opportunities_account_country",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_opportunities_account_countryname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_opportunities_account_type",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_opportunities_account_typename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_opportunities_certainty",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_opportunities_certaintyname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_opportunities_contact_create_on_origin",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_opportunities_create_by_origin",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "mc_opportunities_opp_id",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 4000,
+          "precision": null
+        },
+        {
+          "name": "mc_opportunities_owner",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_opportunities_owner_temp",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "mc_opportunities_ownername",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 200,
+          "precision": null
+        },
+        {
+          "name": "mc_opportunities_owneryominame",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 200,
+          "precision": null
+        },
+        {
+          "name": "mc_opportunities_presales",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "mc_opportunities_validator",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 4000,
+          "precision": null
+        },
+        {
+          "name": "modifiedby",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "modifiedbyname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "modifiedbyyominame",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "modifiedon",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "modifiedonbehalfby",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "modifiedonbehalfbyname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "modifiedonbehalfbyyominame",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "overriddencreatedon",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "ownerid",
+          "attribute_type": "Owner",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "owneridname",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "owneridtype",
+          "attribute_type": "EntityName",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "owneridyominame",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "owningbusinessunit",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "owningbusinessunitname",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "owningteam",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "owninguser",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "statecode",
+          "attribute_type": "State",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "statecodename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "statuscode",
+          "attribute_type": "Status",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "statuscodename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "timezoneruleversionnumber",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "utcconversiontimezonecode",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "versionnumber",
+          "attribute_type": "BigInt",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        }
+      ]
+    },
+    {
+      "name": "systemuser",
+      "schema_name": "SystemUser",
+      "entity_set_name": "systemusers",
+      "primary_key": "systemuserid",
+      "primary_name": "fullname",
+      "fields": [
+        {
+          "name": "accessmode",
+          "attribute_type": "Picklist",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "accessmodename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "activedirectoryguid",
+          "attribute_type": "Uniqueidentifier",
+          "required_level": "None",
+          "is_valid_for_read": false,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "address1_addressid",
+          "attribute_type": "Uniqueidentifier",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "address1_addresstypecode",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "address1_addresstypecodename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "address1_city",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 128,
+          "precision": null
+        },
+        {
+          "name": "address1_composite",
+          "attribute_type": "Memo",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 1000,
+          "precision": null
+        },
+        {
+          "name": "address1_country",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 128,
+          "precision": null
+        },
+        {
+          "name": "address1_county",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 128,
+          "precision": null
+        },
+        {
+          "name": "address1_fax",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 64,
+          "precision": null
+        },
+        {
+          "name": "address1_latitude",
+          "attribute_type": "Double",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 5
+        },
+        {
+          "name": "address1_line1",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 1024,
+          "precision": null
+        },
+        {
+          "name": "address1_line2",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 1024,
+          "precision": null
+        },
+        {
+          "name": "address1_line3",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 1024,
+          "precision": null
+        },
+        {
+          "name": "address1_longitude",
+          "attribute_type": "Double",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 5
+        },
+        {
+          "name": "address1_name",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "address1_postalcode",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 40,
+          "precision": null
+        },
+        {
+          "name": "address1_postofficebox",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 40,
+          "precision": null
+        },
+        {
+          "name": "address1_shippingmethodcode",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "address1_shippingmethodcodename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "address1_stateorprovince",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 128,
+          "precision": null
+        },
+        {
+          "name": "address1_telephone1",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 64,
+          "precision": null
+        },
+        {
+          "name": "address1_telephone2",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 50,
+          "precision": null
+        },
+        {
+          "name": "address1_telephone3",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 50,
+          "precision": null
+        },
+        {
+          "name": "address1_upszone",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 4,
+          "precision": null
+        },
+        {
+          "name": "address1_utcoffset",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "address2_addressid",
+          "attribute_type": "Uniqueidentifier",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "address2_addresstypecode",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "address2_addresstypecodename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "address2_city",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 128,
+          "precision": null
+        },
+        {
+          "name": "address2_composite",
+          "attribute_type": "Memo",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 1000,
+          "precision": null
+        },
+        {
+          "name": "address2_country",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 128,
+          "precision": null
+        },
+        {
+          "name": "address2_county",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 128,
+          "precision": null
+        },
+        {
+          "name": "address2_fax",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 50,
+          "precision": null
+        },
+        {
+          "name": "address2_latitude",
+          "attribute_type": "Double",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 5
+        },
+        {
+          "name": "address2_line1",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 1024,
+          "precision": null
+        },
+        {
+          "name": "address2_line2",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 1024,
+          "precision": null
+        },
+        {
+          "name": "address2_line3",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 1024,
+          "precision": null
+        },
+        {
+          "name": "address2_longitude",
+          "attribute_type": "Double",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 5
+        },
+        {
+          "name": "address2_name",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "address2_postalcode",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 40,
+          "precision": null
+        },
+        {
+          "name": "address2_postofficebox",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 40,
+          "precision": null
+        },
+        {
+          "name": "address2_shippingmethodcode",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "address2_shippingmethodcodename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "address2_stateorprovince",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 128,
+          "precision": null
+        },
+        {
+          "name": "address2_telephone1",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 50,
+          "precision": null
+        },
+        {
+          "name": "address2_telephone2",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 50,
+          "precision": null
+        },
+        {
+          "name": "address2_telephone3",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 50,
+          "precision": null
+        },
+        {
+          "name": "address2_upszone",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 4,
+          "precision": null
+        },
+        {
+          "name": "address2_utcoffset",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "applicationid",
+          "attribute_type": "Uniqueidentifier",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "applicationiduri",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 1024,
+          "precision": null
+        },
+        {
+          "name": "azureactivedirectoryobjectid",
+          "attribute_type": "Uniqueidentifier",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "azuredeletedon",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "azurestate",
+          "attribute_type": "Picklist",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "azurestatename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "businessunitid",
+          "attribute_type": "Lookup",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "businessunitidname",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "calendarid",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "caltype",
+          "attribute_type": "Picklist",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "caltypename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "createdby",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "createdbyname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "createdbyyominame",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "createdon",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "createdonbehalfby",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "createdonbehalfbyname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "createdonbehalfbyyominame",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "defaultfilterspopulated",
+          "attribute_type": "Boolean",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "defaultmailbox",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "defaultmailboxname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "defaultodbfoldername",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 200,
+          "precision": null
+        },
+        {
+          "name": "deletedstate",
+          "attribute_type": "Picklist",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "deletedstatename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "disabledreason",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 500,
+          "precision": null
+        },
+        {
+          "name": "displayinserviceviews",
+          "attribute_type": "Boolean",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "displayinserviceviewsname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "domainname",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 1024,
+          "precision": null
+        },
+        {
+          "name": "emailrouteraccessapproval",
+          "attribute_type": "Picklist",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "emailrouteraccessapprovalname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "employeeid",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "entityimage",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "entityimage_timestamp",
+          "attribute_type": "BigInt",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "entityimage_url",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 200,
+          "precision": null
+        },
+        {
+          "name": "entityimageid",
+          "attribute_type": "Uniqueidentifier",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "exchangerate",
+          "attribute_type": "Decimal",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": 12
+        },
+        {
+          "name": "firstname",
+          "attribute_type": "String",
+          "required_level": "ApplicationRequired",
+          "is_valid_for_read": true,
+          "max_length": 256,
+          "precision": null
+        },
+        {
+          "name": "fullname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 200,
+          "precision": null
+        },
+        {
+          "name": "governmentid",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "homephone",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 50,
+          "precision": null
+        },
+        {
+          "name": "identityid",
+          "attribute_type": "Integer",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "importsequencenumber",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "incomingemaildeliverymethod",
+          "attribute_type": "Picklist",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "incomingemaildeliverymethodname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "internalemailaddress",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "invitestatuscode",
+          "attribute_type": "Picklist",
+          "required_level": "ApplicationRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "invitestatuscodename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "isactivedirectoryuser",
+          "attribute_type": "Boolean",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": false,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "isallowedbyipfirewall",
+          "attribute_type": "Boolean",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "isallowedbyipfirewallname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "isdisabled",
+          "attribute_type": "Boolean",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "isdisabledname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "isemailaddressapprovedbyo365admin",
+          "attribute_type": "Boolean",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "isintegrationuser",
+          "attribute_type": "Boolean",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "isintegrationusername",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "islicensed",
+          "attribute_type": "Boolean",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "islicensedname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "issyncwithdirectory",
+          "attribute_type": "Boolean",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "jobtitle",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "lastname",
+          "attribute_type": "String",
+          "required_level": "ApplicationRequired",
+          "is_valid_for_read": true,
+          "max_length": 256,
+          "precision": null
+        },
+        {
+          "name": "latestupdatetime",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": false,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_user_market",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mc_user_marketname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "middlename",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 50,
+          "precision": null
+        },
+        {
+          "name": "mobilealertemail",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "mobileofflineprofileid",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "mobileofflineprofileidname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "mobilephone",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 64,
+          "precision": null
+        },
+        {
+          "name": "modifiedby",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "modifiedbyname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "modifiedbyyominame",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "modifiedon",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "modifiedonbehalfby",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "modifiedonbehalfbyname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "modifiedonbehalfbyyominame",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "nickname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 50,
+          "precision": null
+        },
+        {
+          "name": "organizationid",
+          "attribute_type": "Uniqueidentifier",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "organizationidname",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "outgoingemaildeliverymethod",
+          "attribute_type": "Picklist",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "outgoingemaildeliverymethodname",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "overriddencreatedon",
+          "attribute_type": "DateTime",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "parentsystemuserid",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "parentsystemuseridname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "parentsystemuseridyominame",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "passporthi",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "passportlo",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "personalemailaddress",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "photourl",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 200,
+          "precision": null
+        },
+        {
+          "name": "positionid",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "positionidname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "preferredaddresscode",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "preferredaddresscodename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "preferredemailcode",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "preferredemailcodename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "preferredphonecode",
+          "attribute_type": "Picklist",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "preferredphonecodename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "processid",
+          "attribute_type": "Uniqueidentifier",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "queueid",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "queueidname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 400,
+          "precision": null
+        },
+        {
+          "name": "salutation",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 20,
+          "precision": null
+        },
+        {
+          "name": "setupuser",
+          "attribute_type": "Boolean",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "setupusername",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "sharepointemailaddress",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 1024,
+          "precision": null
+        },
+        {
+          "name": "skills",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "stageid",
+          "attribute_type": "Uniqueidentifier",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "systemmanagedusertype",
+          "attribute_type": "Picklist",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "systemmanagedusertypename",
+          "attribute_type": "Virtual",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "systemuserid",
+          "attribute_type": "Uniqueidentifier",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "territoryid",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "territoryidname",
+          "attribute_type": "String",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "timezoneruleversionnumber",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "title",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 128,
+          "precision": null
+        },
+        {
+          "name": "transactioncurrencyid",
+          "attribute_type": "Lookup",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "transactioncurrencyidname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "traversedpath",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 1250,
+          "precision": null
+        },
+        {
+          "name": "userlicensetype",
+          "attribute_type": "Integer",
+          "required_level": "SystemRequired",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "userpuid",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 100,
+          "precision": null
+        },
+        {
+          "name": "utcconversiontimezonecode",
+          "attribute_type": "Integer",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "versionnumber",
+          "attribute_type": "BigInt",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": null,
+          "precision": null
+        },
+        {
+          "name": "windowsliveid",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 1024,
+          "precision": null
+        },
+        {
+          "name": "yammeremailaddress",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 200,
+          "precision": null
+        },
+        {
+          "name": "yammeruserid",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 128,
+          "precision": null
+        },
+        {
+          "name": "yomifirstname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 64,
+          "precision": null
+        },
+        {
+          "name": "yomifullname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 200,
+          "precision": null
+        },
+        {
+          "name": "yomilastname",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 64,
+          "precision": null
+        },
+        {
+          "name": "yomimiddlename",
+          "attribute_type": "String",
+          "required_level": "None",
+          "is_valid_for_read": true,
+          "max_length": 50,
+          "precision": null
+        }
+      ]
+    }
+  ]
+}

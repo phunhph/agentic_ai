@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-04-28T06:45:14.198707+00:00",
+  "rounds": 1,
+  "scenario_count": 28,
+  "generated_scenarios": 0,
+  "space_message_scenarios": 16,
+  "space_message_queries": 48,
+  "mined_failure_queries": 0,
+  "query_runs": 83,
+  "variant_factor": 1,
+  "decision_distribution": {
+    "auto_execute": 6,
+    "ask_clarify": 0
+  },
+  "difficulty_distribution": {
+    "easy": 3,
+    "normal": 12,
+    "hard": 68
+  },
+  "trusted_runs": 6,
+  "learning": {
+    "appended": 0,
+    "skipped_or_blocked": 6
+  },
+  "firewall_decisions": {
+    "allow": 6,
+    "quarantine": 0,
+    "reject": 0
+  },
+  "log_file": "D:\\agentic\\agentic_system\\storage\\v2\\training\\auto_train_logs\\auto_train_runtime_20260428_063220.jsonl"
+}

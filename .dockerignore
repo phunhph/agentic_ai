@@ -1,0 +1,12 @@
+.git
+.github
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.log
+node_modules
+assets
+scratch
+storage/v2/training/archived_runs

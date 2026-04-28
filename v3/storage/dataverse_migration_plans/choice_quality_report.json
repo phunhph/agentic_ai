@@ -1,0 +1,560 @@
+{
+  "summary": {
+    "tables_scanned": 5,
+    "choice_fields_total": 65,
+    "multi_choice_fields": 0,
+    "fields_missing_label_coverage": 0
+  },
+  "tables": [
+    {
+      "table": "hbl_account",
+      "rows_in_staging": 500,
+      "choice_fields": [
+        {
+          "field": "hbl_account_action_class",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 192,
+          "records_with_label": 192,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "hbl_account_is_watching",
+          "attribute_type": "Boolean",
+          "is_multi": false,
+          "records_with_value": 497,
+          "records_with_label": 497,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_account_bu",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 0,
+          "records_with_label": 0,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_account_country",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 2,
+          "records_with_label": 2,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_account_hb",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 0,
+          "records_with_label": 0,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_account_industry",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 11,
+          "records_with_label": 11,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_account_market",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 500,
+          "records_with_label": 500,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_account_potential",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 0,
+          "records_with_label": 0,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_account_revenue",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 11,
+          "records_with_label": 11,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_account_size",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 0,
+          "records_with_label": 0,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_account_type",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 1,
+          "records_with_label": 1,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "statecode",
+          "attribute_type": "State",
+          "is_multi": false,
+          "records_with_value": 500,
+          "records_with_label": 500,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "statuscode",
+          "attribute_type": "Status",
+          "is_multi": false,
+          "records_with_value": 500,
+          "records_with_label": 500,
+          "label_coverage": 1.0
+        }
+      ]
+    },
+    {
+      "table": "hbl_contact",
+      "rows_in_staging": 500,
+      "choice_fields": [
+        {
+          "field": "mc_contact__potential",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 0,
+          "records_with_label": 0,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_contact_annual_revenue",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 11,
+          "records_with_label": 11,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_contact_domain",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 11,
+          "records_with_label": 11,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_contact_industry",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 11,
+          "records_with_label": 11,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_contact_market",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 471,
+          "records_with_label": 471,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_contact_size",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 0,
+          "records_with_label": 0,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_contact_source",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 9,
+          "records_with_label": 9,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_contact_type",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 0,
+          "records_with_label": 0,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "statecode",
+          "attribute_type": "State",
+          "is_multi": false,
+          "records_with_value": 500,
+          "records_with_label": 500,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "statuscode",
+          "attribute_type": "Status",
+          "is_multi": false,
+          "records_with_value": 500,
+          "records_with_label": 500,
+          "label_coverage": 1.0
+        }
+      ]
+    },
+    {
+      "table": "hbl_contract",
+      "rows_in_staging": 73,
+      "choice_fields": [
+        {
+          "field": "hbl_contract_request_type",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 54,
+          "records_with_label": 54,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "hbl_contract_status",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 50,
+          "records_with_label": 50,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_contract_country",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 4,
+          "records_with_label": 4,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_contract_market",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 73,
+          "records_with_label": 73,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "statecode",
+          "attribute_type": "State",
+          "is_multi": false,
+          "records_with_value": 73,
+          "records_with_label": 73,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "statuscode",
+          "attribute_type": "Status",
+          "is_multi": false,
+          "records_with_value": 73,
+          "records_with_label": 73,
+          "label_coverage": 1.0
+        }
+      ]
+    },
+    {
+      "table": "hbl_opportunities",
+      "rows_in_staging": 65,
+      "choice_fields": [
+        {
+          "field": "hbl_opportunities_action_class",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 53,
+          "records_with_label": 53,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "hbl_opportunities_request_type",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 53,
+          "records_with_label": 53,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "hbl_opportunities_status",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 54,
+          "records_with_label": 54,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_opp_market",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 65,
+          "records_with_label": 65,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_opportunities_account_country",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 4,
+          "records_with_label": 4,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_opportunities_account_type",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 0,
+          "records_with_label": 0,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_opportunities_certainty",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 32,
+          "records_with_label": 32,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "statecode",
+          "attribute_type": "State",
+          "is_multi": false,
+          "records_with_value": 65,
+          "records_with_label": 65,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "statuscode",
+          "attribute_type": "Status",
+          "is_multi": false,
+          "records_with_value": 65,
+          "records_with_label": 65,
+          "label_coverage": 1.0
+        }
+      ]
+    },
+    {
+      "table": "systemuser",
+      "rows_in_staging": 218,
+      "choice_fields": [
+        {
+          "field": "accessmode",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 218,
+          "records_with_label": 218,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "address1_addresstypecode",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 213,
+          "records_with_label": 213,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "address1_shippingmethodcode",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 213,
+          "records_with_label": 213,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "address2_addresstypecode",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 213,
+          "records_with_label": 213,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "address2_shippingmethodcode",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 213,
+          "records_with_label": 213,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "azurestate",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 218,
+          "records_with_label": 218,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "caltype",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 218,
+          "records_with_label": 218,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "defaultfilterspopulated",
+          "attribute_type": "Boolean",
+          "is_multi": false,
+          "records_with_value": 218,
+          "records_with_label": 218,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "deletedstate",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 218,
+          "records_with_label": 218,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "displayinserviceviews",
+          "attribute_type": "Boolean",
+          "is_multi": false,
+          "records_with_value": 213,
+          "records_with_label": 213,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "emailrouteraccessapproval",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 218,
+          "records_with_label": 218,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "incomingemaildeliverymethod",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 218,
+          "records_with_label": 218,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "invitestatuscode",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 218,
+          "records_with_label": 218,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "isactivedirectoryuser",
+          "attribute_type": "Boolean",
+          "is_multi": false,
+          "records_with_value": 0,
+          "records_with_label": 0,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "isallowedbyipfirewall",
+          "attribute_type": "Boolean",
+          "is_multi": false,
+          "records_with_value": 0,
+          "records_with_label": 0,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "isdisabled",
+          "attribute_type": "Boolean",
+          "is_multi": false,
+          "records_with_value": 218,
+          "records_with_label": 218,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "isemailaddressapprovedbyo365admin",
+          "attribute_type": "Boolean",
+          "is_multi": false,
+          "records_with_value": 218,
+          "records_with_label": 218,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "isintegrationuser",
+          "attribute_type": "Boolean",
+          "is_multi": false,
+          "records_with_value": 218,
+          "records_with_label": 218,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "islicensed",
+          "attribute_type": "Boolean",
+          "is_multi": false,
+          "records_with_value": 218,
+          "records_with_label": 218,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "issyncwithdirectory",
+          "attribute_type": "Boolean",
+          "is_multi": false,
+          "records_with_value": 218,
+          "records_with_label": 218,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "mc_user_market",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 2,
+          "records_with_label": 2,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "outgoingemaildeliverymethod",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 218,
+          "records_with_label": 218,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "preferredaddresscode",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 213,
+          "records_with_label": 213,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "preferredemailcode",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 213,
+          "records_with_label": 213,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "preferredphonecode",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 213,
+          "records_with_label": 213,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "setupuser",
+          "attribute_type": "Boolean",
+          "is_multi": false,
+          "records_with_value": 218,
+          "records_with_label": 218,
+          "label_coverage": 1.0
+        },
+        {
+          "field": "systemmanagedusertype",
+          "attribute_type": "Picklist",
+          "is_multi": false,
+          "records_with_value": 218,
+          "records_with_label": 218,
+          "label_coverage": 1.0
+        }
+      ]
+    }
+  ]
+}

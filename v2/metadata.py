@@ -31,6 +31,35 @@ class MetadataProvider:
                 am[clean[:-1]] = table
             else:
                 am[clean + "s"] = table
+
+        # Add human-friendly aliases for key system tables to match PRD/UX language.
+        # NOTE: keep aliases lowercase; parser performs lowercase matching.
+        if "systemuser" in self.metadata.tables:
+            sys = "systemuser"
+            for alias in [
+                "user",
+                "users",
+                "system user",
+                "system users",
+                "sales",
+                "sale",
+                "sales rep",
+                "sales reps",
+                "presales",
+                "nhan vien",
+                "nhân viên",
+                "nhan vien kinh doanh",
+                "nhân viên kinh doanh",
+                "nhan su",
+                "nhân sự",
+            ]:
+                am[str(alias).strip().lower()] = sys
+
+        # Common shorthand/typos from real chat logs (space_messages.json)
+        # Keep minimal and domain-generic.
+        if "hbl_opportunities" in self.metadata.tables:
+            for alias in ["opps", "ops", "op", "opportunity", "opportunities", "cơ hội", "co hoi"]:
+                am[str(alias).strip().lower()] = "hbl_opportunities"
         return am
 
     def get_table_by_alias(self, alias: str) -> str | None:
@@ -56,18 +85,43 @@ class MetadataProvider:
         all_tables = self.get_all_tables()
         return all_tables[0] if all_tables else "hbl_account"
 
+    def get_identity_priority_fields(self, table_name: str) -> list[str]:
+        fields = self.get_fields(table_name)
+        if not fields:
+            return []
+        if table_name == "systemuser":
+            preferred = [
+                "fullname",
+                "domainname",
+                "internalemailaddress",
+                "firstname",
+                "lastname",
+                "nickname",
+            ]
+            return [f for f in preferred if f in fields]
+        direct = f"{table_name}_name"
+        preferred: list[str] = []
+        if direct in fields:
+            preferred.append(direct)
+        preferred.extend(
+            f
+            for f in ["name", "fullname", "full_name", "title"]
+            if f in fields and f not in preferred
+        )
+        preferred.extend(
+            sorted(
+                f for f in fields if f.endswith("_name") and f not in preferred
+            )
+        )
+        return preferred
+
     def resolve_identity_field(self, table_name: str) -> str | None:
         fields = self.get_fields(table_name)
         if not fields:
             return None
-        direct = f"{table_name}_name"
-        if direct in fields:
-            return direct
-        if "name" in fields:
-            return "name"
-        name_like = sorted([f for f in fields if f.endswith("_name")])
-        if name_like:
-            return name_like[0]
+        prioritized = self.get_identity_priority_fields(table_name)
+        if prioritized:
+            return prioritized[0]
         label_like = sorted([f for f in fields if "label" in f or "title" in f])
         if label_like:
             return label_like[0]
@@ -81,15 +135,30 @@ class MetadataProvider:
         if not col:
             return self.resolve_identity_field(table_name)
         if col in fields:
+            # Prefer label companion for choice-like fields so natural-language
+            # filters (e.g. "market Japan") compare against readable labels.
+            if not col.endswith("_label") and f"{col}_label" in fields:
+                return f"{col}_label"
             return col
         if col.lower() == "name":
             return self.resolve_identity_field(table_name)
         candidates = [f for f in fields if f.endswith(f"_{col}")]
         if len(candidates) == 1:
-            return candidates[0]
+            pick = candidates[0]
+            if not pick.endswith("_label") and f"{pick}_label" in fields:
+                return f"{pick}_label"
+            return pick
         contains = [f for f in fields if col in f]
-        if len(contains) == 1:
-            return contains[0]
+        if contains:
+            # Ambiguous case: prefer *_label field first.
+            label_contains = [f for f in contains if f.endswith("_label")]
+            if len(label_contains) == 1:
+                return label_contains[0]
+            if len(contains) == 1:
+                pick = contains[0]
+                if not pick.endswith("_label") and f"{pick}_label" in fields:
+                    return f"{pick}_label"
+                return pick
         return None
 
     def resolve_cross_table_identity(self, root_table: str, raw_col: str) -> tuple[str, str] | None:

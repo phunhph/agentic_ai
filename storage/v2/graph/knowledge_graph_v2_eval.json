@@ -1,7 +1,7 @@
 {
-  "version": "v2-graph-20260424091623",
-  "node_count": 17,
-  "edge_count": 35,
+  "version": "v2-graph-20260428075735",
+  "node_count": 10,
+  "edge_count": 23,
   "coverage": 1.0,
   "structure_score": 1.0,
   "relation_score": 1.0,
