@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Assistant V3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+    <div class="max-w-6xl mx-auto p-3 sm:p-6 space-y-4">
+        <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-xl sm:text-2xl font-bold">Agentic Assistant <span class="text-blue-500">V3</span></h1>
+                <p class="text-slate-400 text-xs sm:text-sm">Hệ thống Multi-Agent nâng cao, hiểu ngữ cảnh và tự phản biện.</p>
+            </div>
+            <div class="flex gap-2">
+                <a href="/v3/trace" class="text-xs sm:text-sm px-3 py-2 rounded bg-blue-900/30 text-blue-300 hover:bg-blue-900/50 border border-blue-700/50">V3 Trace Console</a>
+                <a href="/v2/user" class="text-xs sm:text-sm px-3 py-2 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700">Back to V2</a>
+            </div>
+        </header>
+
+        <section class="bg-slate-900 border border-slate-800 rounded-xl p-3 sm:p-4 space-y-3">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="md:col-span-3">
+                    <label for="goalInput" class="text-xs text-slate-300 block mb-1">Bạn cần hệ thống làm gì?</label>
+                    <textarea id="goalInput" class="w-full h-24 bg-slate-950 border border-slate-800 rounded p-3 text-sm focus:border-blue-500 outline-none transition-colors" placeholder="Ví dụ: Tìm các account ở Hà Nội. Thế còn HCM thì sao?"></textarea>
+                </div>
+                <div class="flex flex-col justify-end space-y-2">
+                    <button id="askBtn" class="w-full px-3 py-3 text-sm font-semibold rounded bg-blue-700 hover:bg-blue-600 shadow-lg shadow-blue-900/20 transition-all">Gửi yêu cầu (V3)</button>
+                    <button id="clearBtn" class="w-full px-3 py-2 text-sm rounded bg-slate-800 hover:bg-slate-700 border border-slate-700">Xóa màn hình</button>
+                </div>
+            </div>
+            <div class="flex items-center justify-between">
+                <p id="statusMsg" class="text-xs text-slate-400 font-mono">Sẵn sàng.</p>
+                <div id="latencyLabel" class="text-[10px] text-slate-500 hidden">Latency: 0ms</div>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div class="lg:col-span-2 space-y-4">
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl shadow-black/20">
+                    <h2 class="text-xs uppercase tracking-[0.2em] font-bold text-blue-500 mb-6 flex items-center gap-3">
+                        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                        AI ASSISTANT RESPONSE
+                    </h2>
+                    <div id="answerText" class="text-base leading-relaxed whitespace-pre-wrap text-slate-100 min-h-[100px] font-sans">Chưa có kết quả.</div>
+                </div>
+
+                <!-- Thinking Process (V3 specific) - Collapsible -->
+                <details id="thinkingBox" class="group bg-slate-900/30 border border-slate-800/50 rounded-xl overflow-hidden">
+                    <summary class="p-3 text-[10px] uppercase tracking-widest text-slate-500 cursor-pointer hover:bg-slate-800/50 transition-colors list-none flex justify-between items-center">
+                        <span>Click để xem quá trình suy luận (Thinking)</span>
+                        <span class="group-open:rotate-180 transition-transform">▼</span>
+                    </summary>
+                    <div id="thinkingContent" class="p-4 text-[11px] text-slate-400 font-mono space-y-2 border-t border-slate-800/50">
+                        <!-- Filled by JS -->
+                    </div>
+                </details>
+            </div>
+
+            <div class="space-y-4">
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3">
+                    <h2 class="text-sm font-semibold">Thông tin phiên chạy</h2>
+                    <div id="metaBox" class="text-xs text-slate-300 space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Session ID:</span>
+                            <span id="sessionVal" class="font-mono text-[10px] text-blue-400">---</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Resolved Query:</span>
+                            <span id="resolvedVal" class="text-emerald-400 text-right italic">---</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Intent:</span>
+                            <span id="intentVal" class="uppercase font-bold">---</span>
+                        </div>
+                    </div>
+                </div>
+
+                <details class="group bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+                    <summary class="p-4 text-sm font-semibold cursor-pointer hover:bg-slate-800 transition-colors list-none flex justify-between items-center">
+                        <h2>Dữ liệu thô (JSON)</h2>
+                        <span class="group-open:rotate-180 transition-transform">▼</span>
+                    </summary>
+                    <div id="rawDataScroll" class="max-h-96 overflow-y-auto text-[10px] font-mono text-slate-500 bg-black/40 p-4 border-t border-slate-800">
+                        Chưa có dữ liệu.
+                    </div>
+                </details>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const askBtn = document.getElementById('askBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const goalInput = document.getElementById('goalInput');
+        const statusMsg = document.getElementById('statusMsg');
+        const answerText = document.getElementById('answerText');
+        const thinkingBox = document.getElementById('thinkingBox');
+        const thinkingContent = document.getElementById('thinkingContent');
+        const metaBox = document.getElementById('metaBox');
+        const latencyLabel = document.getElementById('latencyLabel');
+        const sessionVal = document.getElementById('sessionVal');
+        const resolvedVal = document.getElementById('resolvedVal');
+        const intentVal = document.getElementById('intentVal');
+        const rawDataScroll = document.getElementById('rawDataScroll');
+
+        let sessionId = (() => {
+            const key = 'v3_user_session_id';
+            const old = sessionStorage.getItem(key);
+            if (old && old.trim()) return old;
+            const sid = `v3-user-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+            sessionStorage.setItem(key, sid);
+            return sid;
+        })();
+
+        sessionVal.textContent = sessionId;
+
+        function setLoading(loading) {
+            askBtn.disabled = loading;
+            askBtn.textContent = loading ? 'V3 đang suy nghĩ...' : 'Gửi yêu cầu (V3)';
+            if (loading) {
+                thinkingBox.classList.remove('hidden');
+                thinkingContent.innerHTML = '<div class="animate-pulse">Đang kết nối Ollama...</div>';
+            }
+        }
+
+        function clearOutputs() {
+            answerText.textContent = 'Chưa có kết quả.';
+            thinkingBox.classList.add('hidden');
+            thinkingContent.innerHTML = '';
+            statusMsg.textContent = 'Đã xóa màn hình.';
+            latencyLabel.classList.add('hidden');
+            resolvedVal.textContent = '---';
+            intentVal.textContent = '---';
+            rawDataScroll.textContent = 'Chưa có dữ liệu.';
+        }
+
+        askBtn.addEventListener('click', async () => {
+            const goal = goalInput.value.trim();
+            if (!goal) {
+                statusMsg.textContent = 'Vui lòng nhập yêu cầu.';
+                return;
+            }
+            setLoading(true);
+            statusMsg.textContent = 'Multi-Agent đang làm việc...';
+            
+            try {
+                const form = new FormData();
+                form.append('goal', goal);
+                form.append('role', 'DEFAULT');
+                form.append('session_id', sessionId);
+
+                const res = await fetch('/api/v3/run', { method: 'POST', body: form });
+                const data = await res.json();
+                
+                if (!res.ok) throw new Error(data?.detail || 'V3 Run failed');
+                
+                const result = data?.result || {};
+                const reasoning = result.reasoning || {};
+                
+                // Render Thinking Process
+                thinkingContent.innerHTML = `
+                    <div class="border-l-2 border-blue-500 pl-2 mb-2">
+                        <div class="text-blue-400 font-bold">[Stage 1: Context Resolved]</div>
+                        <div>${result.resolved_query}</div>
+                    </div>
+                    <div class="border-l-2 border-purple-500 pl-2 mb-2">
+                        <div class="text-purple-400 font-bold">[Stage 2: Thought Process]</div>
+                        <div>${reasoning.thought_process || 'N/A'}</div>
+                    </div>
+                    <div class="border-l-2 border-emerald-500 pl-2">
+                        <div class="text-emerald-400 font-bold">[Stage 3: Reflection]</div>
+                        <div>${reasoning.reflection || 'N/A'}</div>
+                    </div>
+                `;
+
+                answerText.textContent = result.assistant_response || 'Đã xử lý xong.';
+                resolvedVal.textContent = result.resolved_query;
+                intentVal.textContent = reasoning.intent || 'retrieve';
+                
+                latencyLabel.textContent = `Latency: ${result.latency_ms}ms`;
+                latencyLabel.classList.remove('hidden');
+                
+                rawDataScroll.textContent = JSON.stringify(result.execution_result, null, 2);
+                statusMsg.textContent = 'V3 Hoàn tất.';
+                
+            } catch (err) {
+                statusMsg.textContent = `Lỗi: ${String(err?.message || err)}`;
+                thinkingContent.innerHTML = `<div class="text-red-400">Lỗi hệ thống: ${err.message}</div>`;
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        clearBtn.addEventListener('click', clearOutputs);
+        sessionVal.textContent = sessionId;
+    </script>
+</body>
+</html>

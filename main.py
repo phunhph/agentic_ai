@@ -17,8 +17,10 @@ from v2.plan import compile_execution_plan
 from v2.execute import validate_execution_plan
 from v2.lifecycle import LIFECYCLE_STORE
 from v2.memory import clear_all_session_contexts, create_session_context, delete_session_context, list_session_contexts
+from v3.service import V3Service
 
 app = FastAPI()
+v3_service = V3Service()
 templates = Jinja2Templates(directory="web/templates")
 EVENT_ACK_SLA_MS = get_env_int("EVENT_ACK_SLA_MS", 1500)
 
@@ -55,6 +57,24 @@ async def v2_console(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="v2_console.html",
+        context={"request": request},
+    )
+
+
+@app.get("/v3/user", response_class=HTMLResponse)
+async def v3_user(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="v3_user.html",
+        context={"request": request},
+    )
+
+
+@app.get("/v3/trace", response_class=HTMLResponse)
+async def v3_trace(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="v3_console.html",
         context={"request": request},
     )
 
@@ -238,6 +258,19 @@ async def run_v2(
 ):
     try:
         result = run_v2_pipeline(goal, role=role, session_id=session_id, lang=lang)
+        return {"ok": True, "result": result}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/v3/run")
+async def run_v3(
+    goal: str = Form(...),
+    role: str = Form("DEFAULT"),
+    session_id: str = Form(""),
+):
+    try:
+        result = v3_service.run_pipeline(goal, session_id=session_id, role=role)
         return {"ok": True, "result": result}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

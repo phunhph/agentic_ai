@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V3 Trace Console</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+    <div class="max-w-7xl mx-auto p-4 space-y-4">
+        <header class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold">V3 Multi-Agent <span class="text-blue-500">Trace Console</span></h1>
+                <p class="text-slate-400 text-sm">Giám sát quá trình suy luận, tự phản biện và thực thi của V3.</p>
+            </div>
+            <a href="/v3/user" class="px-4 py-2 bg-slate-800 rounded hover:bg-slate-700 text-sm">Chế độ người dùng</a>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            <!-- Sidebar: Input & History -->
+            <div class="lg:col-span-1 space-y-4">
+                <section class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3">
+                    <h2 class="text-sm font-semibold border-b border-slate-800 pb-2">Input</h2>
+                    <textarea id="goalInput" class="w-full h-32 bg-slate-950 border border-slate-800 rounded p-2 text-xs font-mono" placeholder="Nhập yêu cầu tại đây..."></textarea>
+                    <button id="runBtn" class="w-full py-2 bg-blue-700 hover:bg-blue-600 rounded text-sm font-bold">Run V3 Pipeline</button>
+                </section>
+
+                <section class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-2">
+                    <h2 class="text-sm font-semibold border-b border-slate-800 pb-2">Session</h2>
+                    <select id="sessionSelect" class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-[10px]"></select>
+                    <div class="text-[10px] text-slate-500 italic">Mẹo: Chọn session cũ để kiểm tra khả năng nối tiếp ngữ cảnh.</div>
+                </section>
+            </div>
+
+            <!-- Main: Trace -->
+            <div class="lg:col-span-3 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Stage 1: Context -->
+                    <section class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                        <h3 class="text-xs font-bold text-blue-400 mb-3 uppercase tracking-widest">Stage 1: Context Resolver</h3>
+                        <div class="space-y-2">
+                            <div class="text-[10px] text-slate-500">Resolved Query:</div>
+                            <div id="resolvedQuery" class="bg-slate-950 p-2 rounded border border-blue-900/30 text-sm italic text-blue-200 min-h-[40px]">---</div>
+                        </div>
+                    </section>
+
+                    <!-- Stage 2: Intent & Entity -->
+                    <section class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                        <h3 class="text-xs font-bold text-purple-400 mb-3 uppercase tracking-widest">Stage 2: Semantic Intent</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="bg-slate-950 p-2 rounded border border-slate-800">
+                                <div class="text-[10px] text-slate-500">Intent</div>
+                                <div id="intentVal" class="font-bold text-purple-300">---</div>
+                            </div>
+                            <div class="bg-slate-950 p-2 rounded border border-slate-800">
+                                <div class="text-[10px] text-slate-500">Primary Entity</div>
+                                <div id="entityVal" class="font-bold text-purple-300">---</div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Stage 3: Reasoning & Reflection -->
+                <section class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                    <h3 class="text-xs font-bold text-emerald-400 mb-3 uppercase tracking-widest">Stage 3: Agent Reasoning & Reflection</h3>
+                    <div class="space-y-4">
+                        <div class="space-y-1">
+                            <div class="text-[10px] text-slate-500">Thought Process:</div>
+                            <div id="thoughtProcess" class="bg-slate-950 p-3 rounded text-xs leading-relaxed text-slate-300 min-h-[80px]">---</div>
+                        </div>
+                        <div class="bg-emerald-900/10 border border-emerald-800/50 p-3 rounded">
+                            <div class="text-[10px] text-emerald-500 font-bold uppercase mb-1">Self-Reflection Check:</div>
+                            <div id="reflectionVal" class="text-xs text-emerald-200 italic">---</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Stage 4: Execution & Response -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <section class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                        <h3 class="text-xs font-bold text-amber-400 mb-3 uppercase tracking-widest">Stage 4: Data Execution</h3>
+                        <div id="dataView" class="bg-slate-950 p-2 rounded text-[10px] font-mono text-slate-400 h-48 overflow-auto">
+                            No data.
+                        </div>
+                    </section>
+                    <section class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                        <h3 class="text-xs font-bold text-pink-400 mb-3 uppercase tracking-widest">Stage 5: Response Architect</h3>
+                        <div id="finalResponse" class="bg-slate-950 p-3 rounded text-sm text-slate-100 min-h-[100px]">
+                            Chưa có phản hồi.
+                        </div>
+                        <div id="latencyVal" class="mt-2 text-[10px] text-slate-600 text-right">Latency: 0ms</div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const runBtn = document.getElementById('runBtn');
+        const goalInput = document.getElementById('goalInput');
+        const sessionSelect = document.getElementById('sessionSelect');
+        const resolvedQuery = document.getElementById('resolvedQuery');
+        const intentVal = document.getElementById('intentVal');
+        const entityVal = document.getElementById('entityVal');
+        const thoughtProcess = document.getElementById('thoughtProcess');
+        const reflectionVal = document.getElementById('reflectionVal');
+        const dataView = document.getElementById('dataView');
+        const finalResponse = document.getElementById('finalResponse');
+        const latencyVal = document.getElementById('latencyVal');
+
+        let currentSessionId = `v3-trace-${Date.now()}`;
+
+        async function refreshSessions() {
+            try {
+                const res = await fetch('/api/v2/contexts?limit=10');
+                const data = await res.json();
+                const contexts = data.contexts || [];
+                
+                let options = `<option value="${currentSessionId}">[NEW] ${currentSessionId}</option>`;
+                contexts.forEach(ctx => {
+                    options += `<option value="${ctx.session_id}">${ctx.session_id} (${ctx.last_query || 'no query'})</option>`;
+                });
+                sessionSelect.innerHTML = options;
+            } catch (e) { console.error(e); }
+        }
+
+        runBtn.addEventListener('click', async () => {
+            const goal = goalInput.value.trim();
+            if (!goal) return;
+
+            runBtn.disabled = true;
+            runBtn.textContent = 'Ollama Thinking...';
+            
+            try {
+                const form = new FormData();
+                form.append('goal', goal);
+                form.append('session_id', sessionSelect.value);
+
+                const res = await fetch('/api/v3/run', { method: 'POST', body: form });
+                const data = await res.json();
+                
+                if (!res.ok) throw new Error(data.detail);
+
+                const result = data.result || {};
+                const r = result.reasoning || {};
+
+                resolvedQuery.textContent = result.resolved_query || goal;
+                intentVal.textContent = r.intent || 'unknown';
+                entityVal.textContent = r.primary_entity || 'N/A';
+                thoughtProcess.textContent = r.thought_process || r.error || 'No thought process available.';
+                reflectionVal.textContent = r.reflection || 'No reflection provided.';
+                dataView.textContent = JSON.stringify(result.execution_result || [], null, 2);
+                finalResponse.textContent = result.assistant_response || 'Hệ thống không trả về phản hồi cụ thể.';
+                latencyVal.textContent = `Latency: ${result.latency_ms || 0}ms`;
+
+            } catch (err) {
+                alert('Error: ' + err.message);
+            } finally {
+                runBtn.disabled = false;
+                runBtn.textContent = 'Run V3 Pipeline';
+                refreshSessions();
+            }
+        });
+
+        refreshSessions();
+    </script>
+</body>
+</html>
