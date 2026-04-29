@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DANN | Sales Copilot Chat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* Messenger Style Bubbles[cite: 1, 3] */
+    .chat-container { height: calc(100vh - 160px); }
+    .msg-bubble { max-width: 80%; position: relative; transition: all 0.2s ease; }
+    
+    /* Tin nhắn người dùng (Phải) */
+    .user-bubble {
+        background: #4f46e5; color: white;
+        border-radius: 18px 18px 4px 18px;
+        align-self: flex-end;
+    }
+    
+    /* Tin nhắn Bot (Trái)[cite: 1] */
+    .bot-bubble {
+        background: white; color: #1e293b;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px 18px 18px 4px;
+        align-self: flex-start;
+    }
+
+    /* Hiệu ứng Typing Dots */
+    .typing span {
+        width: 6px; height: 6px; background: #94a3b8;
+        border-radius: 50%; display: inline-block;
+        animation: bounce 1.4s infinite ease-in-out both;
+    }
+    .typing span:nth-child(1) { animation-delay: -0.32s; }
+    .typing span:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes bounce {
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 h-screen flex flex-col font-sans">
+
+  <!-- Header[cite: 3] -->
+  <header class="bg-white border-b px-6 py-4 flex justify-between items-center shadow-sm">
+    <div class="flex items-center gap-3">
+      <div class="bg-indigo-600 text-white p-2 rounded-lg shadow-md">
+        <i class="fas fa-robot"></i>
+      </div>
+      <div>
+        <h1 class="text-sm font-bold text-slate-800">DANN Copilot</h1>
+        <p class="text-[10px] text-green-500 font-bold uppercase tracking-widest">Online | PoreyDB Connected</p>
+      </div>
+    </div>
+    <div id="tstatus" class="text-[10px] text-slate-400 font-mono">Ready</div>
+  </header>
+
+  <!-- Feed Hội thoại -->
+  <div id="feed" class="chat-container overflow-y-auto p-6 flex flex-col gap-4">
+    <!-- Tin nhắn sẽ hiện ở đây -->
+  </div>
+
+  <!-- Khu vực nhập tin nhắn[cite: 3] -->
+  <footer class="bg-white border-t p-4">
+    <div class="max-w-4xl mx-auto relative flex items-center gap-2">
+      <input id="msg" type="text" 
+             placeholder="Nhập yêu cầu (ví dụ: 'danh sách account')..." 
+             class="flex-1 bg-slate-100 border-none rounded-2xl px-5 py-3.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-inner">
+      <button id="send" class="bg-indigo-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-indigo-700 active:scale-90 transition-all shadow-lg">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+  </footer>
+
+  <script>
+    async function fetchFeed() {
+      const res = await fetch('/api/qna');
+      const data = await res.json();
+      const el = document.getElementById('feed');
+      el.innerHTML = '';
+      data.forEach(item => {
+        const isBot = item.sender === 'Agent' || item.sender === 'Bot';
+        appendMessage(item.sender, item.message, isBot);
+      });
+    }
+
+    function appendMessage(sender, text, isBot) {
+      const feed = document.getElementById('feed');
+      const bubbleClass = isBot ? 'bot-bubble' : 'user-bubble shadow-indigo-100 shadow-md';
+      
+      const html = `
+        <div class="flex flex-col ${isBot ? 'items-start' : 'items-end'} animate-fadeIn">
+          <div class="msg-bubble px-4 py-2.5 text-sm ${bubbleClass}">
+            <div class="text-[9px] font-bold uppercase opacity-40 mb-1">${sender}</div>
+            <div class="leading-relaxed">${text}</div>
+          </div>
+        </div>`;
+      feed.insertAdjacentHTML('beforeend', html);
+      feed.scrollTop = feed.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('msg');
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      // 1. Hiện tin nhắn của mình ngay lập tức[cite: 3]
+      appendMessage('Kelvin (Sales)', msg, false);
+      input.value = '';
+
+      // 2. Hiện hiệu ứng Typing (Dấu chấm nhấp nháy)[cite: 3]
+      const typingId = 'typing-' + Date.now();
+      const typingHtml = `
+        <div id="${typingId}" class="flex flex-col items-start">
+          <div class="msg-bubble bot-bubble px-4 py-4 flex gap-1 typing">
+            <span></span><span></span><span></span>
+          </div>
+        </div>`;
+      document.getElementById('feed').insertAdjacentHTML('beforeend', typingHtml);
+      document.getElementById('feed').scrollTop = document.getElementById('feed').scrollHeight;
+
+      try {
+        const res = await fetch('/api/send', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({message: msg, sender: 'web'})
+        });
+        const data = await res.json();
+        
+        // 3. Xóa Typing và nạp lại Feed thực tế từ Backend
+        document.getElementById(typingId).remove();
+        fetchFeed();
+      } catch (e) {
+        document.getElementById(typingId).innerHTML = '<div class="text-red-500 text-[10px]">Lỗi Agent Node...</div>';
+      }
+    }
+
+    document.getElementById('send').addEventListener('click', sendMessage);
+    document.getElementById('msg').addEventListener('keydown', (e) => { if(e.key === 'Enter') sendMessage(); });
+    setInterval(fetchFeed, 3000); // Đồng bộ mỗi 3 giây[cite: 3]
+    fetchFeed();
+  </script>
+</body>
+</html>

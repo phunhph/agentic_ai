@@ -1,0 +1,9 @@
+{
+  "clarify_person_question": "Bạn có thể cung cấp họ và tên đầy đủ hoặc email của người bán hàng \"{candidate}\" được không? Ví dụ: 'Phu Nguyen' hoặc 'phu@company.com'",
+  "find_one": "Dạ, Cindy tìm thấy 1 {entity_label} tên {name}.",
+  "find_multiple": "Dạ, Cindy đã tìm thấy {count} {entity_label}. Ví dụ: {examples}.",
+  "not_found": "Dạ, Cindy đã tìm nhưng chưa thấy {entity_label} phù hợp cho '{query}'. Bạn muốn thử từ khoá khác không ạ?",
+  "generic_processed": "Dạ, Cindy đã xử lý yêu cầu '{query}'. Kết quả: {count}.",
+  "clarify_prefix": "XIN LƯU Ý: câu hỏi cần thêm thông tin",
+  "ask_try_alternative": "Bạn muốn tôi thử từ khoá khác không ạ?"
+}

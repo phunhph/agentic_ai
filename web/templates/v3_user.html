@@ -15,7 +15,6 @@
             </div>
             <div class="flex gap-2">
                 <a href="/v3/trace" class="text-xs sm:text-sm px-3 py-2 rounded bg-blue-900/30 text-blue-300 hover:bg-blue-900/50 border border-blue-700/50">V3 Trace Console</a>
-                <a href="/v2/user" class="text-xs sm:text-sm px-3 py-2 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700">Back to V2</a>
             </div>
         </header>
 
@@ -162,27 +161,28 @@
                 // Render Thinking Process
                 thinkingContent.innerHTML = `
                     <div class="border-l-2 border-blue-500 pl-2 mb-2">
-                        <div class="text-blue-400 font-bold">[Stage 1: Context Resolved]</div>
-                        <div>${result.resolved_query}</div>
+                        <div class="text-blue-400 font-bold">[Stage 1: Query Received]</div>
+                        <div>${reasoning.resolved_query || reasoning.query || goal}</div>
                     </div>
                     <div class="border-l-2 border-purple-500 pl-2 mb-2">
-                        <div class="text-purple-400 font-bold">[Stage 2: Thought Process]</div>
-                        <div>${reasoning.thought_process || 'N/A'}</div>
+                        <div class="text-purple-400 font-bold">[Stage 2: Neural Reasoning]</div>
+                        <div>${reasoning.thought_process || 'Đang suy luận...'}</div>
                     </div>
                     <div class="border-l-2 border-emerald-500 pl-2">
-                        <div class="text-emerald-400 font-bold">[Stage 3: Reflection]</div>
-                        <div>${reasoning.reflection || 'N/A'}</div>
+                        <div class="text-emerald-400 font-bold">[Stage 3: Entity → ${reasoning.primary_entity || '?'}]</div>
+                        <div>Intent: ${reasoning.intent || 'retrieve'} | Data: ${(reasoning.data || []).length} records</div>
                     </div>
                 `;
 
                 answerText.textContent = result.assistant_response || 'Đã xử lý xong.';
-                resolvedVal.textContent = result.resolved_query;
+                resolvedVal.textContent = result.resolved_query || reasoning.query || goal;
                 intentVal.textContent = reasoning.intent || 'retrieve';
                 
                 latencyLabel.textContent = `Latency: ${result.latency_ms}ms`;
                 latencyLabel.classList.remove('hidden');
                 
-                rawDataScroll.textContent = JSON.stringify(result.execution_result, null, 2);
+                const displayData = result.data || result.execution_result || [];
+                rawDataScroll.textContent = JSON.stringify(displayData, null, 2);
                 statusMsg.textContent = 'V3 Hoàn tất.';
                 
             } catch (err) {

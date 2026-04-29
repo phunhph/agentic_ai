@@ -1,1 +1,54 @@
-{}
+{
+  "v3-user-1777423235679-xzqpbb": {
+    "ts": 1777430951.431474,
+    "intent": "retrieve",
+    "entities": [
+      "systemuser"
+    ],
+    "request_filters": [],
+    "last_query": "các contract đang chạy của phunh",
+    "last_normalized_query": "<text>",
+    "history": [
+      {
+        "role": "user",
+        "content": "các contract đang chạy của phunh"
+      },
+      {
+        "role": "assistant",
+        "content": "Dạ, tôi đã kiểm tra hệ thống nhưng rất tiếc là chưa tìm thấy dữ liệu nào phù hợp với yêu cầu của bạn. Bạn có muốn tôi thử tìm kiếm với các tiêu chí khác không ạ?"
+      },
+      {
+        "role": "user",
+        "content": "các contract đang chạy của phunh"
+      },
+      {
+        "role": "assistant",
+        "content": "Chào bạn!\n\nTôi đã kiểm tra hệ thống và tìm thấy 100 bản ghi phù hợp với yêu cầu \"các contract đang chạy của phunh\". Tôi rất hân hạnh được chia sẻ kết quả này với bạn.\n\nĐể giúp bạn dễ dàng hơn trong việc tham khảo, tôi sẽ cung cấp một tóm tắt về các điểm nổi bật nhất:\n\n* Số lượng: 100 bản ghi\n* Phạm vi: [phạm vi của các contract]\n\nNếu bạn muốn xem chi tiết hơn về mỗi hợp đồng, tôi có thể giúp bạn truy cập vào hệ thống và tìm kiếm theo nhu cầu của bạn.\n\nTôi hy vọng phản hồi này sẽ giúp ích cho bạn. Nếu có thêm bất kỳ yêu cầu nào hoặc cần hỗ trợ thêm, xin vui lòng không ngần ngại hỏi tôi!\n\nCindy"
+      },
+      {
+        "role": "user",
+        "content": "tôi bảo contract mà sao bạn lại lấy ở account xem lại giúp tôi"
+      },
+      {
+        "role": "assistant",
+        "content": "Chào bạn!\n\nTôi đã kiểm tra lại hệ thống và tìm thấy 100 bản ghi phù hợp với yêu cầu \"tôi bảo contract mà sao bạn lại lấy ở account xem lại giúp tôi\". Tôi rất hân hạnh được chia sẻ kết quả này với bạn.\n\nĐể giúp bạn dễ dàng hơn trong việc tham khảo, tôi sẽ cung cấp một tóm tắt về các điểm nổi bật nhất:\n\n* Số lượng: 100 bản ghi\n* Phạm vi: [phạm vi của các contract]\n\nNếu bạn muốn xem chi tiết hơn về mỗi hợp đồng, tôi có thể giúp bạn truy cập vào hệ thống và tìm kiếm theo nhu cầu của bạn.\n\nTôi hy vọng phản hồi này sẽ giúp ích cho bạn. Nếu có thêm bất kỳ yêu cầu nào hoặc cần hỗ trợ thêm, xin vui lòng không ngần ngại hỏi tôi!\n\nCindy"
+      },
+      {
+        "role": "user",
+        "content": "tôi bảo contract mà sao bạn lại lấy ở account xem lại giúp tôi"
+      },
+      {
+        "role": "assistant",
+        "content": "Dạ, tôi đã kiểm tra hệ thống nhưng rất tiếc là chưa tìm thấy dữ liệu nào phù hợp với yêu cầu của bạn. Bạn có muốn tôi thử tìm kiếm với các tiêu chí khác không ạ?"
+      },
+      {
+        "role": "user",
+        "content": "các contract đang chạy của phunh"
+      },
+      {
+        "role": "assistant",
+        "content": "Dạ, tôi đã kiểm tra hệ thống nhưng rất tiếc là chưa tìm thấy dữ liệu nào phù hợp với yêu cầu của bạn. Bạn có muốn tôi thử tìm kiếm với các tiêu chí khác không ạ?"
+      }
+    ]
+  }
+}

@@ -32,34 +32,46 @@ class MetadataProvider:
             else:
                 am[clean + "s"] = table
 
-        # Add human-friendly aliases for key system tables to match PRD/UX language.
-        # NOTE: keep aliases lowercase; parser performs lowercase matching.
-        if "systemuser" in self.metadata.tables:
-            sys = "systemuser"
-            for alias in [
-                "user",
-                "users",
-                "system user",
-                "system users",
-                "sales",
-                "sale",
-                "sales rep",
-                "sales reps",
-                "presales",
-                "nhan vien",
-                "nhân viên",
-                "nhan vien kinh doanh",
-                "nhân viên kinh doanh",
-                "nhan su",
-                "nhân sự",
-            ]:
-                am[str(alias).strip().lower()] = sys
-
-        # Common shorthand/typos from real chat logs (space_messages.json)
-        # Keep minimal and domain-generic.
-        if "hbl_opportunities" in self.metadata.tables:
-            for alias in ["opps", "ops", "op", "opportunity", "opportunities", "cơ hội", "co hoi"]:
-                am[str(alias).strip().lower()] = "hbl_opportunities"
+        # Load external aliases from infra/aliases.json when present to avoid hard-coding.
+        try:
+            from pathlib import Path
+            import json
+            aliases_path = Path("infra/aliases.json")
+            if aliases_path.exists():
+                raw = json.loads(aliases_path.read_text(encoding="utf-8"))
+                for table, alias_list in (raw or {}).items():
+                    if table not in self.metadata.tables:
+                        # allow alias file to include names for tables not present; skip those
+                        continue
+                    for alias in alias_list or []:
+                        am[str(alias).strip().lower()] = table
+        except Exception:
+            # fallback to built-in minimal aliases when external file missing or invalid
+            if "systemuser" in self.metadata.tables:
+                sys = "systemuser"
+                for alias in [
+                    "user",
+                    "users",
+                    "system user",
+                    "system users",
+                    "sales",
+                    "sale",
+                    "sales rep",
+                    "sales reps",
+                    "presales",
+                    "nhan vien",
+                    "nhân viên",
+                    "nhan vien kinh doanh",
+                    "nhân viên kinh doanh",
+                    "nhan su",
+                    "nhân sự",
+                ]:
+                    am[str(alias).strip().lower()] = sys
+                for extra in ["thong tin", "thông tin", "thongtin", "tt"]:
+                    am[str(extra).strip().lower()] = sys
+            if "hbl_opportunities" in self.metadata.tables:
+                for alias in ["opps", "ops", "op", "opportunity", "opportunities", "cơ hội", "co hoi"]:
+                    am[str(alias).strip().lower()] = "hbl_opportunities"
         return am
 
     def get_table_by_alias(self, alias: str) -> str | None:

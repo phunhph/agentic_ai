@@ -1,0 +1,22 @@
+LiteNextgenCRM/
+├── agents/                 # Chứa logic của các Node tác nhân (DANN)
+│   ├── router.py           # Định tuyến ý định: UPDATE, QUERY, HELP
+│   ├── analyst.py          # Trích xuất thực thể BANT & xử lý logic nhận thức
+│   ├── operator.py         # Thực thi ghi/đọc Database (PoreyDB)
+│   └── tactician.py        # Đề xuất hành động tiếp theo (Viable Steps)
+├── core/                   # Cấu trúc lõi của hệ thống
+│   ├── config.py           # Quản lý DATABASE_URL và Ollama Endpoint
+│   ├── database.py         # Cấu hình SQLAlchemy & PostgreSQL (PoreyDB)
+│   └── orchestrator.py     # Điều phối luồng Agent (State Machine)
+├── models/                 # Định nghĩa dữ liệu
+│   ├── domain.py           # SQLAlchemy Models (hbl_account, hbl_opportunities...)[cite: 5]
+│   └── schema.py           # Pydantic Models cho Agent State & Mixs JSON
+├── ui/                     # Google Chat Cards V2 Builders
+│   ├── success_card.py     # Layout Direction 1: Data-Dense Grid[cite: 1]
+│   ├── fallback_card.py    # Layout Direction 2: Action First[cite: 1]
+│   └── components.py       # BANT_Grid_Widget & Audit_Footer_Widget
+├── prompts/                # Quản lý các mẫu Prompt cho Ollama[cite: 4]
+│   ├── extraction.yaml     # Prompt trích xuất BANT chuyên sâu
+│   └── classification.yaml # Prompt phân loại intent
+├── app.py                  # Entry point (FastAPI/Web-hook)
+└── requirements.txt

@@ -1,0 +1,16 @@
+fastapi>=0.95
+uvicorn[standard]>=0.22
+requests>=2.31
+SQLAlchemy>=1.4
+psycopg2-binary>=2.9
+pydantic>=1.10
+chromadb>=0.3
+sentence-transformers>=2.2
+faiss-cpu>=1.7
+scikit-learn>=1.2
+# Optional integrations (install only if you have access)
+# langgraph (optional): 
+# pip install 
+langgraph
+# autogen (optional): # pip install 
+autogen

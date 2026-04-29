@@ -28,9 +28,10 @@ DATABASE_URL = os.getenv(
     "DATABASE_URL", "postgresql://postgres:123456@localhost:5432/agentic_store"
 )
 
-OLLAMA_CHAT_MODEL = os.getenv("OLLAMA_CHAT_MODEL", "llama3:latest")
-OLLAMA_REASONING_MODEL = os.getenv("OLLAMA_REASONING_MODEL", "gemma3:4b")
-OLLAMA_EMBEDDING_MODEL = os.getenv("OLLAMA_EMBEDDING_MODEL", "llama3:latest")
+OLLAMA_CHAT_MODEL = os.getenv("OLLAMA_CHAT_MODEL", "llama3:8b")
+# Default reasoning model: use the smaller 8b variant for lower latency
+OLLAMA_REASONING_MODEL = os.getenv("OLLAMA_REASONING_MODEL", "llama3:8b")
+OLLAMA_EMBEDDING_MODEL = os.getenv("OLLAMA_EMBEDDING_MODEL", "all-minilm:latest")
 
 
 def get_env_bool(name: str, default: bool = False) -> bool:
@@ -92,6 +93,28 @@ AUTO_MATRIX_EVAL_REFRESH = get_env_bool("AUTO_MATRIX_EVAL_REFRESH", True)
 RAG_EMBEDDING_CACHE_PATH = os.getenv("RAG_EMBEDDING_CACHE_PATH", "storage/schema_embedding_cache.json")
 RAG_FORCE_REBUILD = get_env_bool("RAG_FORCE_REBUILD", False)
 LEARNING_STORE_DIR = os.getenv("LEARNING_STORE_DIR", "storage/learning")
+
+
+# Response templates and runtime flags
+ENABLE_DEBUG_LOGS = get_env_bool("ENABLE_DEBUG_LOGS", False)
+RESPONSES_FILE = os.getenv("RESPONSES_FILE", "infra/responses.json")
+
+def load_response_templates() -> dict:
+    import json
+    try:
+        with open(RESPONSES_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        # sensible defaults
+        return {
+            "clarify_person_question": "Bạn có thể cho tôi biết họ và tên đầy đủ hoặc email của người bán hàng '{candidate}' được không?",
+            "find_one": "Dạ, Cindy tìm thấy 1 {entity_label} tên {name}.",
+            "find_multiple": "Dạ, Cindy đã tìm thấy {count} {entity_label}. Ví dụ: {examples}.",
+            "not_found": "Dạ, Cindy đã tìm nhưng chưa thấy {entity_label} phù hợp cho '{query}'. Bạn muốn thử từ khoá khác không ạ?",
+            "generic_processed": "Dạ, Cindy đã xử lý yêu cầu '{query}'. Kết quả: {count}.",
+        }
+
+RESPONSE_TEMPLATES = load_response_templates()
 
 PERCEPTION_CREATE_VERBS = get_env_list("PERCEPTION_CREATE_VERBS", "thêm,tao,tạo,create,new")
 PERCEPTION_COMPARE_VERBS = get_env_list("PERCEPTION_COMPARE_VERBS", "so sánh,thống kê,compare,ranking,xếp hạng")

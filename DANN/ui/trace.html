@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DANN | Agentic Trace System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* Thanh cuộn hiện đại cho phần payload JSON */
+    pre::-webkit-scrollbar { width: 6px; height: 6px; }
+    pre::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .trace-card:hover { border-left-width: 4px; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-10 px-6 py-4 flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <div class="bg-blue-600 text-white p-2 rounded-lg">
+        <i class="fas fa-robot text-xl"></i>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold tracking-tight">Agentic Trace</h1>
+        <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">LiteNextgenCRM Orchestrator</p>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-4">
+      <div id="tstatus" class="text-xs font-mono text-slate-400 bg-slate-100 px-3 py-1.5 rounded-full">Idle</div>
+      <button id="refresh" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 shadow-sm active:scale-95">
+        <i class="fas fa-sync-alt" id="refresh-icon"></i>
+        Làm mới
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto p-6">
+    <!-- Stats / Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+        <span class="text-slate-400 text-xs font-bold uppercase">System Status</span>
+        <div class="text-2xl font-bold text-green-500 flex items-center gap-2">
+          <span class="relative flex h-3 w-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+          </span>
+          Active
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+        <span class="text-slate-400 text-xs font-bold uppercase">Database</span>
+        <div class="text-2xl font-bold text-slate-700">PoreyDB</div>
+      </div>
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+        <span class="text-slate-400 text-xs font-bold uppercase">Active Agents</span>
+        <div class="text-2xl font-bold text-blue-600">4 Nodes</div>
+      </div>
+    </div>
+
+    <!-- Trace Feed -->
+    <div id="traces" class="space-y-4">
+      <!-- Traces will be injected here -->
+    </div>
+  </main>
+
+  <script>
+    const LEVEL_COLORS = {
+      'INFO': 'border-blue-500 text-blue-700 bg-blue-50',
+      'SUCCESS': 'border-green-500 text-green-700 bg-green-50',
+      'WARNING': 'border-amber-500 text-amber-700 bg-amber-50',
+      'ERROR': 'border-red-500 text-red-700 bg-red-50'
+    };
+
+    async function fetchTrace(){
+      const btnIcon = document.getElementById('refresh-icon');
+      btnIcon.classList.add('animate-spin');
+      
+      try {
+        const res = await fetch('/api/trace');
+        const data = await res.json();
+        const el = document.getElementById('traces'); 
+        el.innerHTML = '';
+
+        data.slice().reverse().forEach(t => {
+          const colorClass = LEVEL_COLORS[t.level] || 'border-slate-300 text-slate-700 bg-white';
+          const d = document.createElement('div');
+          d.className = `trace-card bg-white border-l-4 p-5 rounded-xl shadow-sm border border-slate-200 transition-all ${colorClass.split(' ')[0]}`;
+          
+          const payload = (t.payload && Object.keys(t.payload).length) ? 
+            `<pre class="mt-4 bg-slate-900 text-blue-300 p-4 rounded-lg text-xs overflow-auto font-mono shadow-inner border border-slate-800">${JSON.stringify(t.payload, null, 2)}</pre>` : '';
+
+          d.innerHTML = `
+            <div class="flex justify-between items-start mb-2">
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded shadow-sm ${colorClass}">${t.level}</span>
+                <span class="text-sm font-bold text-slate-700 italic">@${t.source}</span>
+              </div>
+              <span class="text-[11px] font-mono text-slate-400 bg-slate-50 px-2 py-1 rounded border border-slate-100">${new Date(t.ts*1000).toLocaleString()}</span>
+            </div>
+            <div class="text-slate-800 font-medium leading-relaxed">${t.message}</div>
+            ${payload}
+          `;
+          el.appendChild(d);
+        });
+        
+        document.getElementById('tstatus').textContent = 'Last Sync: ' + new Date().toLocaleTimeString();
+      } catch (err) {
+        console.error("Failed to fetch traces:", err);
+      } finally {
+        setTimeout(() => btnIcon.classList.remove('animate-spin'), 500);
+      }
+    }
+
+    document.getElementById('refresh').addEventListener('click', fetchTrace);
+    setInterval(fetchTrace, 5000); // Tự động cập nhật mỗi 5 giây
+    fetchTrace();
+  </script>
+</body>
+</html>
