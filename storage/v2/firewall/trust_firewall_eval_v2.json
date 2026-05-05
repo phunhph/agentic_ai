@@ -1,14 +1,14 @@
 {
-  "version": "v2-firewall-20260424091738",
-  "evaluated_at": "2026-04-24T09:17:38.215086+00:00",
+  "version": "v2-firewall-20260505090306",
+  "evaluated_at": "2026-05-05T09:03:06.621449+00:00",
   "counts": {
-    "allow": 291,
+    "allow": 294,
     "quarantine": 2,
-    "reject": 44
+    "reject": 67
   },
   "rates": {
-    "quarantine_rate": 0.0059,
-    "reject_rate": 0.1306
+    "quarantine_rate": 0.0055,
+    "reject_rate": 0.1846
   },
   "pass": true
 }

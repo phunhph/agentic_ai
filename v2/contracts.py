@@ -26,6 +26,7 @@ class IngestResult:
     role: str = "DEFAULT"
     domain: str = "general"
     persona_context: dict[str, Any] = field(default_factory=dict)
+    llm_trace: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass

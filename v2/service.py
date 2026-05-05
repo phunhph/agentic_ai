@@ -22,6 +22,7 @@ from v2.learn.trainset import append_trainset_sample
 from v2.memory import get_session_context, update_session_context
 from v2.metadata import MetadataProvider
 from v2.plan import compile_execution_plan
+from v2.api_clients import get_dynamic_client
 from v2.reason import reason_about_query
 from v2.tactician import build_tactician_payload
 
@@ -126,9 +127,11 @@ def _compute_learning_evidence(ingest: dict, execution_trace: dict) -> dict:
 
 
 def _format_value(value):
-    if isinstance(value, float):
-        return f"{value:,.2f}"
-    return str(value)
+    if isinstance(value, Decimal):
+        return float(value)
+    if hasattr(value, "__str__") and "UUID" in str(type(value)):
+        return str(value)
+    return value
 
 
 def _detect_locale(query: str) -> str:
@@ -474,6 +477,46 @@ def _build_professional_response(query: str, rows: list[dict], execution_trace: 
     return f"{overview}\n\nKết quả nổi bật:\n{details}{hidden_line}\n\nGợi ý tiếp theo: thêm 1 điều kiện lọc để chốt đúng đối tượng cần xử lý."
 
 
+def _build_agentic_response(query: str, rows: list[dict], execution_trace: dict, locale: str = "vi", role: str = "DEFAULT") -> str:
+    """Use LLM to generate a professional, contextualized response based on data."""
+    client = get_dynamic_client("chat")
+    
+    try:
+        # Prepare a compact representation of rows for the LLM
+        data_summary = json.dumps(rows[:5], indent=2, ensure_ascii=False)
+        
+        prompt = f"""
+You are a professional CRM assistant. Your task is to summarize the retrieved data for the user in a natural, helpful way.
+
+USER QUERY: {query}
+USER ROLE: {role}
+LOCALE: {locale}
+DATA RETRIEVED ({len(rows)} rows total):
+{data_summary if rows else "NO DATA FOUND (0 rows)"}
+
+RULES:
+1. If there are many rows, provide a high-level summary.
+2. If there is only 1 row, provide key details naturally.
+3. Be professional and concise.
+4. Respond in the requested LOCALE ({locale}).
+5. Use markdown for better readability.
+6. Do NOT mention technical details like table names (e.g., use 'Account' instead of 'hbl_account').
+7. If NO DATA was found, explain politely and suggest what the user might do next (e.g., check name spelling or search broader).
+
+RESPONSE:
+"""
+        # We don't use JSON format here as we want natural language
+        response = client.generate(prompt, format="text")
+        content = response.get("response", "").strip()
+        if content:
+            return content
+    except Exception as e:
+        print(f"Lỗi khi tạo phản hồi Agentic: {str(e)}")
+    
+    # Fallback to deterministic response if LLM fails
+    return _build_professional_response(query, rows, execution_trace, locale)
+
+
 def _apply_lean_personalization(text: str, role: str, locale: str = "vi") -> str:
     role_key = str(role or "DEFAULT").strip().upper()
     if role_key == "JUNIOR":
@@ -731,6 +774,7 @@ def run_v2_pipeline(query: str, role: str = "DEFAULT", session_id: str = "", lan
                     "entities": ingest.entities,
                     "ambiguity_score": ingest.ambiguity_score,
                     "context_usage": context_usage,
+                    "llm_trace": ingest.llm_trace,
                 },
                 "reason": reason_result.get("planner_trace_v2", {}),
                 "execute": {},
@@ -744,6 +788,7 @@ def run_v2_pipeline(query: str, role: str = "DEFAULT", session_id: str = "", lan
                 "used": context_usage,
                 "saved": bool(saved_context),
             },
+            "llm_trace": ingest.llm_trace,
         }
 
     plan = compile_execution_plan(ingest, reason_result)
@@ -777,6 +822,7 @@ def run_v2_pipeline(query: str, role: str = "DEFAULT", session_id: str = "", lan
                     "entities": ingest.entities,
                     "ambiguity_score": ingest.ambiguity_score,
                     "context_usage": context_usage,
+                    "llm_trace": ingest.llm_trace,
                 },
                 "reason": reason_result.get("planner_trace_v2", {}),
                 "execute": {},
@@ -798,6 +844,7 @@ def run_v2_pipeline(query: str, role: str = "DEFAULT", session_id: str = "", lan
                 "used": context_usage,
                 "saved": bool(saved_context),
             },
+            "llm_trace": ingest.llm_trace,
         }
 
     execution = execute_plan(plan)
@@ -808,6 +855,7 @@ def run_v2_pipeline(query: str, role: str = "DEFAULT", session_id: str = "", lan
         "request_filters": [asdict(f) for f in ingest.request_filters],
         "context_usage": context_usage,
         "persona_context": ingest.persona_context if isinstance(ingest.persona_context, dict) else {},
+        "llm_trace": ingest.llm_trace,
     }
     layer_reason = reason_result.get("planner_trace_v2", {})
     layer_execute = execution.execution_trace
@@ -897,11 +945,12 @@ def run_v2_pipeline(query: str, role: str = "DEFAULT", session_id: str = "", lan
     recommendation = ""
     if not execution.success:
         recommendation = _build_clarify_suggestion(layer_ingest, execution.execution_trace, locale=locale)
-    assistant_response = _build_professional_response(
+    assistant_response = _build_agentic_response(
         ingest.normalized_query,
         execution.data,
         execution.execution_trace,
         locale=locale,
+        role=role,
     )
     assistant_response_before_lean = assistant_response
     tactician_payload = build_tactician_payload(
@@ -959,4 +1008,5 @@ def run_v2_pipeline(query: str, role: str = "DEFAULT", session_id: str = "", lan
             "used": context_usage,
             "saved": bool(saved_context),
         },
+        "llm_trace": ingest.llm_trace,
     }

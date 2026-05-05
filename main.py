@@ -263,6 +263,7 @@ async def diagnose_v2(goal: str = Form(...), role: str = Form("DEFAULT"), action
                     "ambiguity_score": ingest.ambiguity_score,
                     "request_filters": [f.__dict__ for f in ingest.request_filters],
                 },
+                "llm_trace": ingest.llm_trace,
                 "knowledge_alignment": graph_alignment,
                 "planner_trace_v2": reason_result.get("planner_trace_v2", {}),
                 "action_contract": action_contract,

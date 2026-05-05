@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def get_env_int(name: str, default: int) -> int:
@@ -25,12 +28,22 @@ APP_HOST = os.getenv("APP_HOST", "127.0.0.1")
 APP_PORT = get_env_int("APP_PORT", 8000)
 
 DATABASE_URL = os.getenv(
-    "DATABASE_URL", "postgresql://postgres:123456@localhost:5432/agentic_store"
+    "DATABASE_URL", "postgresql://postgres:sa@localhost:5432/agentic_store"
 )
 
-OLLAMA_CHAT_MODEL = os.getenv("OLLAMA_CHAT_MODEL", "llama3:latest")
-OLLAMA_REASONING_MODEL = os.getenv("OLLAMA_REASONING_MODEL", "gemma3:4b")
-OLLAMA_EMBEDDING_MODEL = os.getenv("OLLAMA_EMBEDDING_MODEL", "llama3:latest")
+# API Keys
+GROK_API_KEY = os.getenv("GROK_API_KEY", "")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+
+# Model Configurations
+CHAT_MODEL = os.getenv("CHAT_MODEL", "grok")  # Options: grok, gemini, openrouter
+REASONING_MODEL = os.getenv("REASONING_MODEL", "gemini")
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "openrouter")
+
+# OLLAMA_CHAT_MODEL = os.getenv("OLLAMA_CHAT_MODEL", "llama3:latest")
+# OLLAMA_REASONING_MODEL = os.getenv("OLLAMA_REASONING_MODEL", "gemma3:4b")
+# OLLAMA_EMBEDDING_MODEL = os.getenv("OLLAMA_EMBEDDING_MODEL", "llama3:latest")
 
 
 def get_env_bool(name: str, default: bool = False) -> bool:

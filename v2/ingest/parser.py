@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import json
 import re
-import ollama
 
-from infra.settings import OLLAMA_CHAT_MODEL
+from infra.settings import CHAT_MODEL
+from v2.api_clients import APIClient, get_dynamic_client  # Added API clients
 from v2.contracts import IngestResult, RequestFilter
 from v2.metadata import MetadataProvider
 from v2.tactician.persona_profile import build_persona_context
@@ -229,7 +229,7 @@ def _dedupe_filters(out: list[RequestFilter]) -> list[RequestFilter]:
     return final_filters
 
 
-def _llm_parse(query: str) -> tuple[str, list[str], list[RequestFilter], dict, float]:
+def _llm_parse(query: str) -> tuple[str, list[str], list[RequestFilter], dict, float, dict]:
     valid_tables = list(_PROVIDER.get_all_tables())
     prompt = """
 You are a CRM request parser.
@@ -255,7 +255,9 @@ User query: {query}
     prompt = (
         prompt.replace("{valid_tables}", json.dumps(valid_tables)).replace("{query}", query)
     )
-    response = ollama.generate(model=OLLAMA_CHAT_MODEL, prompt=prompt, format="json")
+    # Use dynamic API client instead of Ollama
+    client = get_dynamic_client("chat")
+    response = client.generate(prompt, format="json")
     raw = json.loads(response["response"])
     intent = str(raw.get("intent", "unknown")).strip().lower()
     if intent not in {"retrieve", "analyze", "create", "update", "unknown"}:
@@ -290,7 +292,7 @@ User query: {query}
     filters = _sanitize_and_enrich_filters(query, entities, filters)
     if entities and not filters and not _is_generic_list_query(query) and intent != "update":
         ambiguity = max(ambiguity, 0.7)
-    return intent, entities, filters, update_data, ambiguity
+    return intent, entities, filters, update_data, ambiguity, response.get("llm_trace", {})
 
 
 def _apply_deterministic_overrides(
@@ -345,6 +347,7 @@ def ingest_query(query: str, role: str = "DEFAULT") -> IngestResult:
     update_data = {}
     persona_context = build_persona_context(role=role)
     rule_based = _rule_based_detail_parse(normalized)
+    llm_trace = {}
     if rule_based:
         intent, entities, request_filters, update_data, ambiguity_score = rule_based
         request_filters = _dedupe_filters(request_filters)
@@ -359,9 +362,10 @@ def ingest_query(query: str, role: str = "DEFAULT") -> IngestResult:
             role=role,
             domain="general",
             persona_context=persona_context,
+            llm_trace={"mode": "rule_based"},
         )
     try:
-        intent, entities, request_filters, update_data, ambiguity_score = _llm_parse(normalized)
+        intent, entities, request_filters, update_data, ambiguity_score, llm_trace = _llm_parse(normalized)
     except Exception:
         intent = _detect_intent(normalized)
         entities = _detect_entities(normalized)
@@ -383,4 +387,5 @@ def ingest_query(query: str, role: str = "DEFAULT") -> IngestResult:
         role=role,
         domain="general",
         persona_context=persona_context,
+        llm_trace=llm_trace,
     )

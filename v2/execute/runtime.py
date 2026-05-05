@@ -22,6 +22,8 @@ def _serialize_value(value: Any) -> Any:
         return value.isoformat()
     if isinstance(value, Decimal):
         return float(value)
+    if hasattr(value, "__str__") and "UUID" in str(type(value)):
+        return str(value)
     return value
 
 
@@ -324,6 +326,7 @@ def execute_plan(plan: ExecutionPlan) -> ExecutionResult:
     if int(plan.limit) > 0:
         stmt = stmt.limit(int(plan.limit))
 
+    print(f"🛠️ Đang thực thi truy vấn SQL:\n{stmt}")
     with engine.connect() as conn:
         rows_raw = conn.execute(stmt).mappings().all()
     rows = [{k: _serialize_value(v) for k, v in dict(r).items()} for r in rows_raw]

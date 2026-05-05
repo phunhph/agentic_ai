@@ -4,6 +4,7 @@ uvicorn
 jinja2
 python-multipart
 psycopg2-binary
+python-dotenv
 
 # --- Agentic AI Core (LangChain & LangGraph) ---
 langchain
@@ -11,11 +12,11 @@ langchain-community
 langgraph
 pydantic
 
-# --- Ollama & Utilities ---
+# --- API Clients for Models ---
 requests
 aiohttp
-ollama
-langchain-ollama
+# Gemini: using REST API directly, no SDK needed
+# OpenRouter: uses openai-compatible REST API
 
 # --- Dev Tools ---
 pre-commit

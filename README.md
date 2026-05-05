@@ -6,6 +6,7 @@
 - Uncertainty manager (`auto_execute`, `ask_clarify`) + trust gate consistency.
 - Fast-path + cache để giảm độ trễ planner.
 - Matrix learning/eval tự động để theo dõi chất lượng và tiến hóa theo dữ liệu thật.
+- **Dynamic Agentic Neural Network**: Sử dụng API của Grok (xAI), Gemini (Google), và OpenRouter để truy cập Gemma 3 12B, thay thế Ollama cho tính linh hoạt và hiệu suất cao hơn.
 
 ---
 
@@ -96,6 +97,30 @@ flowchart TD
 - State icons: `queued -> analyzing -> processing -> done/clarify/error`
 
 </details>
+
+## Model Configuration
+
+Hệ thống sử dụng Dynamic Agentic Neural Network với các API models:
+
+- **Grok (xAI)**: Sử dụng cho chat và reasoning thông minh.
+- **Gemini (Google)**: Sử dụng cho tasks phức tạp và phân tích.
+- **OpenRouter (Gemma 3 12B)**: Sử dụng cho embedding và tasks chuyên biệt.
+
+### Environment Variables
+
+```bash
+# API Keys
+GROK_API_KEY=your_grok_api_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+
+# Model Assignments
+CHAT_MODEL=grok  # Options: grok, gemini, openrouter
+REASONING_MODEL=gemini
+EMBEDDING_MODEL=openrouter
+```
+
+Hệ thống tự động chọn model dựa trên task type để tối ưu hiệu suất.
 
 ### Runtime Gate Contract
 
