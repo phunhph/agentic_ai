@@ -100,8 +100,7 @@ def compile_execution_plan(ingest: IngestResult, reason_result: dict) -> Executi
     keyword = str(args.get("keyword", "") or "").strip()
     aggregate_ops = _build_aggregate_ops(ingest, root_table, include_tables)
     if aggregate_ops:
-        keyword = ""
-        where_filters = []
+        pass
     if keyword and not where_filters:
         # Build a deterministic keyword filter so preview/runtime and learning
         # both reflect the intended WHERE constraint instead of empty filters.

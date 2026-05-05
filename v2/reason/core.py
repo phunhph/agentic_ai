@@ -5,6 +5,7 @@ from collections import deque
 from v2.contracts import IngestResult
 from v2.metadata import MetadataProvider
 
+from infra.settings import ENABLE_DYNAMIC_METADATA_PLANNER
 _PROVIDER = MetadataProvider()
 
 
@@ -114,17 +115,29 @@ def reason_about_query(ingest: IngestResult) -> dict:
         f"Dispatcher assigned '{selected_tool}' for execution."
     )
 
+    # Decision logic
+    is_complex = len(ingest.entities) > 1 or primary_intent == "analyze"
+    ambiguity_threshold = 0.85 if is_complex else 0.8
+    
+    decision_state = "auto_execute"
+    if ingest.ambiguity_score >= ambiguity_threshold:
+        decision_state = "ask_clarify"
+    
+    # If dynamic planner is enabled, we trust it more with complex paths
+    if ENABLE_DYNAMIC_METADATA_PLANNER and is_complex:
+        decision_state = "auto_execute" # Trust the dynamic logic
+    
     trace = {
-        "planner_mode": "v2_agentic_orchestrator",
+        "planner_mode": "v2_agentic_orchestrator" if not ENABLE_DYNAMIC_METADATA_PLANNER else "v2_dynamic_metadata_orchestrator",
         "thought_process": thought,
         "selected_entities": ingest.entities,
         "join_path": join_path,
         "intent": primary_intent,
-        "decision_state": "ask_clarify" if ingest.ambiguity_score >= 0.8 else "auto_execute",
+        "decision_state": decision_state,
         "agent_consensus": {
-            "analyst_confidence": 1.0 - ingest.ambiguity_score,
-            "researcher_alignment": 0.9 if ingest.entities else 0.5,
-            "dispatcher_match": 1.0
+            "analyst_confidence": round(1.0 - (ingest.ambiguity_score * 0.8), 2),
+            "researcher_alignment": 0.95 if ingest.entities else 0.4,
+            "dispatcher_match": 1.0 if selected_tool != "unknown" else 0.0
         }
     }
 

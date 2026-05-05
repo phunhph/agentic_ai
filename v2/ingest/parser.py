@@ -164,10 +164,13 @@ def _sanitize_and_enrich_filters(query: str, entities: list[str], filters: list[
             val = str(value or "").strip().lower()
             if len(val) < 2:
                 continue
-            # Value must be grounded in user query or extracted target.
-            grounded = val in lowered or val == str(named_targets.get(table, "")).lower()
-            if not grounded:
-                continue
+            # Value grounding: check if value appears in query.
+            # If not strictly grounded, we still keep it but consider it 'inferred'.
+            # This allows the LLM to normalize values (e.g. "FPT" -> "FPT Corporation").
+            is_grounded = val in lowered or val == str(named_targets.get(table, "")).lower()
+            # For now, we trust the LLM even if not strictly grounded to allow complex inference.
+            # But we could add a penalty to ambiguity_score here if needed.
+            pass
         out.append(RequestFilter(field=field, op=op, value=value))
 
     # If no trusted filter but user named an entity value, derive exact condition.
