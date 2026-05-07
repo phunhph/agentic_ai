@@ -1,0 +1,25 @@
+- [x] **Giai đoạn 1: Chuẩn bị hạ tầng (Core)**
+    - [x] Tạo thư mục `core/`, `pipeline/`, `intelligence/`, `memory/`, `metadata/`, `clients/`, `api/`
+    - [x] Move/Refactor `core/settings.py`, `core/database.py`, `core/contracts.py`
+    - [x] Tách `core/i18n.py` từ `v2/service.py`
+    - [x] Tách `core/formatting.py` từ `v2/service.py`
+- [/] **Giai đoạn 2: Tái cấu trúc Pipeline (Phases 1-6)**
+    - [ ] Phase 1: `pipeline/phase1_ingest/` (Move ingest + tách `context_merger.py`)
+    - [ ] Phase 2: `pipeline/phase2_reason/` (Move reason + tách `consistency.py`)
+    - [ ] Phase 3: `pipeline/phase3_plan/` (Move plan)
+    - [ ] Phase 4: `pipeline/phase4_execute/` (Move execute + tách `fk_resolver.py`)
+    - [ ] Phase 5: `pipeline/phase5_learn/` (Move learn + tách `sample_builder.py`)
+    - [ ] Phase 6: `pipeline/phase6_respond/` (Tách `builder.py`, `agentic.py`, `tactician.py`)
+    - [ ] Tạo `pipeline/__init__.py` (Master Pipeline)
+- [ ] **Giai đoạn 3: Intelligence & Shared Modules**
+    - [ ] Move `DANN/core/` → `intelligence/`
+    - [ ] Move `v2/tactician/` → `intelligence/persona/`
+    - [ ] Move `v2/memory.py` → `memory/session.py`
+    - [ ] Move `v2/metadata.py` → `metadata/provider.py`
+    - [ ] Move `v2/api_clients.py` → `clients/llm.py`
+- [ ] **Giai đoạn 4: API Layer & Main**
+    - [ ] Tách routes từ `main.py` vào `api/`
+    - [ ] Cập nhật `main.py` gọn nhẹ
+- [ ] **Giai đoạn 5: Cập nhật Import & Kiểm tra**
+    - [ ] Cập nhật import toàn dự án
+    - [ ] Chạy regression test

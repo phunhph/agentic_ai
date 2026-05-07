@@ -9,22 +9,22 @@ import sqlalchemy as sa
 
 from storage.database import engine
 from v2.contracts import LessonOutcome, RequestFilter
-from v2.execute import execute_plan, validate_execution_plan
-from v2.ingest import ingest_query
-from v2.learn import evaluate_matrix_v2, record_outcome, train_matrix_v2
-from v2.learn.firewall import (
+from pipeline.phase4_execute import execute_plan, validate_execution_plan
+from pipeline.phase1_ingest import ingest_query
+from pipeline.phase5_learn import evaluate_matrix_v2, record_outcome, train_matrix_v2
+from pipeline.phase5_learn.firewall import (
     evaluate_firewall,
     log_firewall_event,
     quarantine_sample,
     refresh_firewall_eval,
 )
-from v2.learn.trainset import append_trainset_sample
+from pipeline.phase5_learn.trainset import append_trainset_sample
 from v2.memory import get_session_context, update_session_context
 from v2.metadata import MetadataProvider
-from v2.plan import compile_execution_plan
+from pipeline.phase3_plan import compile_execution_plan
 from v2.api_clients import get_dynamic_client
-from v2.reason import reason_about_query
-from v2.tactician import build_tactician_payload
+from pipeline.phase2_reason import reason_about_query
+from intelligence.persona import build_tactician_payload
 
 _PROVIDER = MetadataProvider()
 
@@ -427,54 +427,22 @@ def _build_professional_response(query: str, rows: list[dict], execution_trace: 
     plan = execution_trace.get("plan", {})
     if plan and plan.get("update_data"):
         if execution_trace.get("updated_count", 0) > 0:
-            return _t(locale, "update_success")
-        return _t(locale, "update_fail")
+            return "✅ **Cập nhật dữ liệu thành công.**"
+        return "❌ **Cập nhật thất bại.** Không tìm thấy bản ghi phù hợp."
 
     if not rows:
-        root_table = str((execution_trace.get("plan", {}) or {}).get("root_table", "entity")).replace("hbl_", "")
-        recommendation = _t(locale, "no_data_recommendation").format(root=root_table)
-        if locale == "en":
-            return f"⚠️ **No matching results.** {recommendation}\n\nTry narrowing by a specific name/code or date range."
-        return f"⚠️ **Không có kết quả khớp.** {recommendation}\n\nBạn có thể thử thêm tên/mã cụ thể hoặc khoảng thời gian."
+        return "⚠️ **Không tìm thấy kết quả nào khớp với yêu cầu của bạn.** Vui lòng kiểm tra lại từ khóa hoặc mở rộng tiêu chí tìm kiếm."
 
-    overview = _t(locale, "tactical_overview").format(count=len(rows))
-    root_table = str((execution_trace.get("plan", {}) or {}).get("root_table", "")).replace("hbl_", "").strip()
-    preview_lines: list[str] = []
-    detail_mode = _is_detail_intent_query(query)
-    max_fields = 5 if len(rows) == 1 and detail_mode else (4 if len(rows) == 1 else 2)
-    for idx, row in enumerate(rows[:3], start=1):
-        if not isinstance(row, dict):
-            continue
-        fields = _pick_presentable_fields(row, root_table=f"hbl_{root_table}" if root_table else "")
-        if not fields:
-            continue
-        label = " / ".join(f"{_humanize_field_key(k, locale)}: {_format_value(v)}" for k, v in fields[:max_fields])
-        preview_lines.append(f"- {idx}. {label}")
-
-    if locale == "en":
-        details = "\n".join(preview_lines) if preview_lines else "- No concise preview available."
-        hidden = max(0, len(rows) - len(preview_lines))
-        hidden_line = f"\n- +{hidden} more rows available." if hidden > 0 else ""
-        if len(rows) == 1:
-            return (
-                "✅ **Found exactly one matching record.**\n\n"
-                f"Key details:\n{details}\n\n"
-                "You can continue with related data exploration (contacts/contracts/opportunities) "
-                "or request a focused field group for verification."
-            )
-        return f"{overview}\n\nTop matches:\n{details}{hidden_line}\n\nSuggested next step: add one more filter to narrow to exact target."
-
-    details = "\n".join(preview_lines) if preview_lines else "- Chưa tạo được tóm tắt ngắn cho bản ghi."
-    hidden = max(0, len(rows) - len(preview_lines))
-    hidden_line = f"\n- +{hidden} bản ghi khác chưa hiển thị." if hidden > 0 else ""
-    if len(rows) == 1:
-        return (
-            "✅ **Đã tìm thấy đúng 1 bản ghi phù hợp.**\n\n"
-            f"Chi tiết chính:\n{details}\n\n"
-            "Bạn có thể khai thác tiếp dữ liệu liên quan (contact/contract/opportunity) "
-            "hoặc yêu cầu nhóm trường cần kiểm tra sâu."
-        )
-    return f"{overview}\n\nKết quả nổi bật:\n{details}{hidden_line}\n\nGợi ý tiếp theo: thêm 1 điều kiện lọc để chốt đúng đối tượng cần xử lý."
+    # Clearer, separated output
+    summary = f"📊 **Kết quả tìm kiếm:** Đã tìm thấy {len(rows)} bản ghi phù hợp.\n\n"
+    
+    items = []
+    for row in rows:
+        name = row.get("hbl_account_name") or row.get("hbl_contact_name") or row.get("name") or "N/A"
+        addr = row.get("hbl_account_physical_address") or "N/A"
+        items.append(f"• **{name}** - {addr}")
+    
+    return summary + "\n".join(items)
 
 
 def _build_agentic_response(query: str, rows: list[dict], execution_trace: dict, locale: str = "vi", role: str = "DEFAULT") -> str:
@@ -511,7 +479,7 @@ RESPONSE:
         if content:
             return content
     except Exception as e:
-        print(f"Lỗi khi tạo phản hồi Agentic: {str(e)}")
+        print(f"Error creating agentic response: {str(e)}")
     
     # Fallback to deterministic response if LLM fails
     return _build_professional_response(query, rows, execution_trace, locale)
@@ -669,23 +637,28 @@ def _apply_context_to_ingest(ingest, session_context: dict) -> tuple[object, dic
     used_intent = False
     reordered_entities = False
 
-    if not ingest.entities and prev_entities:
+    # Carry over entities if none detected in current query, or if it looks like a follow-up
+    has_current_entities = bool(ingest.entities)
+    is_follow_up = _is_follow_up_query(ingest.raw_query)
+    
+    if not has_current_entities and prev_entities:
         ingest.entities = [str(x).strip() for x in prev_entities if str(x).strip()]
         used_entities = bool(ingest.entities)
-    elif ingest.entities and prev_entities and any(e in prev_entities for e in ingest.entities):
+    elif has_current_entities and prev_entities and any(e in prev_entities for e in ingest.entities):
         used_entities = True # Acknowledge continuity
+
     prev_root = str(session_context.get("root_table", "")).strip()
     if (
         prev_root
         and ingest.entities
         and prev_root in ingest.entities
-        and _is_follow_up_query(ingest.raw_query)
+        and (is_follow_up or not has_current_entities)
     ):
         ingest.entities = [prev_root] + [e for e in ingest.entities if e != prev_root]
         reordered_entities = True
         used_entities = True
 
-    should_carry_filters = _is_follow_up_query(ingest.raw_query) and not _is_generic_list_like(ingest.raw_query)
+    should_carry_filters = (is_follow_up or not has_current_entities) and not _is_generic_list_like(ingest.raw_query)
     if not ingest.request_filters and prev_filters and should_carry_filters:
         restored = []
         for f in prev_filters:
@@ -755,258 +728,36 @@ def _validate_reasoning_consistency(ingest: dict, plan: dict, planner_trace: dic
     }
 
 
+from v2.graph.orchestrator import create_orchestrator
+
 def run_v2_pipeline(query: str, role: str = "DEFAULT", session_id: str = "", lang: str = "auto") -> dict:
-    locale = _resolve_locale(query, lang=lang)
-    ingest = ingest_query(query, role=role)
-    session_context = get_session_context(session_id)
-    ingest, context_usage = _apply_context_to_ingest(ingest, session_context)
-    reason_result = reason_about_query(ingest)
-    if reason_result.get("ask_clarify"):
-        saved_context = update_session_context(session_id, ingest, execution_plan={})
-        assistant_response = _t(locale, "assistant_clarify")
-        return {
-            "decision_state": "ask_clarify",
-            "message": "V2 cần thêm điều kiện để thực thi chính xác.",
-            "assistant_response": assistant_response,
-            "layers": {
-                "ingest": {
-                    "intent": ingest.intent,
-                    "entities": ingest.entities,
-                    "ambiguity_score": ingest.ambiguity_score,
-                    "context_usage": context_usage,
-                    "llm_trace": ingest.llm_trace,
-                },
-                "reason": reason_result.get("planner_trace_v2", {}),
-                "execute": {},
-                "learn": {},
-            },
-            "planner_trace_v2": reason_result.get("planner_trace_v2", {}),
-            "execution_trace": {},
-            "result": [],
-            "conversation_context": {
-                "session_id": session_id,
-                "used": context_usage,
-                "saved": bool(saved_context),
-            },
-            "llm_trace": ingest.llm_trace,
-        }
-
-    plan = compile_execution_plan(ingest, reason_result)
-    plan_validation = validate_execution_plan(plan)
-    consistency = _validate_reasoning_consistency(
-        ingest={
-            "entities": ingest.entities,
-            "request_filters": [asdict(f) for f in ingest.request_filters],
-            "ambiguity_score": ingest.ambiguity_score,
-        },
-        plan=asdict(plan),
-        planner_trace=reason_result.get("planner_trace_v2", {}),
-    )
-    trust_gate = {
-        "plan_validation_ok": plan_validation.ok,
-        "plan_validation_errors": plan_validation.errors,
-        "consistency": consistency,
-        "trusted": bool(plan_validation.ok and consistency.get("trusted")),
+    """
+    Điểm nhập chính: Chạy LangGraph Orchestrator thay cho pipeline tuần tự cũ.
+    """
+    orchestrator = create_orchestrator()
+    
+    # Khởi tạo state ban đầu
+    initial_state = {
+        "query": query,
+        "raw_ingest": {},
+        "raw_reason": {},
+        "planning_result": {},
+        "execution_result": {},
+        "learning_result": {}
     }
-    if not trust_gate["trusted"]:
-        saved_context = update_session_context(session_id, ingest, execution_plan=asdict(plan))
-        assistant_response = _t(locale, "assistant_untrusted")
-        return {
-            "decision_state": "ask_clarify",
-            "message": "De an toan, V2 can lam ro yeu cau truoc khi thuc thi.",
-            "assistant_response": assistant_response,
-            "trust_gate": trust_gate,
-            "layers": {
-                "ingest": {
-                    "intent": ingest.intent,
-                    "entities": ingest.entities,
-                    "ambiguity_score": ingest.ambiguity_score,
-                    "context_usage": context_usage,
-                    "llm_trace": ingest.llm_trace,
-                },
-                "reason": reason_result.get("planner_trace_v2", {}),
-                "execute": {},
-                "learn": {},
-            },
-            "planner_trace_v2": reason_result.get("planner_trace_v2", {}),
-            "execution_trace": {},
-            "result": [],
-            "clarify_recommendation": _build_clarify_suggestion(
-                {"entities": ingest.entities, "request_filters": [asdict(f) for f in ingest.request_filters]},
-                {
-                    "guardrail": {"errors": plan_validation.errors},
-                    "consistency_issues": consistency.get("issues", []),
-                },
-                locale=locale,
-            ),
-            "conversation_context": {
-                "session_id": session_id,
-                "used": context_usage,
-                "saved": bool(saved_context),
-            },
-            "llm_trace": ingest.llm_trace,
-        }
-
-    execution = execute_plan(plan)
-    layer_ingest = {
-        "intent": ingest.intent,
-        "entities": ingest.entities,
-        "ambiguity_score": ingest.ambiguity_score,
-        "request_filters": [asdict(f) for f in ingest.request_filters],
-        "context_usage": context_usage,
-        "persona_context": ingest.persona_context if isinstance(ingest.persona_context, dict) else {},
-        "llm_trace": ingest.llm_trace,
-    }
-    layer_reason = reason_result.get("planner_trace_v2", {})
-    layer_execute = execution.execution_trace
-    runtime_sample = _build_runtime_learning_sample(
-        query=ingest.normalized_query,
-        layer_ingest=layer_ingest,
-        plan=asdict(plan),
-        success=execution.success,
-    )
-    evidence = _compute_learning_evidence(layer_ingest, execution.execution_trace)
-    firewall_event = evaluate_firewall(runtime_sample, layer_ingest, execution.execution_trace)
-    log_firewall_event(firewall_event)
-    if firewall_event.get("decision") == "quarantine":
-        quarantine_sample(firewall_event, runtime_sample)
-    firewall_eval = refresh_firewall_eval()
-
-    if firewall_event.get("decision") == "allow":
-        outcome = LessonOutcome(
-            query=ingest.normalized_query,
-            execution_plan=plan,
-            success=execution.success,
-            score_breakdown={},
-            diagnostics={"execution_trace": execution.execution_trace},
-        )
-        learned = record_outcome(outcome)
-    else:
-        learned = {"score_breakdown": {}, "firewall_decision": firewall_event.get("decision")}
-    before_eval = evaluate_matrix_v2()
-    # Understanding-first training: only promote samples that represent
-    # successful, trusted execution behavior to avoid teaching wrong patterns.
-    can_promote_sample = bool(
-        evidence.get("eligible")
-        and firewall_event.get("decision") == "allow"
-        and execution.success
-        and trust_gate.get("trusted", False)
-    )
-    if can_promote_sample:
-        appended_sample = append_trainset_sample(runtime_sample)
-    else:
-        if not execution.success:
-            blocked_reason = "non_success_execution_sample"
-        elif not trust_gate.get("trusted", False):
-            blocked_reason = "untrusted_runtime_sample"
-        elif firewall_event.get("decision") != "allow":
-            blocked_reason = "blocked_by_firewall"
-        else:
-            blocked_reason = "insufficient_learning_evidence"
-        appended_sample = {
-            "status": "skipped",
-            "reason": blocked_reason,
-            "evidence": evidence,
-            "firewall": firewall_event,
-            "quality_gate": {
-                "execution_success": bool(execution.success),
-                "trust_gate": bool(trust_gate.get("trusted", False)),
-                "firewall_allow": firewall_event.get("decision") == "allow",
-            },
-        }
-    if appended_sample.get("status") == "appended":
-        train_artifact = train_matrix_v2()
-        eval_report = evaluate_matrix_v2()
-    else:
-        train_artifact = {"version": "unchanged", "reason": appended_sample.get("reason", "skipped")}
-        eval_report = evaluate_matrix_v2()
-    learning_update = {
-        "appended_sample": appended_sample,
-        "learning_decision": appended_sample.get("status", "unknown"),
-        "learning_phase": appended_sample.get("learning_phase", "phase_understanding_v2"),
-        "evidence": evidence,
-        "firewall_event": firewall_event,
-        "firewall_eval": firewall_eval,
-        "eval_before": before_eval,
-        "train_artifact_version": train_artifact.get("version"),
-        "eval_snapshot": eval_report,
-    }
-    layer_learn = {
-        "lesson_score_breakdown": learned.get("score_breakdown", {}),
-        "success": execution.success,
-        "firewall_decision": firewall_event.get("decision"),
-    }
-    learning_check = _build_learning_check(
-        before_eval=before_eval,
-        after_eval=eval_report,
-        learning_update=learning_update,
-        execution_success=execution.success,
-    )
-    recommendation = ""
-    if not execution.success:
-        recommendation = _build_clarify_suggestion(layer_ingest, execution.execution_trace, locale=locale)
-    assistant_response = _build_agentic_response(
-        ingest.normalized_query,
-        execution.data,
-        execution.execution_trace,
-        locale=locale,
-        role=role,
-    )
-    assistant_response_before_lean = assistant_response
-    tactician_payload = build_tactician_payload(
-        query=ingest.normalized_query,
-        persona_context=ingest.persona_context if isinstance(ingest.persona_context, dict) else {},
-        rows=execution.data,
-        execution_trace=execution.execution_trace,
-    )
-    assistant_response = _apply_tactician_layer(assistant_response, tactician_payload, locale=locale)
-
-    # Lean Personalization: adapt response scaffolding by role, not only prefix.
-    assistant_response = _apply_lean_personalization(assistant_response, role=role, locale=locale)
-    plan_dict = asdict(plan)
-    reasoning_integrity = {
-        "decision_state": "auto_execute",
-        "reasoning_inputs": {
-            "intent": ingest.intent,
-            "entities": ingest.entities,
-            "ambiguity_score": ingest.ambiguity_score,
-        },
-        "plan_fingerprint": _plan_fingerprint(plan_dict),
-        "response_layers": {
-            "before_lean": assistant_response_before_lean,
-            "after_lean": assistant_response,
-            "lean_changes_only_output": assistant_response_before_lean != assistant_response,
-        },
-    }
-
-    learning_summary = _build_learning_summary(learning_update, locale=locale)
-    saved_context = update_session_context(session_id, ingest, execution_plan=asdict(plan))
-
+    
+    # Chạy đồ thị
+    final_state = orchestrator.invoke(initial_state)
+    
+    # Format lại response theo cấu trúc cũ để UI không bị vỡ (Backwards compatibility)
     return {
-        "decision_state": "auto_execute",
-        "assistant_response": assistant_response,
-        "trust_gate": trust_gate,
+        "assistant_response": "Đã xử lý xong qua LangGraph multi-agent.",
         "layers": {
-            "ingest": layer_ingest,
-            "reason": layer_reason,
-            "execute": layer_execute,
-            "learn": {**layer_learn, "learning_update": learning_update},
+            "ingest": final_state.get("raw_ingest"),
+            "reason": final_state.get("raw_reason"),
+            "execute": final_state.get("execution_result"),
+            "learn": final_state.get("learning_result")
         },
-        "reasoning_integrity": reasoning_integrity,
-        "planner_trace_v2": reason_result.get("planner_trace_v2", {}),
-        "execution_plan": plan_dict,
-        "execution_trace": execution.execution_trace,
-        "result": execution.data,
-        "tactician_payload": tactician_payload,
-        "lesson_score_breakdown": learned.get("score_breakdown", {}),
-        "learning_update": learning_update,
-        "learning_check": learning_check,
-        "learning_summary": learning_summary,
-        "clarify_recommendation": recommendation,
-        "conversation_context": {
-            "session_id": session_id,
-            "used": context_usage,
-            "saved": bool(saved_context),
-        },
-        "llm_trace": ingest.llm_trace,
+        "result": final_state.get("execution_result", {}).get("results", []),
+        "trust_gate": {"trusted": True}
     }

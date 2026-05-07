@@ -1,32 +1,14 @@
 {
-  "v2-1777973526733-gra9t20y": {
-    "ts": 1777973641.9446418,
+  "v2-1778126969766-agdxr0st": {
+    "ts": 1778129153.3181133,
     "intent": "retrieve",
     "entities": [
-      "hbl_contact",
       "hbl_account"
     ],
-    "request_filters": [
-      {
-        "field": "hbl_account.hbl_contact_name",
-        "op": "eq",
-        "value": "<redacted>"
-      },
-      {
-        "field": "hbl_contact.hbl_contact_name",
-        "op": "eq",
-        "value": "<redacted>"
-      }
-    ],
+    "request_filters": [],
     "root_table": "hbl_account",
-    "join_path": [
-      {
-        "from_table": "hbl_account",
-        "to_table": "hbl_contact",
-        "relation_type": "metadata_lookup_path"
-      }
-    ],
-    "last_query": "thông tin account liên quan tới contact Demo Contact <num>",
-    "last_normalized_query": "thông tin account liên quan tới contact Demo Contact <num>"
+    "join_path": [],
+    "last_query": "danh sách account",
+    "last_normalized_query": "danh sách account"
   }
 }

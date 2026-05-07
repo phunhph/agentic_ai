@@ -57,5 +57,5 @@ if __name__ == "__main__":
     test_json_response_validation()
     
     print("\n" + "="*60)
-    print("✓ All tests completed")
+    print("[OK] All tests completed")
     print("="*60 + "\n")

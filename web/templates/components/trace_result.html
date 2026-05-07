@@ -1,0 +1,73 @@
+<div class="grid grid-cols-12 gap-6 p-4 h-full">
+    <!-- Left: Core Insight (Assistant & Data) -->
+    <div class="col-span-8 space-y-6">
+        <!-- Assistant Response -->
+        <div class="bg-slate-900 border border-slate-700 p-6 rounded-xl shadow-2xl">
+            <h3 class="text-xs font-bold text-slate-400 uppercase mb-4 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-blue-500"></span> Assistant Response
+            </h3>
+            <div class="text-sm text-slate-200 leading-relaxed">{{ assistant_response | safe }}</div>
+        </div>
+
+        <!-- Retrieved Data Table -->
+        {% if result %}
+        <div class="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden">
+            <h4 class="text-[10px] font-bold text-slate-500 uppercase p-4 border-b border-slate-800 bg-slate-950/50">Retrieved Dataset ({{ result|length }} records)</h4>
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left">
+                    <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
+                        <tr>
+                            <th class="p-3">Record Name</th>
+                            <th class="p-3">ID (Snippet)</th>
+                            <th class="p-3">Created</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800 text-slate-300">
+                        {% for row in result[:10] %}
+                        <tr>
+                            <td class="p-3 font-semibold text-white">{{ row.get('hbl_account_name') or row.get('hbl_contact_name') or 'N/A' }}</td>
+                            <td class="p-3 font-mono text-slate-500">{{ row.values()|first|truncate(8, True) }}</td>
+                            <td class="p-3">{{ row.get('createdon', 'N/A')|truncate(10, True) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Right: Agentic Telemetry (Reasoning, Evolution, Trust) -->
+    <div class="col-span-4 space-y-6">
+        <!-- Reasoning -->
+        <div class="bg-slate-900 border border-slate-700 p-5 rounded-xl">
+            <h4 class="text-[10px] font-bold text-slate-500 uppercase mb-3 flex justify-between">
+                Reasoning Logic
+                <span class="text-indigo-400">{{ layers.ingest.intent | upper }}</span>
+            </h4>
+            <p class="text-xs text-slate-400 italic font-mono leading-relaxed bg-slate-950 p-3 rounded border border-slate-800">
+                "{{ layers.reason.thought_process }}"
+            </p>
+        </div>
+
+        <!-- Evolutionary Learning -->
+        <div class="bg-slate-900 border border-slate-700 p-5 rounded-xl">
+            <h4 class="text-[10px] font-bold text-slate-500 uppercase mb-4">Evolutionary Metrics</h4>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-slate-400">Trust Score:</span>
+                    <span class="{{ 'text-emerald-400' if trust_gate.trusted else 'text-amber-400' }} font-bold">
+                        {{ 'VERIFIED' if trust_gate.trusted else 'CAUTION' }}
+                    </span>
+                </div>
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-slate-400">Learning:</span>
+                    <span class="text-blue-400 font-mono">{{ layers.learn.learning_update.learning_decision }}</span>
+                </div>
+                <div class="pt-3 border-t border-slate-800">
+                    <p class="text-[10px] text-slate-500 italic">{{ layers.learn.learning_summary }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
