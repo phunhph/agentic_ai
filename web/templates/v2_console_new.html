@@ -2,81 +2,139 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>DANN | INDUSTRIAL COCKPIT</title>
+    <title>DANN | AGENTIC ORCHESTRATOR</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background: #09090b; color: #a1a1aa; font-family: 'Inter', sans-serif; }
-        .log-line { border-left: 2px solid #27272a; padding-left: 10px; margin-bottom: 4px; font-size: 11px; }
-        .log-ingest { border-left-color: #3b82f6; color: #bfdbfe; }
-        .log-reason { border-left-color: #8b5cf6; color: #ddd6fe; }
-        .log-plan { border-left-color: #10b981; color: #a7f3d0; }
-        .log-execute { border-left-color: #f59e0b; color: #fde68a; }
-        .log-learn { border-left-color: #ec4899; color: #fbcfe8; }
+        .node-active { border-color: #3b82f6 !important; background: #1e3a8a !important; color: #fff !important; }
+        .node-done { border-color: #10b981 !important; color: #34d399 !important; }
     </style>
 </head>
 <body class="h-screen flex flex-col">
-    <header class="h-12 border-b border-zinc-800 flex items-center px-4 justify-between bg-zinc-900">
-        <div class="flex items-center gap-4">
-            <span class="font-bold text-white text-sm">DANN <span class="text-zinc-500">INDUSTRIAL</span></span>
-            <div class="h-6 w-px bg-zinc-700"></div>
-            <button onclick="performAction('reset')" class="text-[10px] text-zinc-500 hover:text-white uppercase font-bold">RESET</button>
-            <button onclick="performAction('retrain')" class="text-[10px] text-zinc-500 hover:text-white uppercase font-bold">RETRAIN</button>
+    <!-- Header -->
+    <header class="h-14 border-b border-zinc-800 flex items-center px-6 justify-between bg-zinc-900">
+        <div class="flex items-center gap-6">
+            <span class="font-bold text-white text-sm">DANN <span class="text-zinc-500">ORCHESTRATOR</span></span>
+            <nav class="flex gap-4">
+                <button onclick="performAction('reset')" class="text-[10px] text-zinc-500 hover:text-white uppercase font-bold">RESET</button>
+                <button onclick="performAction('retrain')" class="text-[10px] text-zinc-500 hover:text-white uppercase font-bold">RETRAIN</button>
+            </nav>
         </div>
-        <div id="runtime-status" class="px-2 py-0.5 rounded bg-zinc-800 text-[9px] text-zinc-400 font-bold uppercase tracking-widest">IDLE</div>
+        <div id="runtime-status" class="px-3 py-1 rounded bg-zinc-800 text-[10px] text-zinc-400 font-bold uppercase tracking-widest">IDLE</div>
     </header>
 
     <div class="flex-1 flex overflow-hidden">
-        <!-- Sidebar: Trace Stream -->
-        <div class="w-1/3 border-r border-zinc-800 flex flex-col bg-zinc-950">
-            <div class="p-3 border-b border-zinc-800 text-[10px] font-bold text-zinc-500 uppercase">Live Trace Stream</div>
-            <div id="logContainer" class="flex-1 overflow-y-auto p-4 font-mono"></div>
+        <!-- Visualization Pane -->
+        <div class="w-1/4 border-r border-zinc-800 bg-zinc-950 p-6">
+            <h2 class="text-[10px] font-bold text-zinc-500 uppercase mb-6">Agentic Flow Map</h2>
+            <div id="graphFlow" class="space-y-4">
+                <div id="node-ingest" class="p-3 border border-zinc-800 rounded text-xs font-bold uppercase">1. Ingest Agent</div>
+                <div id="node-reason" class="p-3 border border-zinc-800 rounded text-xs font-bold uppercase">2. Reasoning Agent</div>
+                <div id="node-plan" class="p-3 border border-zinc-800 rounded text-xs font-bold uppercase">3. Planning Agent</div>
+                <div id="node-execute" class="p-3 border border-zinc-800 rounded text-xs font-bold uppercase">4. Execution Agent</div>
+                <div id="node-learn" class="p-3 border border-zinc-800 rounded text-xs font-bold uppercase">5. Learning Agent</div>
+            </div>
         </div>
 
         <!-- Main Workspace -->
-        <div class="w-2/3 flex flex-col p-6 overflow-y-auto">
+        <div class="flex-1 flex flex-col p-6 overflow-hidden">
             <form id="queryForm" class="mb-6">
-                <textarea id="goalInput" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded text-sm text-zinc-200 focus:border-zinc-500 outline-none" placeholder="Execute neural query..."></textarea>
-                <button type="submit" class="mt-2 bg-white text-black px-6 py-2 rounded text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-200">Submit Task</button>
+                <textarea id="goalInput" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded text-sm text-zinc-200 outline-none" placeholder="Enter query for the swarm..."></textarea>
+                <button type="submit" class="mt-2 bg-white text-black px-6 py-2 rounded text-[10px] font-bold uppercase hover:bg-zinc-200">Dispatch Task</button>
             </form>
-            <div id="resultOutput" class="space-y-6"></div>
+            <div id="resultOutput" class="flex-1 overflow-y-auto pr-2 space-y-4"></div>
         </div>
     </div>
 
     <script>
-        const logContainer = document.getElementById('logContainer');
-        const resultOutput = document.getElementById('resultOutput');
         const statusEl = document.getElementById('runtime-status');
+        const resultOutput = document.getElementById('resultOutput');
 
-        function appendLog(phase, msg) {
-            const line = document.createElement('div');
-            line.className = `log-line log-${phase.toLowerCase()}`;
-            line.innerHTML = `<span class="opacity-50">${new Date().toLocaleTimeString()}</span> [${phase.toUpperCase()}] ${msg}`;
-            logContainer.prepend(line);
+        async function updateNode(nodeId, state) {
+            const el = document.getElementById(`node-${nodeId}`);
+            el.classList.remove('node-active', 'node-done');
+            if (state === 'active') el.classList.add('node-active');
+            if (state === 'done') el.classList.add('node-done');
         }
 
         document.getElementById('queryForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const goal = document.getElementById('goalInput').value;
-            statusEl.textContent = 'RUNNING'; statusEl.className = 'px-2 py-0.5 rounded bg-blue-900/50 text-blue-400 border border-blue-800 text-[9px] font-bold uppercase';
+            statusEl.textContent = 'ORCHESTRATING';
             
-            appendLog('Ingest', 'Starting parse: ' + goal.slice(0, 20));
+            const nodes = ['ingest', 'reason', 'plan', 'execute', 'learn'];
+            for(const n of nodes) {
+                updateNode(n, 'active');
+                await new Promise(r => setTimeout(r, 600)); // Simulate agent hop
+                updateNode(n, 'done');
+            }
+
             const form = new FormData(); form.append('goal', goal);
-            
             const res = await fetch('/api/v2/run', { method: 'POST', body: form });
             const html = await res.text();
             
-            appendLog('Reason', 'Intent Resolved & Plan Validated');
-            appendLog('Execute', 'Database Operation Commited');
-            appendLog('Learn', 'Matrix evolution checked');
-            
             resultOutput.innerHTML = html;
-            statusEl.textContent = 'IDLE'; statusEl.className = 'px-2 py-0.5 rounded bg-zinc-800 text-[9px] text-zinc-400 font-bold uppercase';
+            _executeInjectedScripts(resultOutput);
+            statusEl.textContent = 'IDLE';
         });
 
         async function performAction(type) {
-            const res = await fetch(`/api/v2/action/${type}`, { method: 'POST', body: new FormData() });
-            appendLog('Learn', `System action ${type} triggered.`);
+            await fetch(`/api/v2/action/${type}`, { method: 'POST', body: new FormData() });
+            alert(`System action ${type} initiated.`);
         }
+
+        function _executeInjectedScripts(container) {
+            const scripts = container.querySelectorAll('script');
+            scripts.forEach((script) => {
+                const newScript = document.createElement('script');
+                if (script.src) {
+                    newScript.src = script.src;
+                } else {
+                    newScript.textContent = script.textContent;
+                }
+                document.body.appendChild(newScript);
+                document.body.removeChild(newScript);
+            });
+        }
+
+        window.showAgentTrace = function(agent, traceData) {
+            const modal = document.getElementById('traceModal');
+            const title = document.getElementById('traceModalTitle');
+            const content = document.getElementById('traceModalContent');
+            const agentNames = {
+                'ingest': '① INGEST AGENT - Input/Output & Intent Detection',
+                'reason': '② REASONING AGENT - Decision Logic & Planning',
+                'execute': '③ EXECUTION AGENT - Database Query & Results',
+                'learn': '④ LEARNING AGENT - Knowledge Update & Feedback'
+            };
+            title.textContent = agentNames[agent] || 'Agent Trace';
+            let formattedContent = '';
+            try {
+                const ioTrace = traceData.io_trace || {};
+                formattedContent += '📊 AGENT: ' + agent.toUpperCase() + '\n';
+                formattedContent += '═'.repeat(70) + '\n\n';
+                if (Object.keys(ioTrace).length > 0) {
+                    formattedContent += '🔄 INPUT/OUTPUT TRACE:\n';
+                    if (ioTrace.input) {
+                        formattedContent += '  INPUT:\n' + JSON.stringify(ioTrace.input, null, 4) + '\n\n';
+                    }
+                    if (ioTrace.output) {
+                        formattedContent += '  OUTPUT:\n' + JSON.stringify(ioTrace.output, null, 4) + '\n\n';
+                    }
+                    formattedContent += '─'.repeat(70) + '\n\n';
+                }
+                formattedContent += JSON.stringify(traceData, null, 2);
+            } catch (e) {
+                formattedContent = 'Error formatting trace: ' + e.message + '\n\n' + JSON.stringify(traceData, null, 2);
+            }
+            content.textContent = formattedContent;
+            modal.classList.remove('hidden');
+        };
+
+        window.closeTraceModal = function() {
+            const modal = document.getElementById('traceModal');
+            modal.classList.add('hidden');
+        };
     </script>
 </body>
 </html>

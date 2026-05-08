@@ -25,7 +25,12 @@ class LearningAgent:
         train_matrix_v2()
         
         return {
-            "status": "LEARNED",
-            "evolution_metrics": {"version_updated": True},
-            "firewall_event": event
+            "learning_result": {
+                "learning_summary": "Learning phase completed",
+                "learning_update": {
+                    "learning_decision": "trained",
+                    "evidence": event
+                },
+                "firewall_event": event
+            }
         }

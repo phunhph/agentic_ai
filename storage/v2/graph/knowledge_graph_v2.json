@@ -1,80 +1,80 @@
 {
-  "version": "dann-graph-20260507034110",
-  "trained_at": "2026-05-07T03:41:10.181757+00:00",
+  "version": "dann-graph-20260508053646",
+  "trained_at": "2026-05-08T05:36:46.326292+00:00",
   "node_count": 18,
   "edge_count": 37,
   "nodes": [
     {
       "id": "intent:unknown",
-      "support": 192
+      "support": 1056
     },
     {
       "id": "table:hbl_account",
-      "support": 378
+      "support": 2106
     },
     {
       "id": "tool:list_accounts",
-      "support": 96
+      "support": 528
     },
     {
       "id": "tool:list_contacts",
-      "support": 40
+      "support": 220
     },
     {
       "id": "tool:list_opportunities",
-      "support": 8
+      "support": 44
     },
     {
       "id": "tool:create_contract",
-      "support": 8
+      "support": 44
     },
     {
       "id": "tool:get_account_360",
-      "support": 16
+      "support": 88
     },
     {
       "id": "tool:dynamic_query",
-      "support": 8
+      "support": 44
     },
     {
       "id": "tool:get_account_overview",
-      "support": 8
+      "support": 44
     },
     {
       "id": "intent:retrieve",
-      "support": 288
+      "support": 1620
     },
     {
       "id": "tool:v2_query_executor",
-      "support": 624
+      "support": 3468
     },
     {
       "id": "intent:analyze",
-      "support": 288
+      "support": 1584
     },
     {
       "id": "table:hbl_contract",
-      "support": 128
+      "support": 704
     },
     {
       "id": "table:hbl_contact",
-      "support": 176
+      "support": 968
     },
     {
       "id": "table:hbl_opportunities",
-      "support": 120
+      "support": 660
     },
     {
       "id": "intent:create",
-      "support": 24
+      "support": 132
     },
     {
       "id": "intent:update",
-      "support": 16
+      "support": 88
     },
     {
       "id": "table:systemuser",
-      "support": 6
+      "support": 42
     }
   ],
   "edges": [
@@ -83,259 +83,259 @@
       "to": "table:hbl_account",
       "type": "maps_to",
       "weight": 0.0,
-      "support": 92
+      "support": 506
     },
     {
       "from": "table:hbl_account",
       "to": "tool:list_accounts",
       "type": "served_by",
       "weight": 0.0,
-      "support": 48
+      "support": 264
     },
     {
       "from": "intent:unknown",
       "to": "tool:list_accounts",
       "type": "selects",
       "weight": 0.0,
-      "support": 48
+      "support": 264
     },
     {
       "from": "table:hbl_account",
       "to": "tool:list_contacts",
       "type": "served_by",
       "weight": 0.0,
-      "support": 20
+      "support": 110
     },
     {
       "from": "intent:unknown",
       "to": "tool:list_contacts",
       "type": "selects",
       "weight": 0.0,
-      "support": 20
+      "support": 110
     },
     {
       "from": "table:hbl_account",
       "to": "tool:list_opportunities",
       "type": "served_by",
-      "weight": 0.10000000000000003,
-      "support": 4
+      "weight": 0.0,
+      "support": 22
     },
     {
       "from": "intent:unknown",
       "to": "tool:list_opportunities",
       "type": "selects",
-      "weight": 0.10000000000000003,
-      "support": 4
+      "weight": 0.0,
+      "support": 22
     },
     {
       "from": "table:hbl_account",
       "to": "tool:create_contract",
       "type": "served_by",
-      "weight": 0.10000000000000003,
-      "support": 4
+      "weight": 0.0,
+      "support": 22
     },
     {
       "from": "intent:unknown",
       "to": "tool:create_contract",
       "type": "selects",
-      "weight": 0.10000000000000003,
-      "support": 4
+      "weight": 0.0,
+      "support": 22
     },
     {
       "from": "table:hbl_account",
       "to": "tool:get_account_360",
       "type": "served_by",
       "weight": 0.0,
-      "support": 8
+      "support": 44
     },
     {
       "from": "intent:unknown",
       "to": "tool:get_account_360",
       "type": "selects",
       "weight": 0.0,
-      "support": 8
+      "support": 44
     },
     {
       "from": "table:hbl_account",
       "to": "tool:dynamic_query",
       "type": "served_by",
-      "weight": 0.10000000000000003,
-      "support": 4
+      "weight": 0.0,
+      "support": 22
     },
     {
       "from": "intent:unknown",
       "to": "tool:dynamic_query",
       "type": "selects",
-      "weight": 0.10000000000000003,
-      "support": 4
+      "weight": 0.0,
+      "support": 22
     },
     {
       "from": "table:hbl_account",
       "to": "tool:get_account_overview",
       "type": "served_by",
-      "weight": 0.10000000000000003,
-      "support": 4
+      "weight": 0.0,
+      "support": 22
     },
     {
       "from": "intent:unknown",
       "to": "tool:get_account_overview",
       "type": "selects",
-      "weight": 0.10000000000000003,
-      "support": 4
+      "weight": 0.0,
+      "support": 22
     },
     {
       "from": "intent:retrieve",
       "to": "table:hbl_account",
       "type": "maps_to",
       "weight": 0.9500000000000001,
-      "support": 37
+      "support": 217
     },
     {
       "from": "table:hbl_account",
       "to": "tool:v2_query_executor",
       "type": "served_by",
       "weight": 0.9000000000000002,
-      "support": 97
+      "support": 547
     },
     {
       "from": "intent:retrieve",
       "to": "tool:v2_query_executor",
       "type": "selects",
-      "weight": 0.5000000000000047,
-      "support": 144
+      "weight": 0.6000000000000005,
+      "support": 810
     },
     {
       "from": "intent:analyze",
       "to": "table:hbl_account",
       "type": "maps_to",
-      "weight": 0.5000000000000018,
-      "support": 48
+      "weight": 0.5000000000000098,
+      "support": 264
     },
     {
       "from": "intent:analyze",
       "to": "tool:v2_query_executor",
       "type": "selects",
       "weight": 0.05,
-      "support": 144
+      "support": 792
     },
     {
       "from": "intent:analyze",
       "to": "table:hbl_contract",
       "type": "maps_to",
       "weight": 0.0,
-      "support": 36
+      "support": 198
     },
     {
       "from": "table:hbl_contract",
       "to": "tool:v2_query_executor",
       "type": "served_by",
       "weight": 0.0,
-      "support": 64
+      "support": 352
     },
     {
       "from": "intent:retrieve",
       "to": "table:hbl_contact",
       "type": "maps_to",
-      "weight": 0.5000000000000009,
-      "support": 48
+      "weight": 0.5000000000000049,
+      "support": 264
     },
     {
       "from": "table:hbl_contact",
       "to": "tool:v2_query_executor",
       "type": "served_by",
       "weight": 0.15000000000000002,
-      "support": 88
+      "support": 484
     },
     {
       "from": "intent:analyze",
       "to": "table:hbl_contact",
       "type": "maps_to",
       "weight": 0.05,
-      "support": 36
+      "support": 198
     },
     {
       "from": "intent:retrieve",
       "to": "table:hbl_contract",
       "type": "maps_to",
       "weight": 0.0,
-      "support": 28
+      "support": 154
     },
     {
       "from": "intent:analyze",
       "to": "table:hbl_opportunities",
       "type": "maps_to",
       "weight": 0.05,
-      "support": 24
+      "support": 132
     },
     {
       "from": "table:hbl_opportunities",
       "to": "tool:v2_query_executor",
       "type": "served_by",
       "weight": 0.15000000000000002,
-      "support": 60
+      "support": 330
     },
     {
       "from": "intent:retrieve",
       "to": "table:hbl_opportunities",
       "type": "maps_to",
-      "weight": 0.700000000000001,
-      "support": 28
+      "weight": 0.9500000000000001,
+      "support": 154
     },
     {
       "from": "intent:create",
       "to": "table:hbl_account",
       "type": "maps_to",
       "weight": 0.5,
-      "support": 12
+      "support": 66
     },
     {
       "from": "intent:create",
       "to": "tool:v2_query_executor",
       "type": "selects",
       "weight": 0.5,
-      "support": 12
+      "support": 66
     },
     {
       "from": "intent:update",
       "to": "table:hbl_opportunities",
       "type": "maps_to",
-      "weight": 0.29999999999999993,
-      "support": 8
+      "weight": 0.05,
+      "support": 44
     },
     {
       "from": "intent:update",
       "to": "tool:v2_query_executor",
       "type": "selects",
-      "weight": 0.29999999999999993,
-      "support": 8
+      "weight": 0.05,
+      "support": 44
     },
     {
       "from": "intent:unknown",
       "to": "table:hbl_contact",
       "type": "maps_to",
-      "weight": 0.7000000000000002,
-      "support": 4
+      "weight": 1.0,
+      "support": 22
     },
     {
       "from": "intent:unknown",
       "to": "tool:v2_query_executor",
       "type": "selects",
-      "weight": 0.7000000000000002,
-      "support": 4
+      "weight": 1.0,
+      "support": 22
     },
     {
       "from": "intent:retrieve",
       "to": "table:systemuser",
       "type": "maps_to",
-      "weight": 0.6500000000000001,
-      "support": 3
+      "weight": 1.0,
+      "support": 21
     },
     {
       "from": "table:systemuser",
       "to": "tool:v2_query_executor",
       "type": "served_by",
-      "weight": 0.6500000000000001,
-      "support": 3
+      "weight": 1.0,
+      "support": 21
     }
   ]
 }

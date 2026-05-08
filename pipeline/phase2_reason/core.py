@@ -3,13 +3,31 @@ from __future__ import annotations
 import json
 from collections import deque
 
-from core.contracts import IngestResult
+from core.contracts import IngestResult, RequestFilter
 from metadata.provider import MetadataProvider
 from pipeline.phase5_learn.matrix import find_similar_experience
 from pipeline.phase5_learn.graph import get_path_strength
 
 from infra.settings import ENABLE_DYNAMIC_METADATA_PLANNER
 _PROVIDER = MetadataProvider()
+
+
+def _normalize_ingest(ingest: IngestResult | dict) -> IngestResult:
+    if isinstance(ingest, IngestResult):
+        return ingest
+    data = dict(ingest or {})
+    filters = data.get("request_filters", [])
+    if isinstance(filters, list):
+        normalized_filters = []
+        for f in filters:
+            if isinstance(f, dict):
+                normalized_filters.append(RequestFilter(**f))
+            else:
+                normalized_filters.append(f)
+        data["request_filters"] = normalized_filters
+    valid_keys = set(IngestResult.__dataclass_fields__.keys())
+    filtered_data = {k: v for k, v in data.items() if k in valid_keys}
+    return IngestResult(**filtered_data)
 
 
 def _pick_root_from_query(ingest: IngestResult) -> str:
@@ -60,7 +78,7 @@ def _find_table_path(src: str, dst: str) -> list[str]:
     return []
 
 
-def reason_about_query(ingest: IngestResult) -> dict:
+def reason_about_query(ingest: IngestResult | dict) -> dict:
     """
     DANN Multi-Stage Agentic Reasoning:
     1. Intent Decomposition: Analyst agent breaks down what the user wants.
@@ -68,6 +86,7 @@ def reason_about_query(ingest: IngestResult) -> dict:
     3. Knowledge Alignment: Researcher agent finds matching tables and entities.
     4. Action Dispatch: Dispatcher agent chooses the best tool and parameters.
     """
+    ingest = _normalize_ingest(ingest)
     # 1. Intent Decomposition
     primary_intent = ingest.intent
     raw_query = getattr(ingest, "raw_query", "")

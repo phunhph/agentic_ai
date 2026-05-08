@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import asdict
+from dataclasses import asdict, is_dataclass
+from decimal import Decimal
 from pathlib import Path
 
 import sqlalchemy as sa
@@ -48,6 +49,30 @@ def _build_runtime_learning_sample(
         "source": "runtime_feedback",
         "notes": "auto_update_from_empty_result" if not success else "auto_update_from_success_result",
     }
+
+
+def _serialize_trace_value(value):
+    if isinstance(value, list):
+        return [_serialize_trace_value(v) for v in value]
+    if isinstance(value, dict):
+        return {k: _serialize_trace_value(v) for k, v in value.items()}
+    if is_dataclass(value):
+        return asdict(value)
+    return value
+
+
+def _normalize_agent_layer(layer: dict) -> dict:
+    if not isinstance(layer, dict):
+        return layer
+    normalized = {}
+    for key, value in layer.items():
+        if isinstance(value, list):
+            normalized[key] = [_serialize_trace_value(item) for item in value]
+        elif isinstance(value, dict):
+            normalized[key] = _normalize_agent_layer(value)
+        else:
+            normalized[key] = _serialize_trace_value(value)
+    return normalized
 
 
 def _semantic_template(query: str) -> str:
@@ -423,6 +448,21 @@ def _is_detail_intent_query(query: str) -> bool:
     return any(token in lowered for token in detail_tokens)
 
 
+def _format_row_summary(row: dict) -> str:
+    name = row.get("hbl_account_name") or row.get("hbl_contact_name") or row.get("name") or row.get("title") or "N/A"
+    address = row.get("hbl_account_physical_address") or row.get("hbl_account_address") or row.get("address") or "N/A"
+    phone = row.get("hbl_account_phone") or row.get("phone") or row.get("mobile") or ""
+    email = row.get("hbl_account_email") or row.get("email") or ""
+    parts = [f"**{name}**"]
+    if address and address != "N/A":
+        parts.append(address)
+    if phone:
+        parts.append(phone)
+    if email:
+        parts.append(email)
+    return " - ".join(parts)
+
+
 def _build_professional_response(query: str, rows: list[dict], execution_trace: dict, locale: str = "vi") -> str:
     plan = execution_trace.get("plan", {})
     if plan and plan.get("update_data"):
@@ -433,16 +473,15 @@ def _build_professional_response(query: str, rows: list[dict], execution_trace: 
     if not rows:
         return "⚠️ **Không tìm thấy kết quả nào khớp với yêu cầu của bạn.** Vui lòng kiểm tra lại từ khóa hoặc mở rộng tiêu chí tìm kiếm."
 
-    # Clearer, separated output
-    summary = f"📊 **Kết quả tìm kiếm:** Đã tìm thấy {len(rows)} bản ghi phù hợp.\n\n"
-    
-    items = []
-    for row in rows:
-        name = row.get("hbl_account_name") or row.get("hbl_contact_name") or row.get("name") or "N/A"
-        addr = row.get("hbl_account_physical_address") or "N/A"
-        items.append(f"• **{name}** - {addr}")
-    
-    return summary + "\n".join(items)
+    if len(rows) == 1:
+        summary = "📌 Tôi đã tìm thấy 1 kết quả phù hợp với yêu cầu của bạn."
+        details = _format_row_summary(rows[0])
+        return f"{summary}\n\n{details}"
+
+    summary = f"📊 **Kết quả tìm kiếm:** Đã tìm thấy {len(rows)} bản ghi phù hợp. Dưới đây là một số kết quả tiêu biểu:\n\n"
+    items = [f"• {_format_row_summary(row)}" for row in rows[:5]]
+    more_note = "" if len(rows) <= 5 else f"\n\nHiển thị 5 trong số {len(rows)} bản ghi."
+    return summary + "\n".join(items) + more_note
 
 
 def _build_agentic_response(query: str, rows: list[dict], execution_trace: dict, locale: str = "vi", role: str = "DEFAULT") -> str:
@@ -733,31 +772,183 @@ from v2.graph.orchestrator import create_orchestrator
 def run_v2_pipeline(query: str, role: str = "DEFAULT", session_id: str = "", lang: str = "auto") -> dict:
     """
     Điểm nhập chính: Chạy LangGraph Orchestrator thay cho pipeline tuần tự cũ.
+    Trả về response với chi tiết trace cho từng agent layer.
     """
-    orchestrator = create_orchestrator()
+    try:
+        orchestrator = create_orchestrator()
+    except Exception as e:
+        print(f"[ERROR] Failed to create orchestrator: {str(e)}")
+        # Return safe fallback response
+        return {
+            "assistant_response": f"Error creating orchestrator: {str(e)}",
+            "layers": {
+                "ingest": {"intent": "UNKNOWN", "entities": []},
+                "reason": {"thought_process": "Error", "decision": "error"},
+                "execute": {"status": "ERROR", "results": []},
+                "learn": {"learning_summary": "Error"}
+            },
+            "result": [],
+            "trust_gate": {"trusted": False}
+        }
     
-    # Khởi tạo state ban đầu
-    initial_state = {
-        "query": query,
-        "raw_ingest": {},
-        "raw_reason": {},
-        "planning_result": {},
-        "execution_result": {},
-        "learning_result": {}
-    }
+    try:
+        # Khởi tạo state ban đầu
+        initial_state = {
+            "query": query,
+            "raw_ingest": {},
+            "raw_reason": {},
+            "planning_result": {},
+            "execution_result": {},
+            "learning_result": {}
+        }
+        
+        # Chạy đồ thị
+        final_state = orchestrator.invoke(initial_state)
+    except Exception as e:
+        print(f"[ERROR] Failed to invoke orchestrator: {str(e)}")
+        final_state = initial_state
     
-    # Chạy đồ thị
-    final_state = orchestrator.invoke(initial_state)
+    # Lấy dữ liệu từ các agent
+    ingest_layer = final_state.get("raw_ingest") if isinstance(final_state.get("raw_ingest"), dict) else {}
+    reason_layer = final_state.get("raw_reason") if isinstance(final_state.get("raw_reason"), dict) else {}
+    execute_layer = final_state.get("execution_result") if isinstance(final_state.get("execution_result"), dict) else {}
+    learn_layer = final_state.get("learning_result") if isinstance(final_state.get("learning_result"), dict) else {}
+    
+    # Ensure all layers are dicts with required keys
+    if not ingest_layer:
+        ingest_layer = {
+            "intent": "UNKNOWN",
+            "entities": [],
+            "ambiguity_score": 0.0,
+            "request_filters": [],
+            "raw_query": query
+        }
+    else:
+        # Ensure required keys exist
+        ingest_layer.setdefault("intent", "UNKNOWN")
+        ingest_layer.setdefault("entities", [])
+        ingest_layer.setdefault("ambiguity_score", 0.0)
+        ingest_layer.setdefault("request_filters", [])
+        ingest_layer.setdefault("raw_query", query)
+    
+    if not reason_layer:
+        reason_layer = {
+            "thought_process": "Processing query...",
+            "decision": "auto_execute",
+            "confidence": 0.0,
+            "trace": {}
+        }
+    else:
+        reason_layer.setdefault("thought_process", "Processing...")
+        reason_layer.setdefault("decision", "auto_execute")
+        reason_layer.setdefault("confidence", 0.0)
+        reason_layer.setdefault("trace", {})
+    
+    if not execute_layer:
+        execute_layer = {
+            "status": "EXECUTED",
+            "record_count": 0,
+            "results": [],
+            "errors": []
+        }
+    else:
+        execute_layer.setdefault("status", "EXECUTED")
+        execute_layer.setdefault("record_count", 0)
+        execute_layer.setdefault("results", [])
+        execute_layer.setdefault("errors", [])
+    
+    if not learn_layer:
+        learn_layer = {
+            "learning_summary": "Learning phase completed",
+            "learning_update": {
+                "learning_decision": "skipped",
+                "evidence": {}
+            }
+        }
+    else:
+        learn_layer.setdefault("learning_summary", "Learning phase completed")
+        if "learning_update" not in learn_layer:
+            learn_layer["learning_update"] = {
+                "learning_decision": "skipped",
+                "evidence": {}
+            }
+    
+    # Tambahkan input/output traces untuk transparency
+    if "io_trace" not in ingest_layer:
+        ingest_layer["io_trace"] = {
+            "input": {
+                "raw_query": query,
+                "role": role,
+                "session_id": session_id
+            },
+            "output": {
+                "intent": ingest_layer.get("intent", "UNKNOWN"),
+                "entities": ingest_layer.get("entities", []),
+                "ambiguity_score": ingest_layer.get("ambiguity_score", 0.0)
+            }
+        }
+    
+    if "io_trace" not in reason_layer:
+        reason_layer["io_trace"] = {
+            "input": {
+                "ingest_intent": ingest_layer.get("intent", "UNKNOWN"),
+                "ingest_entities": ingest_layer.get("entities", []),
+                "query": query
+            },
+            "output": {
+                "thought_process": reason_layer.get("thought_process", ""),
+                "decision": reason_layer.get("decision", "auto_execute"),
+                "confidence": reason_layer.get("confidence", 0.0)
+            }
+        }
+    
+    if "io_trace" not in execute_layer:
+        execute_layer["io_trace"] = {
+            "input": {
+                "intent": ingest_layer.get("intent", "UNKNOWN"),
+                "filters": ingest_layer.get("request_filters", [])
+            },
+            "output": {
+                "status": execute_layer.get("status", "EXECUTED"),
+                "record_count": execute_layer.get("record_count", 0),
+                "errors": execute_layer.get("errors", [])
+            }
+        }
+    
+    if "io_trace" not in learn_layer:
+        learn_layer["io_trace"] = {
+            "input": {
+                "execution_success": execute_layer.get("status") == "EXECUTED",
+                "record_count": execute_layer.get("record_count", 0)
+            },
+            "output": {
+                "learning_decision": learn_layer.get("learning_update", {}).get("learning_decision", "skipped"),
+                "learning_summary": learn_layer.get("learning_summary", "")
+            }
+        }
     
     # Format lại response theo cấu trúc cũ để UI không bị vỡ (Backwards compatibility)
+    try:
+        assistant_response = _build_professional_response(
+            query, 
+            execute_layer.get("results", []),
+            execute_layer,
+            _resolve_locale(query, lang)
+        )
+    except Exception as e:
+        print(f"[ERROR] Failed to build professional response: {str(e)}")
+        assistant_response = f"Query processed (response building error: {str(e)})"
+    
+    layers = {
+        "ingest": _normalize_agent_layer(ingest_layer),
+        "reason": _normalize_agent_layer(reason_layer),
+        "execute": _normalize_agent_layer(execute_layer),
+        "learn": _normalize_agent_layer(learn_layer),
+    }
+
     return {
-        "assistant_response": "Đã xử lý xong qua LangGraph multi-agent.",
-        "layers": {
-            "ingest": final_state.get("raw_ingest"),
-            "reason": final_state.get("raw_reason"),
-            "execute": final_state.get("execution_result"),
-            "learn": final_state.get("learning_result")
-        },
-        "result": final_state.get("execution_result", {}).get("results", []),
-        "trust_gate": {"trusted": True}
+        "assistant_response": assistant_response,
+        "layers": layers,
+        "result": layers["execute"].get("results", []) if isinstance(layers["execute"].get("results"), list) else [],
+        "trust_gate": {"trusted": layers["reason"].get("confidence", 0.0) >= 0.65}
     }

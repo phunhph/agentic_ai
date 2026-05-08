@@ -39,14 +39,39 @@
 
     <!-- Right: Agentic Telemetry (Reasoning, Evolution, Trust) -->
     <div class="col-span-4 space-y-6">
+        <!-- Agent Layers (Clickable) -->
+        <div class="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden">
+            <h4 class="text-[10px] font-bold text-slate-500 uppercase p-4 border-b border-slate-800 bg-slate-950/50">
+                Agent Trace Layers
+            </h4>
+            <div class="space-y-2 p-3">
+                <button onclick="showAgentTrace('ingest', {{ layers.ingest|tojson|safe }})" 
+                    class="w-full text-left px-3 py-2 rounded text-xs font-semibold text-blue-300 bg-slate-800/50 hover:bg-blue-900/40 border border-slate-700 hover:border-blue-500 transition cursor-pointer">
+                    ① INGEST AGENT - {{ layers.ingest['intent']|default('UNKNOWN')|upper }}
+                </button>
+                <button onclick="showAgentTrace('reason', {{ layers.reason|tojson|safe }})" 
+                    class="w-full text-left px-3 py-2 rounded text-xs font-semibold text-green-300 bg-slate-800/50 hover:bg-green-900/40 border border-slate-700 hover:border-green-500 transition cursor-pointer">
+                    ② REASONING AGENT
+                </button>
+                <button onclick="showAgentTrace('execute', {{ layers.execute|tojson|safe }})" 
+                    class="w-full text-left px-3 py-2 rounded text-xs font-semibold text-orange-300 bg-slate-800/50 hover:bg-orange-900/40 border border-slate-700 hover:border-orange-500 transition cursor-pointer">
+                    ③ EXECUTION AGENT
+                </button>
+                <button onclick="showAgentTrace('learn', {{ layers.learn|tojson|safe }})" 
+                    class="w-full text-left px-3 py-2 rounded text-xs font-semibold text-purple-300 bg-slate-800/50 hover:bg-purple-900/40 border border-slate-700 hover:border-purple-500 transition cursor-pointer">
+                    ④ LEARNING AGENT
+                </button>
+            </div>
+        </div>
+
         <!-- Reasoning -->
         <div class="bg-slate-900 border border-slate-700 p-5 rounded-xl">
             <h4 class="text-[10px] font-bold text-slate-500 uppercase mb-3 flex justify-between">
                 Reasoning Logic
-                <span class="text-indigo-400">{{ layers.ingest.intent | upper }}</span>
+                <span class="text-indigo-400">{{ layers.ingest['intent']|default('UNKNOWN') | upper }}</span>
             </h4>
             <p class="text-xs text-slate-400 italic font-mono leading-relaxed bg-slate-950 p-3 rounded border border-slate-800">
-                "{{ layers.reason.thought_process }}"
+                "{{ layers.reason['thought_process']|default('N/A') }}"
             </p>
         </div>
 
@@ -62,12 +87,122 @@
                 </div>
                 <div class="flex justify-between items-center text-xs">
                     <span class="text-slate-400">Learning:</span>
-                    <span class="text-blue-400 font-mono">{{ layers.learn.learning_update.learning_decision }}</span>
+                    <span class="text-blue-400 font-mono">
+                        {{ layers.learn.learning_update.learning_decision|default('N/A') }}
+                    </span>
                 </div>
                 <div class="pt-3 border-t border-slate-800">
-                    <p class="text-[10px] text-slate-500 italic">{{ layers.learn.learning_summary }}</p>
+                    <p class="text-[10px] text-slate-500 italic">
+                        {{ layers.learn.learning_summary|default('Processing...') }}
+                    </p>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Trace Modal -->
+    <div id="traceModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onclick="if(event.target===this) closeTraceModal()">
+        <div class="bg-slate-900 border border-slate-700 rounded-xl max-w-3xl w-full max-h-[80vh] overflow-y-auto shadow-2xl">
+            <div class="sticky top-0 bg-slate-950 border-b border-slate-700 p-4 flex items-center justify-between">
+                <h2 id="traceModalTitle" class="text-sm font-bold text-white">Agent Trace Details</h2>
+                <button onclick="closeTraceModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div id="traceModalContent" class="text-xs text-slate-300 font-mono bg-slate-950 p-4 rounded border border-slate-800 max-h-[50vh] overflow-y-auto whitespace-pre-wrap break-words">
+                    <!-- Will be populated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showAgentTrace(agent, traceData) {
+            const modal = document.getElementById('traceModal');
+            const title = document.getElementById('traceModalTitle');
+            const content = document.getElementById('traceModalContent');
+            
+            const agentNames = {
+                'ingest': '① INGEST AGENT - Input/Output & Intent Detection',
+                'reason': '② REASONING AGENT - Decision Logic & Planning',
+                'execute': '③ EXECUTION AGENT - Database Query & Results',
+                'learn': '④ LEARNING AGENT - Knowledge Update & Feedback'
+            };
+            
+            title.textContent = agentNames[agent] || 'Agent Trace';
+            
+            // Format the trace data with proper JSON formatting
+            try {
+                let formattedContent = '';
+                formattedContent += '📊 AGENT: ' + agent.toUpperCase() + '\n';
+                formattedContent += '═'.repeat(70) + '\n\n';
+                
+                // Display I/O Trace if available
+                const ioTrace = traceData.io_trace || {};
+                if (Object.keys(ioTrace).length > 0) {
+                    formattedContent += '🔄 INPUT/OUTPUT TRACE:\n';
+                    if (ioTrace.input) {
+                        formattedContent += '  INPUT:\n' + JSON.stringify(ioTrace.input, null, 4) + '\n\n';
+                    }
+                    if (ioTrace.output) {
+                        formattedContent += '  OUTPUT:\n' + JSON.stringify(ioTrace.output, null, 4) + '\n\n';
+                    }
+                    formattedContent += '─'.repeat(70) + '\n\n';
+                }
+                
+                // Agent-specific trace details
+                if (agent === 'ingest') {
+                    formattedContent += '🔍 INGEST PHASE DETAILS:\n';
+                    formattedContent += '  Intent Detected: ' + (traceData.intent || 'UNKNOWN') + '\n';
+                    formattedContent += '  Entities Found: ' + JSON.stringify(traceData.entities || [], null, 2) + '\n';
+                    formattedContent += '  Ambiguity Score: ' + (traceData.ambiguity_score || 0) + '\n';
+                    formattedContent += '  Request Filters: ' + JSON.stringify(traceData.request_filters || [], null, 2) + '\n';
+                    formattedContent += '  Raw Query: "' + (traceData.raw_query || '') + '"\n';
+                } else if (agent === 'reason') {
+                    formattedContent += '💭 REASONING PHASE DETAILS:\n';
+                    formattedContent += '  Thought Process: ' + (traceData.thought_process || 'N/A') + '\n';
+                    formattedContent += '  Decision: ' + (traceData.decision || 'N/A') + '\n';
+                    formattedContent += '  Confidence: ' + (traceData.confidence || 0) + '\n';
+                    if (traceData.trace && Object.keys(traceData.trace).length > 0) {
+                        formattedContent += '  Reasoning Trace:\n' + JSON.stringify(traceData.trace, null, 2) + '\n';
+                    }
+                } else if (agent === 'execute') {
+                    formattedContent += '⚙️ EXECUTION PHASE DETAILS:\n';
+                    formattedContent += '  Status: ' + (traceData.status || 'EXECUTED') + '\n';
+                    formattedContent += '  Records Found: ' + (traceData.record_count || 0) + '\n';
+                    if (traceData.errors && Array.isArray(traceData.errors) && traceData.errors.length > 0) {
+                        formattedContent += '  Errors: ' + JSON.stringify(traceData.errors, null, 2) + '\n';
+                    }
+                    formattedContent += '  Results (first 3): ' + JSON.stringify((traceData.results || []).slice(0, 3), null, 2) + '\n';
+                } else if (agent === 'learn') {
+                    formattedContent += '🧠 LEARNING PHASE DETAILS:\n';
+                    formattedContent += '  Summary: ' + (traceData.learning_summary || 'Processing...') + '\n';
+                    const learningUpdate = traceData.learning_update || {};
+                    formattedContent += '  Learning Decision: ' + (learningUpdate.learning_decision || 'skipped') + '\n';
+                    if (learningUpdate.evidence) {
+                        formattedContent += '  Evidence:\n' + JSON.stringify(learningUpdate.evidence, null, 2) + '\n';
+                    }
+                }
+                
+                formattedContent += '\n' + '═'.repeat(70) + '\n';
+                formattedContent += '📌 COMPLETE AGENT DATA:\n' + JSON.stringify(traceData, null, 2);
+                
+                content.textContent = formattedContent;
+            } catch(e) {
+                content.textContent = 'Error formatting trace: ' + e.message + '\n\n' + JSON.stringify(traceData, null, 2);
+            }
+            
+            modal.classList.remove('hidden');
+        }
+        
+        function closeTraceModal() {
+            document.getElementById('traceModal').classList.add('hidden');
+        }
+        
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeTraceModal();
+            }
+        });
+    </script>
 </div>
