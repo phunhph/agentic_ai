@@ -5,7 +5,7 @@ Hệ thống AI nghiệp vụ **DANN (Dynamic Agentic Neural Network)** thế h�
 ---
 
 ## 1. Kiến trúc Hệ thống (Agentic Flow)
-Hệ thống vận hành theo chu trình **State-Passing**, nơi mỗi Agent nhận vào một trạng thái hệ thống (`AgentState`) và trả về một dictionary kết quả để update state. Dữ liệu trung tâm được đóng gói trong `IngestResult` (đối với thông tin input) và được truyền tải xuyên suốt các giai đoạn.
+Hệ thống vận hành theo chu trình **State-Passing**, nơi mỗi Agent nhận vào một trạng thái hệ thống (`AgentState`) và trả về một dictionary kết quả để update state. 
 
 ```mermaid
 graph TD
@@ -15,20 +15,18 @@ graph TD
     Plan -- ExecutionPlan --> Execute[ExecutionAgent]
     Execute -- ExecutionResult --> Learn[LearningAgent]
     Learn --> End((End))
-    
-    style Ingest fill:#3b82f6,color:#fff
-    style Reason fill:#8b5cf6,color:#fff
-    style Plan fill:#10b981,color:#fff
-    style Execute fill:#f59e0b,color:#fff
-    style Learn fill:#ec4899,color:#fff
 ```
 
-## 2. Technical Stack & Framework
-Hệ thống được xây dựng trên nền tảng:
-- **Orchestration**: **LangGraph** (quản lý các Agent dưới dạng State Machine & Cyclic Graph).
-- **Communication Protocol**: **MCP (Model Context Protocol)** dùng để kết nối LLM với ngữ cảnh (context) và công cụ (tools) hệ thống.
-- **Neural Storage**: **Neural Matrix** (`v2/intelligence/`) phục vụ cho việc học hỏi và lưu trữ tri thức của mô hình.
-- **State Management**: LangGraph State Object chứa mọi thông tin vận hành (`raw_ingest`, `reasoning_trace`, `execution_plan`).
+## 2. Technical Stack & Architectural Rationale
+Hệ thống không sử dụng các framework đóng gói sẵn (như CrewAI) mà lựa chọn **thành phần tối ưu** để đảm bảo khả năng tùy biến cao:
+
+| Công nghệ/Pattern | Lớp sử dụng | Mục đích & Lý do lựa chọn |
+|---|---|---|
+| **LangGraph** | Orchestrator (`v2/graph/`) | Điều phối đồ thị trạng thái (State Graph). **Tại sao:** Cho phép định nghĩa luồng logic phức tạp, có vòng lặp (cyclic) và quản lý state trung tâm tốt hơn các linear pipeline. |
+| **BabyAGI Pattern** | Planning (`v2/agents/planning/`) | Phân tách goal thành Task list. **Tại sao:** Tối ưu hóa việc chia nhỏ yêu cầu nghiệp vụ phức tạp thành các tác vụ thực thi đơn lẻ, có thể truy xuất (traceability). |
+| **MCP (Model Context Protocol)** | Interface (`v2/api_clients.py`) | Kết nối ngữ cảnh. **Tại sao:** Tiêu chuẩn hóa việc LLM truy cập context/tools, giúp hệ thống không bị phụ thuộc vào một provider cụ thể. |
+
+*Ghi chú: Chúng tôi không sử dụng CrewAI hay AutoGPT do tính "black-box" cao, khó kiểm soát state và khó tích hợp sâu vào hệ thống nghiệp vụ CRM hiện có.*
 
 ## 3. Các lớp thành phần (Component Classes)
 Hệ thống sử dụng các Dataclass chính (trong `core/contracts.py`):
